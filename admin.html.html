@@ -1,0 +1,390 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Administración | Mistrielle</title><style>
+:root{--wine:#521326;--wine2:#701f38;--pink:#f9e8ed;--pink2:#fff6f8;--white:#fffdfd;--ink:#321922;--muted:#916d78;--line:#ecd2da;--gold:#b58b55}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#fbf8f9;color:var(--ink);font-family:Arial,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}.serif{font-family:Georgia,serif}.script{font-family:Georgia,serif;font-style:italic}.top{background:var(--wine);color:#fff;text-align:center;padding:8px;font-size:11px;letter-spacing:.15em}header{background:#fffdfdf2;position:sticky;top:0;z-index:20;border-bottom:1px solid var(--line)}.head{max-width:1200px;margin:auto;padding:15px 20px;display:flex;align-items:center;justify-content:space-between}.brand{text-align:center}.brand b{font:italic 27px Georgia;color:var(--wine)}.brand small{display:block;font-size:8px;letter-spacing:.22em}.icon{border:0;background:none;color:var(--wine);font-size:21px;position:relative}.badge{position:absolute;right:-7px;top:-5px;background:var(--wine);color:white;border-radius:50%;font-size:9px;min-width:16px;height:16px;display:grid;place-items:center}nav{display:flex;justify-content:center;gap:26px;padding:0 12px 12px;font-size:12px}nav a{color:var(--ink);text-decoration:none}.hero{background:linear-gradient(120deg,var(--pink),#fff);text-align:center;padding:65px 20px;border-bottom:1px solid var(--line)}.hero h1{font:italic 48px Georgia;color:var(--wine);margin:5px}.hero p{max-width:620px;margin:15px auto 24px;color:var(--muted);line-height:1.6}.eyebrow{font-size:9px;letter-spacing:.25em;font-weight:800;color:var(--wine)}.btn{border:0;border-radius:999px;padding:11px 18px;background:var(--wine);color:white;font-weight:700}.btn.alt{background:white;color:var(--wine);border:1px solid var(--line)}.btn.sm{padding:8px 11px;font-size:11px}.btn.danger{background:#922f3e}main{max-width:1200px;margin:auto;padding:34px 20px}.section-title{text-align:center;margin:10px 0 25px}.section-title h2{font:italic 32px Georgia;color:var(--wine);margin:0}.section-title p{color:var(--muted);font-size:12px}.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}.filters input,.filters select,.field input,.field select,.field textarea{border:1px solid var(--line);background:#fff;border-radius:10px;padding:11px;width:100%;color:var(--ink)}.filters input{flex:1;min-width:220px}.filters select{width:auto}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.card{background:white;border:1px solid var(--line);border-radius:15px;overflow:hidden;position:relative}.photo{aspect-ratio:1;background:#f4e8eb;display:grid;place-items:center;overflow:hidden}.photo img{width:100%;height:100%;object-fit:cover}.placeholder{font:italic 20px Georgia;color:#b48b96}.cardbody{padding:12px}.id{font-size:9px;letter-spacing:.12em;color:var(--muted)}.name{font:italic 20px Georgia;margin:4px 0}.price{font-weight:800;color:var(--wine)}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.tag{font-size:9px;padding:4px 7px;border-radius:99px;background:var(--pink);color:var(--wine)}.fav{position:absolute;right:9px;top:9px;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--wine);font-size:18px;z-index:2}.empty{text-align:center;padding:45px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);grid-column:1/-1}.box{background:#fff;border:1px solid var(--line);border-radius:13px;padding:18px;margin-bottom:16px}.notice{padding:11px;background:var(--pink2);border:1px solid var(--line);border-radius:9px;color:var(--muted);font-size:11px}.overlay{position:fixed;inset:0;background:#24101788;z-index:50;display:none;align-items:center;justify-content:center;padding:18px}.overlay.open{display:flex}.modal{background:#fff;max-width:780px;width:100%;max-height:92vh;overflow:auto;border-radius:18px;padding:24px;position:relative}.close{position:absolute;right:14px;top:10px;border:0;background:none;font-size:26px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field label{display:block;font-size:9px;letter-spacing:.09em;font-weight:800;color:var(--wine);margin-bottom:5px}.full{grid-column:1/-1}.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{border:1px solid var(--line);padding:8px 10px;border-radius:99px;font-size:11px;background:#fff}.cartitem{display:grid;grid-template-columns:60px 1fr auto;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.thumb{width:60px;height:60px;object-fit:cover;border-radius:8px;background:var(--pink)}footer{text-align:center;background:white;border-top:1px solid var(--line);padding:42px 20px}.contactcards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;max-width:650px;margin:18px auto}.contactcard{padding:16px;border:1px solid var(--line);border-radius:12px;text-decoration:none;color:var(--wine);background:var(--pink2)}
+.admin{min-height:100vh}.adminhead{background:var(--pink2);border-bottom:1px solid var(--line);padding:24px 30px}.adminhead .row{max-width:1400px;margin:auto}.adminhead h1{font:italic 35px Georgia;color:var(--wine);margin:5px 0}.adminwrap{max-width:1400px;margin:auto;padding:20px 30px}.tabs{display:flex;gap:4px;overflow:auto;background:#fff;border:1px solid var(--line);padding:7px;border-radius:10px;margin-bottom:18px}.tab{border:0;background:#fff;padding:10px 13px;border-radius:99px;color:var(--wine);font-size:10px;font-weight:800;white-space:nowrap}.tab.active{background:var(--wine);color:#fff}.panel{display:none}.panel.active{display:block}.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}.stat{border:1px solid var(--line);padding:15px;border-radius:9px}.stat b{display:block;font-size:23px;color:var(--wine)}.stat small{color:var(--muted)}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:900px}th,td{text-align:left;padding:11px;border-bottom:1px solid var(--line);font-size:11px}th{font-size:9px;letter-spacing:.1em;color:var(--wine)}.previewimgs{display:flex;gap:8px}.previewimgs img{width:65px;height:65px;object-fit:cover;border-radius:8px}.stockgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.stockgrid input{text-align:center}.statuspill{padding:4px 7px;border-radius:99px;background:var(--pink);font-size:9px}
+@media(max-width:900px){.grid{grid-template-columns:repeat(3,1fr)}.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:620px){nav{justify-content:flex-start;overflow:auto;gap:14px}.hero h1{font-size:37px}.grid{grid-template-columns:repeat(2,1fr);gap:10px}.fields{grid-template-columns:1fr}.full{grid-column:auto}.contactcards{grid-template-columns:1fr}.adminwrap,.adminhead{padding-left:12px;padding-right:12px}.stockgrid{grid-template-columns:repeat(2,1fr)}}
+
+/* V9 DARK FEMININE LUXURY */
+:root{
+ --wine:#3b0715;--wine2:#651128;--pink:#f4cfd9;--pink2:#fff0f4;
+ --white:#fffaf9;--ink:#2b0c15;--muted:#8c6570;--line:#d8b2bc;
+ --gold:#c5a05a;--gold2:#e6cf91;--cream:#fff8f2
+}
+body{background:
+ radial-gradient(circle at 10% 15%,rgba(197,160,90,.09),transparent 28%),
+ linear-gradient(180deg,#fff8fa,#f9edf1 65%,#fff8fa);color:var(--ink)}
+.top{background:linear-gradient(90deg,#26030c,var(--wine),#26030c);color:var(--gold2);border-bottom:1px solid #8c6a35}
+header{background:rgba(255,248,250,.96);box-shadow:0 10px 35px rgba(59,7,21,.08)}
+.brand b{color:var(--wine);font-size:29px;text-shadow:0 1px 0 #fff}
+.brand small{color:#805c67}
+nav a{font-family:Georgia,serif;font-size:12px;letter-spacing:.03em}
+.hero{min-height:520px;display:grid;place-items:center;position:relative;overflow:hidden;background:
+ linear-gradient(100deg,rgba(44,3,13,.95),rgba(86,10,31,.87)),
+ var(--hero-image,none) center/cover no-repeat;border-bottom:1px solid var(--gold)}
+.hero:before,.hero:after{content:"✦";position:absolute;color:rgba(230,207,145,.42);font-size:70px}
+.hero:before{left:6%;top:15%}.hero:after{right:7%;bottom:12%}
+.hero .hero-inner{max-width:760px;text-align:center;padding:55px 20px;position:relative;z-index:2}
+.hero .eyebrow{color:var(--gold2)}
+.hero h1{font-size:54px;line-height:1.02;color:#fff7f8;text-shadow:0 3px 20px #170107;margin:10px auto}
+.hero p{color:#f6dce3;font-family:Georgia,serif;font-size:16px;max-width:630px}
+.btn{background:linear-gradient(135deg,var(--wine2),var(--wine));box-shadow:0 8px 20px rgba(59,7,21,.17)}
+.btn.gold{background:linear-gradient(135deg,#d8b96f,#a87d32);color:#2a1014;border:1px solid #efd99d}
+.section-title h2{font-size:38px}
+.card{border:1px solid #dcb8c0;box-shadow:0 12px 30px rgba(63,10,26,.08);transition:.22s}
+.card:hover{transform:translateY(-4px);box-shadow:0 18px 38px rgba(63,10,26,.14)}
+.cardbody{background:linear-gradient(#fff,#fff8fa)}
+.discount{background:linear-gradient(135deg,#7d1632,#3b0715);border:1px solid #b88d47}
+.custom-luxe{position:relative;overflow:hidden;background:
+ linear-gradient(110deg,rgba(43,3,13,.97),rgba(99,15,41,.92)),
+ var(--custom-image,none) center/cover no-repeat!important;color:white!important;
+ border:1px solid var(--gold)!important;box-shadow:0 18px 45px rgba(59,7,21,.18);padding:52px 30px!important}
+.custom-luxe:before{content:"";position:absolute;inset:12px;border:1px solid rgba(230,207,145,.55);pointer-events:none}
+.custom-luxe>*{position:relative;z-index:2}.custom-luxe h2{color:#fff7f8!important;font-size:44px!important}
+.custom-luxe p{color:#f6dce3!important;max-width:720px;margin:14px auto 25px}
+.custom-process{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:850px;margin:25px auto}
+.custom-process div{border:1px solid rgba(230,207,145,.45);padding:14px 8px;background:rgba(255,255,255,.05);font:italic 13px Georgia;color:#ffe9ef}
+.ornament{color:var(--gold2);letter-spacing:.35em;margin:10px}
+.logo-img{max-height:64px;max-width:230px;object-fit:contain}
+.faq-media{margin-top:12px}.faq-media img,.faq-media video{max-width:100%;max-height:420px;border-radius:12px;border:1px solid var(--line)}
+.design-preview{padding:20px;border-radius:14px;background:linear-gradient(120deg,var(--wine),var(--wine2));color:white;border:1px solid var(--gold)}
+@media(max-width:620px){.hero{min-height:440px}.hero h1{font-size:39px}.custom-luxe h2{font-size:34px!important}.custom-process{grid-template-columns:1fr 1fr}}
+
+/* V10 — MISTRIELLE NOCTURNE / DARK FEMININE MAXIMAL LUXURY */
+:root{
+ --wine:#4b0717;--wine2:#821b31;--pink:#dca0a7;--pink2:#3b0713;
+ --white:#fff0ea;--ink:#f7ded7;--muted:#c99ca0;--line:#7c3440;
+ --gold:#c8a267;--gold2:#ecd09b;--cream:#f1c2b6;
+ --night:#120207;--night2:#21030b;--panel:#2b0710;--panel2:#3b0a16
+}
+html{background:var(--night)}
+body{
+ background:
+ radial-gradient(circle at 82% 6%,rgba(131,26,48,.30),transparent 24%),
+ radial-gradient(circle at 8% 45%,rgba(113,12,35,.18),transparent 27%),
+ linear-gradient(180deg,#150207 0%,#21040b 46%,#110105 100%)!important;
+ color:var(--ink)!important
+}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.28;
+ background-image:radial-gradient(rgba(236,208,155,.22) .6px,transparent .6px);
+ background-size:22px 22px}
+.top{background:#0e0105!important;color:var(--gold2)!important;border-bottom:1px solid rgba(200,162,103,.45)!important;padding:9px!important}
+header{background:rgba(20,2,7,.94)!important;border-bottom:1px solid rgba(200,162,103,.35)!important;box-shadow:0 16px 40px rgba(0,0,0,.38)!important;backdrop-filter:blur(12px)}
+.brand b{color:#f1b6aa!important;text-shadow:none!important;font-size:30px!important}
+.brand small{color:var(--gold2)!important}
+.icon,nav a{color:#f1c8c0!important}
+.badge{background:var(--pink)!important;color:#25030a!important;font-weight:900}
+nav a{font-size:10px!important;text-transform:uppercase;letter-spacing:.16em!important}
+nav a:hover{color:var(--gold2)!important}
+.hero{min-height:610px!important;border-bottom:1px solid rgba(200,162,103,.55)!important;
+ background:
+ linear-gradient(90deg,rgba(18,1,6,.97) 0%,rgba(64,5,20,.88) 50%,rgba(19,1,6,.95) 100%),
+ var(--hero-image,none) center/cover no-repeat!important}
+.hero:before{content:"✦"!important;font-size:110px!important;left:5%!important;top:8%!important;color:rgba(220,160,167,.14)!important}
+.hero:after{content:"❦"!important;font-size:170px!important;right:4%!important;bottom:0!important;color:rgba(200,162,103,.12)!important}
+.hero .hero-inner{max-width:900px!important}
+.hero h1{font-size:68px!important;max-width:850px;letter-spacing:-.035em;color:#f2b7aa!important;text-transform:none;text-shadow:0 8px 35px rgba(0,0,0,.55)!important}
+.hero p{font-size:17px!important;color:#e7c0bb!important}
+.eyebrow{color:var(--gold2)!important;letter-spacing:.28em!important}
+.ornament{font-size:17px;color:var(--gold2)!important}
+.btn{border-radius:999px!important;border:1px solid rgba(218,177,108,.42)!important;
+ background:linear-gradient(135deg,#7f1730,#4a0616)!important;color:#fff0ea!important;
+ box-shadow:0 10px 30px rgba(0,0,0,.30)!important;text-transform:uppercase;letter-spacing:.06em;font-size:10px}
+.btn:hover{transform:translateY(-1px);filter:brightness(1.13)}
+.btn.gold{background:linear-gradient(135deg,#e2c38a,#b68745)!important;color:#2a0710!important;border-color:#efd7a8!important}
+.btn.alt{background:rgba(255,231,225,.045)!important;color:#f0c6bd!important;border:1px solid rgba(218,177,108,.38)!important}
+.btn.danger{background:#8b2435!important}
+main{max-width:1280px!important;padding-top:58px!important}
+.section-title{margin:24px 0 32px!important}
+.section-title h2{font-size:48px!important;color:#f0b4aa!important;letter-spacing:-.02em}
+.section-title p{color:#cda6a4!important;font-family:Georgia,serif;font-size:13px!important}
+.filters{background:rgba(56,8,20,.72);border:1px solid rgba(200,162,103,.28);padding:12px;border-radius:14px}
+.filters input,.filters select,.field input,.field select,.field textarea{
+ background:#21040c!important;border:1px solid #71303b!important;color:#f7ded7!important;border-radius:7px!important}
+input::placeholder,textarea::placeholder{color:#a9777c}
+select option{background:#21040c;color:#f7ded7}
+.grid{gap:22px!important}
+.card{background:linear-gradient(180deg,#360914,#20040b)!important;border:1px solid rgba(200,162,103,.35)!important;border-radius:5px!important;
+ box-shadow:0 18px 45px rgba(0,0,0,.28)!important}
+.card:hover{transform:translateY(-6px)!important;border-color:rgba(236,208,155,.72)!important;box-shadow:0 25px 55px rgba(0,0,0,.42)!important}
+.photo{background:#180309!important}
+.cardbody{background:linear-gradient(180deg,#3b0a16,#23050d)!important;padding:15px!important}
+.id{color:#b98b8d!important}.name{color:#f1b7ac!important;font-size:22px!important}.tag{background:#5a1022!important;color:#f3c7bd!important;border:1px solid #783145}
+.oldprice{color:#a77b80!important}.saleprice{color:#f2b6aa!important;font-size:24px!important}.discount{background:#8b1c35!important;color:#ffe9e2!important;border:1px solid var(--gold)!important}
+.fav{background:#1b0309!important;color:#efb7ad!important;border-color:#8b5360!important}
+.box{background:linear-gradient(145deg,rgba(58,9,22,.96),rgba(31,4,11,.98))!important;border:1px solid rgba(200,162,103,.30)!important;border-radius:7px!important;box-shadow:0 18px 45px rgba(0,0,0,.20)}
+.notice{background:#310914!important;border-color:#6f3340!important;color:#d7aeb0!important}
+.modal{background:linear-gradient(145deg,#350a16,#180309)!important;border:1px solid rgba(200,162,103,.48)!important;border-radius:8px!important;color:#f7ded7!important;box-shadow:0 30px 90px rgba(0,0,0,.65)}
+.overlay{background:rgba(7,0,3,.82)!important;backdrop-filter:blur(5px)}
+.close{color:#f0c4bc!important}
+.field label{color:var(--gold2)!important}
+.chip{background:#26050d!important;color:#efc2bb!important;border-color:#71303b!important}
+.cartitem{border-color:#66303a!important}
+.thumb{background:#1b0309!important}
+.custom-luxe{padding:72px 38px!important;border-radius:4px!important;
+ background:
+ radial-gradient(circle at 88% 20%,rgba(201,93,112,.18),transparent 25%),
+ linear-gradient(105deg,rgba(23,1,7,.99),rgba(101,11,35,.92),rgba(27,2,8,.98)),
+ var(--custom-image,none) center/cover no-repeat!important;
+ box-shadow:0 28px 75px rgba(0,0,0,.42)!important}
+.custom-luxe:before{inset:16px!important;border-color:rgba(236,208,155,.56)!important}
+.custom-luxe:after{content:"❦";position:absolute;right:5%;bottom:-35px;font-size:190px;color:rgba(236,208,155,.10)}
+.custom-luxe h2{font-size:58px!important;color:#f2b7aa!important}
+.custom-process div{background:rgba(18,1,6,.52)!important;border-color:rgba(236,208,155,.36)!important;color:#f0c9c1!important}
+footer{background:#0e0105!important;border-top:1px solid rgba(200,162,103,.35)!important;color:#d6aaa7!important}
+.contactcard{background:#2c0711!important;border-color:#71303b!important;color:#edc1b8!important}
+
+/* ADMIN NOCTURNE */
+.admin{background:
+ radial-gradient(circle at 88% 8%,rgba(126,22,46,.27),transparent 25%),
+ linear-gradient(180deg,#140207,#22040c 55%,#100105)!important}
+.adminhead{background:linear-gradient(115deg,#170208,#4b0717 56%,#170208)!important;border-bottom:1px solid rgba(200,162,103,.48)!important;padding:34px 38px!important;box-shadow:0 18px 45px rgba(0,0,0,.30)}
+.adminhead h1{font-size:46px!important;color:#f1b5aa!important;margin:5px 0!important}
+.adminhead small{color:#d0a5a4!important}
+.adminwrap{padding-top:26px!important}
+.tabs{background:#170208!important;border:1px solid rgba(200,162,103,.35)!important;border-radius:6px!important;padding:8px!important;box-shadow:0 14px 35px rgba(0,0,0,.24)}
+.tab{background:transparent!important;color:#d9aaa7!important;border-radius:4px!important;letter-spacing:.06em!important}
+.tab:hover{background:#310813!important;color:#f0d0c7!important}
+.tab.active{background:linear-gradient(135deg,#7d1730,#4b0717)!important;color:#fff0ea!important;border:1px solid rgba(200,162,103,.42)!important}
+.admin .box{padding:24px!important}
+.admin h2.script{color:#f1b5aa!important;font-size:34px}
+.stats{gap:12px!important}
+.stat{background:linear-gradient(145deg,#3a0a16,#22050d)!important;border:1px solid rgba(200,162,103,.28)!important;border-radius:5px!important;padding:19px!important}
+.stat b{color:#f0b2a8!important;font:italic 29px Georgia}
+.stat small{color:#c99ca0!important}
+table{background:rgba(20,2,7,.42)}
+th{color:var(--gold2)!important;background:#21040c!important}
+td{color:#e5bdb8!important;border-color:#542631!important}
+tr:hover td{background:#2d0711}
+.statuspill{background:#5c1224!important;color:#f0c1b9!important}
+.design-preview{background:
+ linear-gradient(110deg,#160207,#690f28 60%,#24040d)!important;
+ border:1px solid var(--gold)!important;border-radius:5px!important;padding:28px!important;
+ box-shadow:inset 0 0 0 7px rgba(200,162,103,.06),0 16px 40px rgba(0,0,0,.28)}
+.faq-media img,.faq-media video{border-color:#75404a!important}
+@media(max-width:620px){
+ .hero{min-height:500px!important}.hero h1{font-size:45px!important}.section-title h2{font-size:38px!important}
+ .custom-luxe{padding:55px 20px!important}.custom-luxe h2{font-size:43px!important}
+ .adminhead h1{font-size:36px!important}
+}
+
+
+/* V11: lujo sin glifos decorativos */
+.ornament{display:none!important}
+.hero:before,.hero:after,.custom-luxe:after{content:none!important;display:none!important}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+window.MN_SUPABASE_URL='https://sjevqvcpkdpaeuxjxhlq.supabase.co';
+window.MN_SUPABASE_KEY='sb_publishable_5bOuzwywcvqzPEcGrQZEvw_2uEUUp2a';
+</script>
+</head><body class="admin">
+<div class="adminhead"><div class="row"><div><div class="eyebrow">MISTRIELLE NAILS · PRIVATE ATELIER</div><h1>Panel de Administración</h1><small style="color:var(--muted)">Catálogo, pedidos, solicitudes, stock y contenido.</small></div><a class="btn alt sm" href="https://misstyee.github.io/Mistrielle-Nails/">Volver a la tienda</a></div></div>
+<div class="adminwrap"><div class="tabs"><button class="tab active" data-tab="home">INICIO</button><button class="tab" data-tab="products">PRODUCTOS</button><button class="tab" data-tab="orders">PEDIDOS</button><button class="tab" data-tab="requests">SOLICITUDES</button><button class="tab" data-tab="sales">VENTAS / GANANCIAS</button><button class="tab" data-tab="discounts">DESCUENTOS / ENVÍO</button><button class="tab" data-tab="faq">PREGUNTAS FRECUENTES</button><button class="tab" data-tab="design">DISEÑO DE LA TIENDA</button><button class="tab" data-tab="options">CATEGORÍAS / TALLAS / FORMAS</button><button class="tab" data-tab="config">CONFIGURACIÓN / CONTACTO</button></div>
+<div id="home" class="panel active"></div><div id="products" class="panel"></div><div id="orders" class="panel"></div><div id="requests" class="panel"></div><div id="sales" class="panel"></div><div id="discounts" class="panel"></div><div id="faq" class="panel"></div><div id="design" class="panel"></div><div id="options" class="panel"></div><div id="config" class="panel"></div></div>
+<div id="modal" class="overlay"><div class="modal"><button class="close" onclick="closeModal()">×</button><div id="modalContent"></div></div></div><script>
+const DEFAULT={categories:['Sencillas','Francesas','Cat Eye','Chrome','Decoradas','3D','Diseños especiales','Personalizadas'],sizes:['XS','S','M','L','XL'],forms:['Almendrada','Bailarina','Cuadrada','Ovalada','Stiletto'],lengths:['Corto','Medio','Largo'],faqs:[
+{q:'¿Qué son las press-on nails?',a:'Son uñas postizas reutilizables que puedes colocar y retirar sin acudir al salón.'},
+{q:'¿Cómo sé qué talla necesito?',a:'Puedes elegir XS, S, M, L o XL, o registrar las medidas de cada uña en milímetros.'},
+{q:'¿Puedo pedir medidas personalizadas?',a:'Sí. Selecciona talla personalizada e introduce el ancho de cada uña.'},
+{q:'¿Hacen diseños personalizados?',a:'Sí. Puedes enviar una solicitud desde la sección Personalizadas.'},
+{q:'¿Cómo funcionan los envíos?',a:'Manejamos envío local y entrega en UPN según disponibilidad.'}
+]};
+const load=(k,d)=>{try{return JSON.parse(localStorage.getItem('mn_'+k))??d}catch(e){return d}}, save=(k,v)=>localStorage.setItem('mn_'+k,JSON.stringify(v));
+let products=load('products',[]),orders=load('orders',[]),requests=load('requests',[]),discounts=load('discounts',[]),categories=load('categories',DEFAULT.categories),sizes=load('sizes',DEFAULT.sizes),forms=load('forms',DEFAULT.forms),lengths=load('lengths',DEFAULT.lengths),faqs=load('faqs',DEFAULT.faqs),config=load('config',{whatsapp:'',instagram:'',email:'',local:true,upn:true,national:false,welcome:'Un pequeño lujo hecho para tus manos.',heroSubtitle:'Uñas Press-On Personalizadas y a la Medida. Tu mejor opción.',heroButton:'Descubrir diseños',customTitle:'Hechas para ti',customText:'Tu idea. Tus medidas. Tu set. Creamos una manicura pensada especialmente para ti.',logo:'',heroImage:'',customImage:'',freeShippingEnabled:false,freeShippingMode:'amount',freeShippingAmount:600,freeShippingQty:3,shippingLabel:'Envío local',colorWine:'#3b0715',colorPink:'#f4cfd9',colorGold:'#c5a05a'});
+let cart=load('cart',[]),favorites=load('favorites',[]),orderCounter=load('orderCounter',0),requestCounter=load('requestCounter',0),idCounter=load('idCounter',0),sales=load('sales',[]);
+const $=id=>document.getElementById(id), money=n=>'$'+Number(n||0).toFixed(0), esc=s=>String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function nextProductId(){idCounter++;save('idCounter',idCounter);return 'MN-'+String(idCounter).padStart(3,'0')}
+function openModal(){ $('modal').classList.add('open') } function closeModal(){ $('modal').classList.remove('open') }
+function img(src){return src?`<img src="${src}" alt="">`:`<span class="placeholder">Mistrielle</span>`}
+
+function renderAdmin(){
+ products=load('products',products);orders=load('orders',orders);requests=load('requests',requests);sales=load('sales',sales);discounts=load('discounts',discounts);faqs=load('faqs',faqs);config=load('config',config);
+ let visibleOrders=orders.filter(o=>!o.hidden), visibleRequests=requests.filter(r=>!r.hidden), delivered=sales.reduce((s,x)=>s+Number(x.revenue||0),0), profit=sales.reduce((s,x)=>s+(Number(x.revenue||0)-Number(x.cost||0)),0);
+ $('home').innerHTML=`<div class="box"><div class="eyebrow">RESUMEN</div><h2 class="script">Administrar Mistrielle</h2><div class="stats"><div class="stat"><b>${products.length}</b><small>Productos</small></div><div class="stat"><b>${visibleOrders.length}</b><small>Pedidos actuales</small></div><div class="stat"><b>${visibleOrders.filter(x=>x.status==='Nuevo').length}</b><small>Nuevos</small></div><div class="stat"><b>${visibleRequests.length}</b><small>Solicitudes actuales</small></div><div class="stat"><b>${money(delivered)}</b><small>Ingresos registrados</small></div><div class="stat"><b>${money(profit)}</b><small>Ganancia / pérdida</small></div></div></div>`;
+ $('products').innerHTML=`<div class="box"><div class="row"><h2 class="script">Productos</h2><button class="btn sm" onclick="productForm()">+ Nuevo producto</button></div><div class="tablewrap"><table><thead><tr><th>IMAGEN</th><th>PRODUCTO</th><th>ID</th><th>PRECIO</th><th>STOCK</th><th>ESTADO</th><th>ACCIONES</th></tr></thead><tbody>${products.map(p=>`<tr><td><div class="thumb">${p.images?.[0]?`<img class="thumb" src="${p.images[0]}">`:''}</div></td><td><b>${esc(p.name)}</b><br><small>${esc(p.keywords||'')}</small></td><td>${p.id}</td><td>${money(p.price)}</td><td>${p.madeToOrder?'Bajo pedido':sizes.map(s=>s+': '+(p.stock?.[s]||0)).join(' · ')}</td><td>${p.status}</td><td><button class="btn alt sm" onclick="productForm('${p.id}')">Editar</button> <button class="btn danger sm" onclick="deleteProduct('${p.id}')">Eliminar</button></td></tr>`).join('')}</tbody></table></div></div>`;
+ $('orders').innerHTML=`<div class="box"><h2 class="script">Pedidos recibidos</h2><div class="tablewrap"><table><thead><tr><th>PEDIDO</th><th>CLIENTA</th><th>TOTAL</th><th>ENTREGA</th><th>ESTADO</th><th>DETALLE</th></tr></thead><tbody>${orders.map((o,i)=>({o,i})).filter(x=>!x.o.hidden).map(({o,i})=>`<tr><td><b>${o.number}</b><br><small>${new Date(o.created).toLocaleString()}</small></td><td>${esc(o.name)}<br>${esc(o.whatsapp)}</td><td>${o.discountCode?`<small>${money(o.subtotal??(Number(o.total||0)+Number(o.discountAmount||0)))} − ${money(o.discountAmount)}</small><br>`:''}<b>${money(o.total)}</b>${o.discountCode?`<br><small>${esc(o.discountCode)} · ${o.discountState==='Usado'?'USADO':'APLICADO'}</small>`:''}</td><td>${esc(o.delivery)}</td><td><select onchange="orderStatus(${i},this.value)">${['Nuevo','Confirmado','En preparación','Listo','Enviado','Entregado','Cancelado'].map(s=>`<option ${s===o.status?'selected':''}>${s}</option>`)}</select></td><td><button class="btn alt sm" onclick="orderDetail(${i})">Ver</button> <button class="btn alt sm" onclick="hideOrder(${i})">Ocultar</button> <button class="btn danger sm" onclick="deleteOrder(${i})">Eliminar</button></td></tr>`).join('')}</tbody></table></div></div>`;
+ $('requests').innerHTML=`<div class="box"><h2 class="script">Solicitudes personalizadas</h2>${requests.length?requests.map((r,i)=>`<div class="cartitem">${r.image?`<img class="thumb" src="${r.image}">`:'<div class="thumb"></div>'}<div><b>${r.number} · ${esc(r.name)}</b><br><small>${esc(r.whatsapp)} · ${esc(r.form)} · ${esc(r.length)}</small><p>${esc(r.details)}</p>${r.convertedOrder?`<div class="notice">Convertida en pedido: <b>${esc(r.convertedOrder)}</b>${Number(r.quotedPrice||0)>0?` · Total: <b>${money(r.quotedPrice)}</b>`:''}</div>`:''}<div class="field"><label>PRECIO COTIZADO</label><input id="rprice_${i}" type="number" min="0" step=".01" value="${Number(r.quotedPrice||0)}" placeholder="Ej. 320"><small style="color:var(--muted)">La clienta verá este precio al consultar su solicitud. Si la aceptas, será el total inicial del pedido.</small></div><div class="field"><label>RESPUESTA VISIBLE PARA LA CLIENTA</label><textarea id="reply_${i}" placeholder="Ej. Sí podemos realizarlo. El precio sería de $320.">${esc(r.reply||'')}</textarea></div></div><div><select id="rstatus_${i}">${['Nueva','En revisión','Cotizada','Aceptada','Rechazada','Cerrada'].map(s=>`<option ${s===r.status?'selected':''}>${s}</option>`)}</select><br><button class="btn sm" style="margin-top:8px" onclick="saveRequestAdmin(${i})">Guardar estado y mensaje</button><br><button class="btn danger sm" style="margin-top:8px" onclick="deleteRequest(${i})">Eliminar</button></div></div>`).join(''):'<div class="empty">No hay solicitudes.</div>'}</div>`;
+ $('discounts').innerHTML=`<div class="box"><div class="row"><div><div class="eyebrow">PROMOCIONES</div><h2 class="script">Códigos de descuento</h2><p style="color:var(--muted)">Aplicado = reservado por un pedido nuevo. Usado = pedido/pago confirmado.</p></div><button class="btn sm" onclick="discountForm()">+ Nuevo código</button></div><div class="tablewrap"><table><thead><tr><th>CÓDIGO</th><th>DESCUENTO</th><th>RESERVADOS</th><th>USADOS</th><th>LÍMITE</th><th>VENCE</th><th>ESTADO</th><th>ACCIONES</th></tr></thead><tbody>${discounts.length?discounts.map((d,i)=>{let reserved=orders.filter(o=>o.discountCode===d.code&&o.discountState==='Reservado'&&o.status!=='Cancelado').length;return `<tr><td><b>${esc(d.code)}</b><br><small>${esc(d.note||'')}</small></td><td>${d.type==='percent'?`${Number(d.value)}%`:money(d.value)}</td><td>${reserved}</td><td><b>${Number(d.used||0)}</b></td><td>${Number(d.maxUses||0)>0?Number(d.maxUses):'∞'}</td><td>${esc(d.expires||'Sin fecha')}</td><td>${d.active?'Activo':'Inactivo'}</td><td><button class="btn alt sm" onclick="discountForm(${i})">Editar</button> <button class="btn danger sm" onclick="deleteDiscount(${i})">Eliminar</button></td></tr>`}).join(''):`<tr><td colspan="8">Todavía no hay códigos.</td></tr>`}</tbody></table></div><h3 class="script" style="margin-top:28px">Códigos usados</h3><div class="tablewrap"><table><thead><tr><th>PEDIDO</th><th>CÓDIGO</th><th>DESCUENTO</th><th>CLIENTA</th><th>CONFIRMADO</th></tr></thead><tbody>${orders.filter(o=>o.discountCode&&o.discountState==='Usado').length?orders.filter(o=>o.discountCode&&o.discountState==='Usado').map(o=>`<tr><td>${o.number}</td><td><b>${esc(o.discountCode)}</b></td><td>−${money(o.discountAmount)}</td><td>${esc(o.name)}</td><td>${o.discountConfirmedAt?new Date(o.discountConfirmedAt).toLocaleString():'Confirmado'}</td></tr>`).join(''):`<tr><td colspan="5">Todavía no hay códigos confirmados como usados.</td></tr>`}</tbody></table></div><hr style="border-color:var(--line);margin:28px 0"><div class="eyebrow">REGLA DE ENTREGA</div><h2 class="script">Envío gratis</h2><div class="fields"><div class="field"><label>ACTIVAR</label><select id="fsEnabled"><option value="false" ${!config.freeShippingEnabled?'selected':''}>Desactivado</option><option value="true" ${config.freeShippingEnabled?'selected':''}>Activado</option></select></div><div class="field"><label>SE ACTIVA POR</label><select id="fsMode"><option value="amount" ${config.freeShippingMode!=='qty'?'selected':''}>Monto mínimo comprado</option><option value="qty" ${config.freeShippingMode==='qty'?'selected':''}>Cantidad de productos</option></select></div><div class="field"><label>MONTO MÍNIMO</label><input id="fsAmount" type="number" min="0" step=".01" value="${Number(config.freeShippingAmount||600)}"></div><div class="field"><label>CANTIDAD MÍNIMA DE PRODUCTOS</label><input id="fsQty" type="number" min="1" step="1" value="${Number(config.freeShippingQty||3)}"></div></div><br><button class="btn" onclick="saveFreeShipping()">Guardar regla de envío</button></div>`; $('sales').innerHTML=`<div class="box"><div class="row"><div><div class="eyebrow">REGISTRO REAL</div><h2 class="script">Ventas, costos y ganancias</h2></div><button class="btn sm" onclick="saleForm()">+ Registrar movimiento</button></div><div class="stats"><div class="stat"><b>${money(sales.reduce((s,x)=>s+Number(x.revenue||0),0))}</b><small>Ingresos</small></div><div class="stat"><b>${money(sales.reduce((s,x)=>s+Number(x.cost||0),0))}</b><small>Costos / pérdidas</small></div><div class="stat"><b>${money(sales.reduce((s,x)=>s+Number(x.revenue||0)-Number(x.cost||0),0))}</b><small>Resultado neto</small></div></div><br><div class="tablewrap"><table><thead><tr><th>FECHA</th><th>CONCEPTO</th><th>PEDIDO</th><th>INGRESO</th><th>COSTO</th><th>GANANCIA / PÉRDIDA</th><th>ACCIÓN</th></tr></thead><tbody>${sales.map((s,i)=>`<tr><td>${esc(s.date)}</td><td>${esc(s.concept)}</td><td>${esc(s.order||'-')}</td><td>${money(s.revenue)}</td><td>${money(s.cost)}</td><td><b>${money(Number(s.revenue||0)-Number(s.cost||0))}</b></td><td><button class="btn alt sm" onclick="saleForm(${i})">Editar</button> <button class="btn danger sm" onclick="sales.splice(${i},1);save('sales',sales);renderAdmin()">Eliminar</button></td></tr>`).join('')}</tbody></table></div></div>`;
+ $('faq').innerHTML=`<div class="box"><div class="row"><h2 class="script">Preguntas frecuentes</h2><button class="btn sm" onclick="faqForm()">+ Agregar</button></div>${faqs.map((f,i)=>`<div class="cartitem"><div></div><div><b>${esc(f.q)}</b><p>${esc(f.a)}</p></div><div><button class="btn alt sm" onclick="faqForm(${i})">Editar</button> <button class="btn danger sm" onclick="faqs.splice(${i},1);save('faqs',faqs);renderAdmin()">Eliminar</button></div></div>`).join('')}</div>`;
+ $('design').innerHTML=`<div class="box"><div class="eyebrow">EDITOR VISUAL</div><h2 class="script">Diseño de la tienda</h2><p style="color:var(--muted)">Cambia la identidad visual sin tocar el código. Las imágenes se guardan localmente durante esta etapa de prueba.</p><div class="design-preview"><b>Dark Feminine Luxury</b><br><small>Vino profundo · rosa característico · dorado</small></div><br><div class="fields"><div class="field"><label>COLOR VINO</label><input id="dwine" type="color" value="${config.colorWine||'#3b0715'}"></div><div class="field"><label>COLOR ROSA</label><input id="dpink" type="color" value="${config.colorPink||'#f4cfd9'}"></div><div class="field"><label>COLOR DORADO</label><input id="dgold" type="color" value="${config.colorGold||'#c5a05a'}"></div><div class="field"><label>LOGO</label><input id="dlogo" type="file" accept="image/*"></div><div class="field full"><label>TÍTULO PRINCIPAL</label><input id="dtitle" value="${esc(config.welcome||'Un pequeño lujo hecho para tus manos.')}"></div><div class="field full"><label>SUBTÍTULO</label><input id="dsub" value="${esc(config.heroSubtitle||'Uñas Press-On Personalizadas y a la Medida. Tu mejor opción.')}"></div><div class="field"><label>TEXTO BOTÓN PRINCIPAL</label><input id="dbtn" value="${esc(config.heroButton||'Descubrir diseños')}"></div><div class="field"><label>IMAGEN PRINCIPAL / BANNER</label><input id="dhero" type="file" accept="image/*"></div><div class="field full"><label>TÍTULO DE PERSONALIZADAS</label><input id="dct" value="${esc(config.customTitle||'Hechas para ti')}"></div><div class="field full"><label>TEXTO DE PERSONALIZADAS</label><textarea id="dcx">${esc(config.customText||'Tu idea. Tus medidas. Tu set.')}</textarea></div><div class="field full"><label>IMAGEN DE FONDO PARA PERSONALIZADAS</label><input id="dcimg" type="file" accept="image/*"></div></div><br><button class="btn" onclick="saveDesign()">Guardar diseño</button> <button class="btn alt" onclick="resetDesign()">Restablecer estilo</button></div>`; $('options').innerHTML=editor('Categorías',categories,'categories')+editor('Tallas',sizes,'sizes')+editor('Formas',forms,'forms')+editor('Largos',lengths,'lengths');
+ $('config').innerHTML=`<div class="box"><h2 class="script">Contacto y tienda</h2><div class="fields"><div class="field"><label>WHATSAPP PARA RECIBIR PEDIDOS *</label><input id="cwa" value="${esc(config.whatsapp)}" placeholder="529931234567"><small style="color:var(--muted)">Incluye 52 para México, sin +, espacios ni guiones.</small></div><div class="field"><label>INSTAGRAM</label><input id="cig" value="${esc(config.instagram)}"></div><div class="field"><label>CORREO</label><input id="cem" value="${esc(config.email)}"></div><div class="field full"><label>TEXTO PRINCIPAL</label><input id="cwel" value="${esc(config.welcome)}"></div><div class="field full"><label>ENTREGAS</label><div class="chips"><label class="chip"><input id="cloc" type="checkbox" ${config.local?'checked':''}> Envío local</label><label class="chip"><input id="cupn" type="checkbox" ${config.upn?'checked':''}> UPN</label><label class="chip"><input id="cnat" type="checkbox" ${config.national?'checked':''}> Nacional</label></div></div></div><br><button class="btn" onclick="saveConfig()">Guardar configuración</button> <button class="btn alt" onclick="resetTestStock()">Restablecer stock según cantidades actuales</button></div><div class="notice"><b>Para que tienda y administración compartan pedidos y solicitudes de forma fiable, publícalas bajo el mismo dominio.</b> Al abrir dos HTML separados directamente desde Descargas, algunos navegadores aíslan el almacenamiento de cada archivo.</div>`;
+}
+function editor(title,a,key){return `<div class="box"><div class="row"><h2 class="script">${title}</h2><button class="btn sm" onclick="addOpt('${key}')">+ Agregar</button></div><div class="chips">${a.map((x,i)=>`<span class="chip">${esc(x)} <button onclick="removeOpt('${key}',${i})" style="border:0;background:none">×</button></span>`).join('')}</div></div>`}
+function addOpt(k){let v=prompt('Nueva opción:');if(!v)return;window[k].push(v);save(k,window[k]);renderAdmin()}function removeOpt(k,i){window[k].splice(i,1);save(k,window[k]);renderAdmin()}
+function productForm(id){let p=id?products.find(x=>x.id===id):null;$('modalContent').innerHTML=`<div class="eyebrow">${p?'EDITAR':'NUEVO'} PRODUCTO</div><h2 class="script">${p?esc(p.name):'Agregar producto'}</h2><div class="fields"><div class="field"><label>NOMBRE *</label><input id="pn" value="${esc(p?.name||'')}"></div><div class="field"><label>PRECIO *</label><input id="pp" type="number" value="${p?.price||''}"></div><div class="field"><label>PRECIO PROMOCIONAL</label><input id="psale" type="number" value="${p?.salePrice||''}"></div><div class="field"><label>CATEGORÍA</label><select id="pc">${categories.map(x=>`<option ${x===p?.category?'selected':''}>${x}</option>`)}</select></div><div class="field full"><label>DESCRIPCIÓN</label><textarea id="pd">${esc(p?.description||'')}</textarea></div><div class="field full"><label>PALABRAS DE BÚSQUEDA / ETIQUETAS</label><input id="pkey" value="${esc(p?.keywords||'')}" placeholder="rosa, verano, flores, coquette, playa..."></div><div class="field"><label>ESTADO</label><select id="pst">${['Disponible','Agotado','Próximamente','Oculto'].map(x=>`<option ${x===p?.status?'selected':''}>${x}</option>`)}</select></div><div class="field"><label>MODALIDAD</label><select id="pmade" onchange="stockToggle()"><option value="stock" ${!p?.madeToOrder?'selected':''}>Stock disponible</option><option value="order" ${p?.madeToOrder?'selected':''}>Hecho bajo pedido</option></select></div><div class="field full" id="stockArea"><label>STOCK POR TALLA</label><div class="stockgrid">${sizes.map(s=>`<div><small>${s}</small><input class="stock" data-size="${s}" type="number" min="0" value="${p?.stock?.[s]??0}"></div>`).join('')}</div></div><div class="field full"><label>IMÁGENES (HASTA 3)</label><input id="pimgs" type="file" accept="image/*" multiple><div class="previewimgs">${(p?.images||[]).map(x=>`<img src="${x}">`).join('')}</div></div><div class="field full"><label>FORMAS DISPONIBLES</label><div class="chips">${forms.map(x=>`<label class="chip"><input class="pf" type="checkbox" value="${x}" ${(p?.forms||forms).includes(x)?'checked':''}> ${x}</label>`)}</div></div><div class="field full"><label>LARGOS</label><div class="chips">${lengths.map(x=>`<label class="chip"><input class="pl" type="checkbox" value="${x}" ${(p?.lengths||lengths).includes(x)?'checked':''}> ${x}</label>`)}</div></div><div class="field full"><label>TALLAS</label><div class="chips">${sizes.map(x=>`<label class="chip"><input class="psz" type="checkbox" value="${x}" ${(p?.sizes||sizes).includes(x)?'checked':''}> ${x}</label>`)}</div></div></div><br><button class="btn" onclick="saveProduct('${p?.id||''}')">Guardar producto</button>`;stockToggle();openModal()}
+function stockToggle(){if($('stockArea'))$('stockArea').style.display=$('pmade').value==='order'?'none':'block'}
+function saveProduct(id){let name=$('pn').value.trim(),price=Number($('pp').value);if(!name||!price)return alert('Nombre y precio son obligatorios.');let old=id?products.find(x=>x.id===id):null,stock={};document.querySelectorAll('.stock').forEach(x=>stock[x.dataset.size]=Number(x.value||0));let files=[...$('pimgs').files].slice(0,3),finish=images=>{let p={id:old?.id||nextProductId(),name,price,salePrice:Number($('psale').value)||null,category:$('pc').value,description:$('pd').value,keywords:$('pkey').value,status:$('pst').value,madeToOrder:$('pmade').value==='order',stock,images:images.length?images:(old?.images||[]),forms:[...document.querySelectorAll('.pf:checked')].map(x=>x.value),lengths:[...document.querySelectorAll('.pl:checked')].map(x=>x.value),sizes:[...document.querySelectorAll('.psz:checked')].map(x=>x.value),created:old?.created||Date.now()};if(old)products[products.indexOf(old)]=p;else products.push(p);save('products',products);closeModal();renderAdmin()};if(!files.length)return finish([]);let out=[],left=files.length;files.forEach(f=>{let r=new FileReader();r.onload=()=>{out.push(r.result);if(!--left)finish(out)};r.readAsDataURL(f)})}
+function deleteProduct(id){if(confirm('¿Eliminar definitivamente este producto? Si solo quieres retirarlo temporalmente de la tienda, usa estado Oculto.')){products=products.filter(x=>x.id!==id);save('products',products);let favs=load('favorites',[]).filter(x=>x!==id);save('favorites',favs);renderAdmin()}}
+
+function saveRequestAdmin(i){let r=requests[i],newStatus=$('rstatus_'+i).value,price=Number($('rprice_'+i).value||0);r.status=newStatus;r.reply=$('reply_'+i).value.trim();r.quotedPrice=price;if(newStatus==='Aceptada'&&price<=0)return alert('Antes de aceptar la solicitud, añade el precio acordado o cotizado.');if(newStatus==='Aceptada'&&!r.convertedOrder){orderCounter++;save('orderCounter',orderCounter);let num='PED-'+String(orderCounter).padStart(4,'0');let o={number:num,created:Date.now(),name:r.name,whatsapp:r.whatsapp,delivery:'Por acordar',address:'Solicitud personalizada '+r.number,notes:'Pedido creado automáticamente desde '+r.number+'. '+r.details,status:'Nuevo',stockApplied:false,items:[{key:Date.now(),id:'PERSONALIZADO',name:'Diseño personalizado '+r.number,image:r.image||'',price:price,form:r.form,length:r.length,size:'Personalizada',measures:[],qty:1}],total:price,sourceRequest:r.number,hidden:false};orders.unshift(o);r.convertedOrder=num;save('orders',orders)}else if(r.convertedOrder){let o=orders.find(x=>x.number===r.convertedOrder);if(o&&price>0){o.total=price;if(o.items?.length===1&&o.items[0].id==='PERSONALIZADO')o.items[0].price=price;save('orders',orders)}}save('requests',requests);alert(newStatus==='Aceptada'?`Solicitud aceptada por ${money(price)} y vinculada al pedido ${r.convertedOrder}.`:'Estado, precio y mensaje guardados.');renderAdmin()}
+function deleteRequest(i){if(confirm('¿Eliminar esta solicitud?')){requests=load('requests',requests);requests.splice(i,1);save('requests',requests);renderAdmin()}}
+function hideOrder(i){orders[i].hidden=true;save('orders',orders);renderAdmin()}
+function deleteOrder(i){if(confirm('¿Eliminar definitivamente este pedido?')){orders=load('orders',orders);orders.splice(i,1);save('orders',orders);renderAdmin()}}
+
+function generateDiscountCode(){let chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',s='MIS-';for(let i=0;i<6;i++)s+=chars[Math.floor(Math.random()*chars.length)];$('dcode').value=s}
+function discountForm(i){let d=i===undefined?null:discounts[i];$('modalContent').innerHTML=`<div class="eyebrow">PROMOCIÓN</div><h2 class="script">${d?'Editar':'Nuevo'} código</h2><div class="fields"><div class="field"><label>CÓDIGO *</label><div style="display:flex;gap:7px"><input id="dcode" value="${esc(d?.code||'')}" placeholder="MISTRIELLE20"><button class="btn alt sm" onclick="generateDiscountCode()">Generar</button></div></div><div class="field"><label>TIPO DE DESCUENTO</label><select id="dtype"><option value="percent" ${d?.type!=='fixed'?'selected':''}>Porcentaje</option><option value="fixed" ${d?.type==='fixed'?'selected':''}>Cantidad fija</option></select></div><div class="field"><label>DESCUENTO *</label><input id="dvalue" type="number" min="0" step=".01" value="${Number(d?.value||0)}"></div><div class="field"><label>LÍMITE TOTAL DE USOS</label><input id="dmax" type="number" min="0" step="1" value="${Number(d?.maxUses||0)}"><small style="color:var(--muted)">1 = código único. 0 = usos ilimitados.</small></div><div class="field"><label>FECHA DE VENCIMIENTO</label><input id="dexpires" type="date" value="${esc(d?.expires||'')}"></div><div class="field"><label>ESTADO</label><select id="dactive"><option value="true" ${d?.active!==false?'selected':''}>Activo</option><option value="false" ${d?.active===false?'selected':''}>Inactivo</option></select></div><div class="field full"><label>NOTA INTERNA</label><input id="dnote" value="${esc(d?.note||'')}" placeholder="Ej. Grupo UPN / Clienta especial / Octubre"></div></div><br><button class="btn" onclick="saveDiscount(${i===undefined?'-1':i})">Guardar código</button></div>`;openModal()}
+function saveDiscount(i){let code=$('dcode').value.trim().toUpperCase().replace(/\s+/g,''),type=$('dtype').value,value=Number($('dvalue').value||0),maxUses=Number($('dmax').value||0);if(!code||value<=0)return alert('Escribe un código y un descuento válido.');if(type==='percent'&&value>100)return alert('El porcentaje no puede ser mayor a 100%.');if(discounts.some((x,j)=>j!==i&&x.code===code))return alert('Ese código ya existe.');let old=i>=0?discounts[i]:{};let d={...old,code,type,value,maxUses,expires:$('dexpires').value,active:$('dactive').value==='true',note:$('dnote').value.trim(),used:Number(old.used||0)};if(i<0)discounts.unshift(d);else discounts[i]=d;save('discounts',discounts);closeModal();renderAdmin()}
+function deleteDiscount(i){if(confirm('¿Eliminar este código de descuento?')){discounts.splice(i,1);save('discounts',discounts);renderAdmin()}}
+function saveFreeShipping(){config={...config,freeShippingEnabled:$('fsEnabled').value==='true',freeShippingMode:$('fsMode').value,freeShippingAmount:Number($('fsAmount').value||0),freeShippingQty:Number($('fsQty').value||1)};save('config',config);alert('Regla de envío gratis guardada.');renderAdmin()}
+function saleForm(i){let s=i===undefined?null:sales[i],today=new Date().toISOString().slice(0,10);$('modalContent').innerHTML=`<div class="eyebrow">REGISTRO FINANCIERO</div><h2 class="script">${s?'Editar movimiento':'Registrar venta, costo o pérdida'}</h2><div class="fields"><div class="field"><label>FECHA</label><input id="sdate" type="date" value="${esc(s?.date||today)}"></div><div class="field"><label>PEDIDO (OPCIONAL)</label><input id="sorder" value="${esc(s?.order||'')}" placeholder="PED-0001"></div><div class="field full"><label>CONCEPTO *</label><input id="sconcept" value="${esc(s?.concept||'')}" placeholder="Venta set rojo / material perdido / envío..."></div><div class="field"><label>DINERO QUE ENTRÓ</label><input id="srev" type="number" step=".01" value="${s?.revenue??0}"></div><div class="field"><label>COSTO O DINERO PERDIDO</label><input id="scost" type="number" step=".01" value="${s?.cost??0}"></div><div class="field full"><label>NOTAS</label><textarea id="snotes">${esc(s?.notes||'')}</textarea></div></div><div class="notice" style="margin-top:12px">Resultado = ingreso − costo. Si solo perdiste dinero, deja ingreso en 0 y registra la pérdida en costo.</div><br><button class="btn" onclick="saveSale(${i===undefined?'-1':i})">Guardar registro</button>`;openModal()}
+function saveSale(i){let x={date:$('sdate').value,order:$('sorder').value.trim().toUpperCase(),concept:$('sconcept').value.trim(),revenue:Number($('srev').value||0),cost:Number($('scost').value||0),notes:$('snotes').value.trim()};if(!x.concept)return alert('Escribe el concepto.');if(i<0)sales.unshift(x);else sales[i]=x;save('sales',sales);closeModal();renderAdmin()}
+function orderStatus(i,v){
+ let o=orders[i],prev=o.status;o.status=v;discounts=load('discounts',discounts);
+ // Confirm coupon when order/payment is confirmed.
+ if(v==='Confirmado'&&o.discountCode&&o.discountState!=='Usado'){
+   let d=discounts.find(x=>x.code===o.discountCode);
+   if(d){d.used=Number(d.used||0)+1;save('discounts',discounts)}
+   o.discountState='Usado';o.discountConfirmedAt=Date.now();
+ }
+ // If a confirmed coupon order is cancelled, return that use.
+ if(v==='Cancelado'&&o.discountCode&&o.discountState==='Usado'&&prev!=='Cancelado'){
+   let d=discounts.find(x=>x.code===o.discountCode);
+   if(d){d.used=Math.max(0,Number(d.used||0)-1);save('discounts',discounts)}
+   o.discountState='Liberado';o.discountConfirmedAt=null;
+ }
+ // If cancelled before confirmation, simply release reservation.
+ if(v==='Cancelado'&&o.discountCode&&o.discountState==='Reservado')o.discountState='Liberado';
+ if(v==='Entregado'&&!o.saleRecorded){sales.unshift({date:new Date().toISOString().slice(0,10),order:o.number,concept:'Venta '+o.number,revenue:Number(o.total||0),cost:0,notes:'Registro creado al marcar el pedido como entregado.'});o.saleRecorded=true;save('sales',sales);}
+ if(v==='Confirmado'&&!o.stockApplied){for(let it of o.items){let p=products.find(x=>x.id===it.id);if(p&&!p.madeToOrder&&it.size!=='Personalizada'){p.stock=p.stock||{};p.stock[it.size]=Math.max(0,Number(p.stock[it.size]||0)-it.qty);if(sizes.every(s=>Number(p.stock[s]||0)<=0))p.status='Agotado'}}o.stockApplied=true;save('products',products)}
+ if(v==='Cancelado'&&o.stockApplied&&prev!=='Cancelado'){for(let it of o.items){let p=products.find(x=>x.id===it.id);if(p&&!p.madeToOrder&&it.size!=='Personalizada'){p.stock=p.stock||{};p.stock[it.size]=Number(p.stock[it.size]||0)+it.qty;if(p.status==='Agotado')p.status='Disponible'}}o.stockApplied=false;save('products',products)}
+ save('orders',orders);renderAdmin()
+}
+function saveOrderEdit(i){let o=orders[i];o.total=Number($('ototal').value||0);o.delivery=$('odelivery').value.trim();o.address=$('oaddress').value.trim();o.notes=$('onotes').value.trim();if(o.items?.length===1&&o.items[0].id==='PERSONALIZADO')o.items[0].price=o.total;save('orders',orders);closeModal();renderAdmin()}
+function orderDetail(i){let o=orders[i];$('modalContent').innerHTML=`<div class="eyebrow">${o.number}</div><h2 class="script">${esc(o.name)}</h2>${o.items.map(x=>`<div class="cartitem"><div></div><div><b>${esc(x.name)}</b><br><small>${x.form} · ${x.length} · ${x.size} · x${x.qty}</small>${x.measures?.length?`<br><small>Medidas: ${x.measures.join(', ')} mm</small>`:''}</div><b>${money(x.price*x.qty)}</b></div>`).join('')}<h3>Total ${money(o.total)}</h3>${o.discountCode?`<div class="notice"><b>Código ${esc(o.discountCode)}</b><br>Descuento: −${money(o.discountAmount)}<br>Estado: <b>${o.discountState==='Usado'?'USADO / CONFIRMADO':'APLICADO / PENDIENTE'}</b></div><p>Subtotal: ${money(o.subtotal??(Number(o.total||0)+Number(o.discountAmount||0)))}</p>`:''}${o.freeShipping?`<div class="notice"><b>Este pedido obtuvo envío gratis.</b></div>`:''}<div class="fields"><div class="field"><label>TOTAL REAL DEL PEDIDO</label><input id="ototal" type="number" step=".01" value="${Number(o.total||0)}"></div><div class="field"><label>ENTREGA</label><input id="odelivery" value="${esc(o.delivery||'')}"></div><div class="field full"><label>DIRECCIÓN / ACUERDO</label><input id="oaddress" value="${esc(o.address||'')}"></div><div class="field full"><label>NOTAS</label><textarea id="onotes">${esc(o.notes||'')}</textarea></div></div><br><button class="btn" onclick="saveOrderEdit(${i})">Guardar cambios del pedido</button>`;openModal()}
+function faqForm(i){let f=i===undefined?null:faqs[i];$('modalContent').innerHTML=`<h2 class="script">${f?'Editar':'Nueva'} pregunta</h2><div class="field"><label>PREGUNTA</label><input id="fq" value="${esc(f?.q||'')}"></div><br><div class="field"><label>RESPUESTA</label><textarea id="fa">${esc(f?.a||'')}</textarea></div><br><div class="field"><label>IMAGEN, FLYER O VIDEO DE APOYO</label><input id="fmedia" type="file" accept="image/*,video/*"><small style="color:var(--muted)">Opcional. Puedes usar una imagen, flyer o video explicativo.</small></div>${f?.media?`<div class="notice" style="margin-top:10px">Esta pregunta ya tiene material visual. Si eliges otro archivo, será reemplazado. <button class="btn alt sm" onclick="removeFaqMedia(${i})">Quitar material</button></div>`:''}<br><button class="btn" onclick="saveFaq(${i===undefined?'-1':i})">Guardar</button>`;openModal()}
+function saveFaq(i){let q=$('fq').value.trim(),a=$('fa').value.trim();if(!q||!a)return alert('Completa pregunta y respuesta.');let old=i>=0?faqs[i]:{},file=$('fmedia').files[0],finish=(media,type)=>{let f={q,a,media:media??old.media??'',mediaType:type??old.mediaType??''};if(i<0)faqs.push(f);else faqs[i]=f;save('faqs',faqs);closeModal();renderAdmin()};if(file){let r=new FileReader();r.onload=()=>finish(r.result,file.type.startsWith('video/')?'video':'image');r.readAsDataURL(file)}else finish()}
+function removeFaqMedia(i){faqs[i].media='';faqs[i].mediaType='';save('faqs',faqs);closeModal();renderAdmin()}
+function resetTestStock(){if(!confirm('Esto NO cambia las cantidades que escribiste en cada producto. Solo quita la marca interna de stock ya descontado de pedidos de prueba, para que esos pedidos no vuelvan a afectar existencias. ¿Continuar?'))return;orders.forEach(o=>{o.stockApplied=false});save('orders',orders);alert('Marcas de pruebas restablecidas. Revisa y guarda el stock real de cada producto desde Productos.');renderAdmin()}
+
+function fileData(id){return new Promise(resolve=>{let f=$(id)?.files?.[0];if(!f)return resolve(null);let r=new FileReader();r.onload=()=>resolve(r.result);r.readAsDataURL(f)})}
+async function saveDesign(){let [logo,hero,custom]=await Promise.all([fileData('dlogo'),fileData('dhero'),fileData('dcimg')]);config={...config,colorWine:$('dwine').value,colorPink:$('dpink').value,colorGold:$('dgold').value,welcome:$('dtitle').value.trim(),heroSubtitle:$('dsub').value.trim(),heroButton:$('dbtn').value.trim(),customTitle:$('dct').value.trim(),customText:$('dcx').value.trim(),logo:logo||config.logo||'',heroImage:hero||config.heroImage||'',customImage:custom||config.customImage||''};save('config',config);alert('Diseño guardado. Abre o actualiza la tienda para verlo.');renderAdmin()}
+function resetDesign(){if(!confirm('¿Restablecer los colores y textos visuales? Tus productos y pedidos no se tocarán.'))return;config={...config,colorWine:'#3b0715',colorPink:'#f4cfd9',colorGold:'#c5a05a',welcome:'Un pequeño lujo hecho para tus manos.',heroSubtitle:'Uñas Press-On Personalizadas y a la Medida. Tu mejor opción.',heroButton:'Descubrir diseños',customTitle:'Hechas para ti',customText:'Tu idea. Tus medidas. Tu set. Creamos una manicura pensada especialmente para ti.',logo:'',heroImage:'',customImage:''};save('config',config);renderAdmin()}
+function saveConfig(){config={...config,whatsapp:$('cwa').value,instagram:$('cig').value,email:$('cem').value,welcome:$('cwel').value,local:$('cloc').checked,upn:$('cupn').checked,national:$('cnat').checked};save('config',config);alert('Configuración guardada.');renderAdmin()}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab,.panel').forEach(x=>x.classList.remove('active'));b.classList.add('active');$(b.dataset.tab).classList.add('active')});
+renderAdmin();
+</script>
+<style>
+#mnAuthGate{position:fixed;inset:0;z-index:99999;background:#17050b;display:flex;align-items:center;justify-content:center;padding:24px;font-family:inherit}.mn-login{width:min(430px,100%);background:#fff7f7;border:1px solid #c5a05a;padding:28px;border-radius:18px;box-shadow:0 25px 80px #0008;color:#3b0715}.mn-login h2{margin:0 0 8px;font-size:30px}.mn-login p{color:#735c64}.mn-login input{width:100%;box-sizing:border-box;margin:7px 0 12px;padding:12px;border:1px solid #d8c7cb;border-radius:10px}.mn-login button{width:100%;padding:12px;border:0;border-radius:10px;background:#3b0715;color:white;font-weight:700;cursor:pointer}#mnAuthError{color:#a11635;min-height:20px;font-size:13px;margin-top:10px}.mn-cloud-badge{position:fixed;right:12px;bottom:12px;z-index:9998;background:#17050b;color:#f4cfd9;border:1px solid #c5a05a;padding:7px 10px;border-radius:999px;font-size:11px}
+</style>
+<div id="mnAuthGate"><div class="mn-login"><div style="letter-spacing:.18em;font-size:11px">MISTRIELLE NAILS</div><h2>Administración</h2><p>Inicia sesión con tu cuenta administradora.</p><label>Correo</label><input id="mnLoginEmail" type="email" autocomplete="username"><label>Contraseña</label><input id="mnLoginPassword" type="password" autocomplete="current-password"><button id="mnLoginBtn">Entrar</button><div id="mnAuthError"></div></div></div><div class="mn-cloud-badge" id="mnCloudBadge">Nube: conectando…</div>
+<script>
+const mnCloud = window.supabase.createClient(window.MN_SUPABASE_URL, window.MN_SUPABASE_KEY);
+function mnFromDb(p){return {id:p.id,name:p.name||'',description:p.description||'',keywords:p.keywords||'',price:Number(p.price||0),salePrice:p.promo_price==null?null:Number(p.promo_price),category:Array.isArray(p.categories)?(p.categories[0]||''):((p.categories&&p.categories.category)||''),images:Array.isArray(p.images)?p.images:[],forms:Array.isArray(p.forms)?p.forms:[],lengths:Array.isArray(p.lengths)?p.lengths:[],stock:(p.stock&&typeof p.stock==='object')?p.stock:{},madeToOrder:!!p.made_to_order,status:p.status||'Disponible',created:p.created_at?new Date(p.created_at).getTime():Date.now()};}
+function mnToDb(p){return {id:p.id,name:p.name||'',description:p.description||'',keywords:p.keywords||'',price:Number(p.price||0),promo_price:p.salePrice==null?null:Number(p.salePrice),categories:[p.category||''],images:Array.isArray(p.images)?p.images:[],forms:Array.isArray(p.forms)?p.forms:[],lengths:Array.isArray(p.lengths)?p.lengths:[],stock:p.stock||{},made_to_order:!!p.madeToOrder,status:p.status||'Disponible',visible:p.status!=='Oculto'};}
+async function mnCheckAdmin(){const {data,error}=await mnCloud.rpc('is_admin');if(error||data!==true)throw new Error('Esta cuenta no tiene permisos de administradora.');}
+async function mnLoadCloudProducts(){const {data,error}=await mnCloud.from('products').select('*').order('created_at',{ascending:false});if(error)throw error;products=(data||[]).map(mnFromDb);localStorage.setItem('mn_products',JSON.stringify(products));renderAdmin();}
+async function mnSyncProducts(){
+ try{
+  document.getElementById('mnCloudBadge').textContent='Nube: guardando…';
+  const rows=products.map(mnToDb);
+  if(rows.length){const {error}=await mnCloud.from('products').upsert(rows,{onConflict:'id'});if(error)throw error;}
+  const {data:remote,error:re}=await mnCloud.from('products').select('id');if(re)throw re;
+  const keep=new Set(products.map(p=>p.id));const gone=(remote||[]).map(x=>x.id).filter(id=>!keep.has(id));
+  if(gone.length){const {error}=await mnCloud.from('products').delete().in('id',gone);if(error)throw error;}
+  document.getElementById('mnCloudBadge').textContent='Nube: guardado ✓';
+ }catch(e){console.error(e);document.getElementById('mnCloudBadge').textContent='Nube: error';alert('No se pudo guardar el catálogo en Supabase: '+e.message);}
+}
+// Conserva V13.1 localmente y, cuando cambia Productos, replica el catálogo a Supabase.
+const mnOriginalSetItem=localStorage.setItem.bind(localStorage);
+localStorage.setItem=function(k,v){mnOriginalSetItem(k,v);if(k==='mn_products'&&window.mnCloudReady)queueMicrotask(mnSyncProducts);};
+async function mnOpenAdmin(){await mnCheckAdmin();document.getElementById('mnAuthGate').style.display='none';window.mnCloudReady=false;await mnLoadCloudProducts();window.mnCloudReady=true;document.getElementById('mnCloudBadge').textContent='Nube: conectada ✓';}
+async function mnBoot(){const {data}=await mnCloud.auth.getSession();if(data.session){try{await mnOpenAdmin();}catch(e){await mnCloud.auth.signOut();document.getElementById('mnAuthError').textContent=e.message;}}}
+document.getElementById('mnLoginBtn').onclick=async()=>{const b=document.getElementById('mnLoginBtn'),err=document.getElementById('mnAuthError');err.textContent='';b.disabled=true;b.textContent='Entrando…';try{const email=document.getElementById('mnLoginEmail').value.trim(),password=document.getElementById('mnLoginPassword').value;const {error}=await mnCloud.auth.signInWithPassword({email,password});if(error)throw error;await mnOpenAdmin();}catch(e){err.textContent=e.message||'No se pudo iniciar sesión.';}finally{b.disabled=false;b.textContent='Entrar';}};
+mnBoot();
+</script>
+<script>
+// V14.1: sincronización completa de datos operativos con Supabase.
+const mnStateKeys={faqs:true,config:true,categories:true,sizes:true,forms:true,lengths:true,sales:false};
+function mnPayload(x){return JSON.parse(JSON.stringify(x));}
+async function mnUpsertCloud(table,row,conflict){const {error}=await mnCloud.from(table).upsert(row,{onConflict:conflict});if(error)throw error;}
+async function mnSyncCollection(k){
+ if(!window.mnCloudReady)return;
+ try{
+  if(k==='orders'){
+   for(const o of orders) await mnUpsertCloud('mn_orders_cloud',{order_number:o.number,whatsapp:String(o.whatsapp||'').replace(/\D/g,''),payload:mnPayload(o),updated_at:new Date().toISOString()},'order_number');
+  }else if(k==='requests'){
+   for(const r of requests) await mnUpsertCloud('mn_requests_cloud',{request_number:r.number,whatsapp:String(r.whatsapp||'').replace(/\D/g,''),payload:mnPayload(r),updated_at:new Date().toISOString()},'request_number');
+  }else if(k==='discounts'){
+   for(const d of discounts) await mnUpsertCloud('mn_discounts_cloud',{code:String(d.code||'').toUpperCase(),payload:mnPayload(d),updated_at:new Date().toISOString()},'code');
+  }else if(k in mnStateKeys){
+   const value=({faqs,config,categories,sizes,forms,lengths,sales})[k];
+   await mnUpsertCloud('mn_store_state',{key:k,payload:mnPayload(value),public_read:!!mnStateKeys[k],updated_at:new Date().toISOString()},'key');
+  }
+  document.getElementById('mnCloudBadge').textContent='Nube: guardado ✓';
+ }catch(e){console.error('Cloud sync '+k,e);document.getElementById('mnCloudBadge').textContent='Nube: error';}
+}
+const mnSetItemV141=localStorage.setItem.bind(localStorage);
+localStorage.setItem=function(k,v){mnSetItemV141(k,v);const short=k.startsWith('mn_')?k.slice(3):k;if(['orders','requests','discounts','faqs','config','categories','sizes','forms','lengths','sales'].includes(short)&&window.mnCloudReady)queueMicrotask(()=>mnSyncCollection(short));};
+async function mnLoadFullCloud(){
+ // V14.5: cada módulo se carga de forma independiente.
+ // Un fallo en solicitudes/descuentos/configuración ya no impide mostrar pedidos válidos.
+ const results=await Promise.allSettled([
+  mnCloud.from('mn_orders_cloud').select('order_number,payload,created_at').order('created_at',{ascending:false}),
+  mnCloud.from('mn_requests_cloud').select('request_number,payload,created_at').order('created_at',{ascending:false}),
+  mnCloud.from('mn_discounts_cloud').select('code,payload'),
+  mnCloud.from('mn_store_state').select('key,payload')
+ ]);
+ const [ooS,rrS,ddS,ssS]=results;
+ const getResult=(settled,label)=>{
+   if(settled.status==='rejected'){console.error('Cloud '+label,settled.reason);return null;}
+   const r=settled.value;
+   if(r?.error){console.error('Cloud '+label,r.error);return null;}
+   return r;
+ };
+ const oo=getResult(ooS,'orders');
+ const rr=getResult(rrS,'requests');
+ const dd=getResult(ddS,'discounts');
+ const ss=getResult(ssS,'state');
+
+ if(oo){
+   orders=(oo.data||[]).map(x=>{
+     const p=(x.payload&&typeof x.payload==='object')?x.payload:{};
+     if(!p.number)p.number=x.order_number;
+     return p;
+   });
+   mnOriginalSetItem('mn_orders',JSON.stringify(orders));
+ }
+ if(rr){
+   requests=(rr.data||[]).map(x=>{
+     const p=(x.payload&&typeof x.payload==='object')?x.payload:{};
+     if(!p.number)p.number=x.request_number;
+     return p;
+   });
+   mnOriginalSetItem('mn_requests',JSON.stringify(requests));
+ }
+ if(dd){
+   discounts=(dd.data||[]).map(x=>{
+     const p=(x.payload&&typeof x.payload==='object')?x.payload:{};
+     if(!p.code)p.code=x.code;
+     return p;
+   });
+   mnOriginalSetItem('mn_discounts',JSON.stringify(discounts));
+ }
+ if(ss){
+   for(const x of ss.data||[]){
+     if(x.key==='faqs')faqs=x.payload;
+     if(x.key==='config')config=x.payload;
+     if(x.key==='categories')categories=x.payload;
+     if(x.key==='sizes')sizes=x.payload;
+     if(x.key==='forms')forms=x.payload;
+     if(x.key==='lengths')lengths=x.payload;
+     if(x.key==='sales')sales=x.payload;
+     mnOriginalSetItem('mn_'+x.key,JSON.stringify(x.payload));
+   }
+ }
+ renderAdmin();
+
+ const failed=[
+   !oo&&'pedidos',!rr&&'solicitudes',!dd&&'descuentos',!ss&&'configuración'
+ ].filter(Boolean);
+ if(failed.length){
+   document.getElementById('mnCloudBadge').textContent='Nube: parcial';
+   console.warn('Módulos sin acceso:',failed.join(', '));
+ }else{
+   document.getElementById('mnCloudBadge').textContent='Nube: conectada ✓';
+ }
+}
+const mnOpenAdminV14=mnOpenAdmin;
+mnOpenAdmin=async function(){await mnOpenAdminV14();window.mnCloudReady=false;try{await mnLoadFullCloud();}catch(e){console.error(e);console.error('Carga operativa de nube',e);document.getElementById('mnCloudBadge').textContent='Nube: error';}window.mnCloudReady=true;};
+</script>
+</body></html>
