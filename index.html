@@ -200,19 +200,20 @@ const $=id=>document.getElementById(id), money=n=>'$'+Number(n||0).toFixed(0), p
 function nextProductId(){idCounter++;save('idCounter',idCounter);return 'MN-'+String(idCounter).padStart(3,'0')}
 function openModal(){ $('modal').classList.add('open') } function closeModal(){ $('modal').classList.remove('open') }
 function img(src){return src?`<img src="${src}" alt="">`:`<span class="placeholder">Mistrielle</span>`}
-function faqHTML(s){
- const safe=esc(s||'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
- const lines=safe.split(/\r?\n/),out=[];let list=[];
- const flush=()=>{if(list.length){out.push('<ul style="line-height:1.65;padding-left:22px">'+list.map(x=>'<li>'+x+'</li>').join('')+'</ul>');list=[]}};
- for(const raw of lines){const line=raw.trim();if(!line){flush();out.push('<div style="height:8px"></div>');continue}if(line.startsWith('• ')||line.startsWith('- ')){list.push(line.slice(2));continue}flush();out.push('<p style="margin:8px 0;line-height:1.65">'+line+'</p>')}flush();return out.join('')
-}
 
+function faqHTML(t){
+ const safe=esc(t||'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+ const lines=safe.split(/\r?\n/);let out='',list=false;
+ for(const raw of lines){const line=raw.trim();
+  if(line.startsWith('• ')||line.startsWith('- ')){if(!list){out+='<ul style="margin:8px 0 8px 20px">';list=true}out+='<li>'+line.slice(2)+'</li>';continue}
+  if(list){out+='</ul>';list=false}
+  if(!line)out+='<div style="height:8px"></div>';else out+='<div style="margin:4px 0">'+line+'</div>';
+ }if(list)out+='</ul>';return out;
+}
 function render(){
  document.documentElement.style.setProperty('--wine',config.colorWine||'#3b0715');
  document.documentElement.style.setProperty('--pink',config.colorPink||'#f4cfd9');
  document.documentElement.style.setProperty('--gold',config.colorGold||'#c5a05a');
- document.body.style.fontFamily=config.bodyFont||'Arial, sans-serif';
- document.querySelectorAll('.serif,.script,.brand b,.hero h1,.section-title h2,.name,.saleprice').forEach(x=>x.style.fontFamily=config.titleFont||'Georgia, serif');
  if(config.heroImage)document.querySelector('.hero').style.setProperty('--hero-image',`url("${config.heroImage}")`);
  if(config.customImage)$('customLuxe').style.setProperty('--custom-image',`url("${config.customImage}")`);
  $('brandLogo').innerHTML=config.logo?`<img class="logo-img" src="${config.logo}" alt="Mistrielle Nails">`:`<b>Mistrielle Nails</b><small>PRESS ON NAILS</small>`;
@@ -229,7 +230,7 @@ function render(){
  if(sort==='asc')a.sort((x,y)=>(x.salePrice||x.price)-(y.salePrice||y.price)); if(sort==='desc')a.sort((x,y)=>(y.salePrice||y.price)-(x.salePrice||x.price)); if(sort==='new')a.sort((x,y)=>y.created-x.created);
  $('grid').innerHTML=a.length?a.map(p=>{let fav=favorites.includes(p.id);return `<article class="card"><button class="fav" onclick="toggleFav('${p.id}',event)" title="Favorito">${fav?'♥':'♡'}</button><div onclick="openProduct('${p.id}')"><div class="photo">${img(p.images?.[0])}</div><div class="cardbody"><span class="id">${p.id}</span><div class="name">${esc(p.name)}</div><div class="row">${priceHTML(p)}<span class="tag">${esc(p.status||'Disponible')}</span></div></div></div></article>`}).join(''):`<div class="empty">Todavía no hay productos publicados.</div>`;
  $('cartBadge').textContent=cart.reduce((s,x)=>s+x.qty,0);let visibleFavs=favorites.filter(id=>products.some(p=>p.id===id&&p.status!=='Oculto'));$('favBadge').textContent=visibleFavs.length;
- $('faqList').innerHTML=faqs.map(f=>`<details class="box"><summary><b>${esc(f.q)}</b></summary><div style="color:var(--muted)">${faqHTML(f.a)}</div>${f.media?`<div class="faq-media">${f.mediaType==='video'?`<video controls src="${f.media}"></video>`:`<img src="${f.media}" alt="">`}</div>`:''}</details>`).join('');
+ $('faqList').innerHTML=faqs.map(f=>`<details class="box"><summary><b>${esc(f.q)}</b></summary><div style="color:var(--muted);margin-top:10px">${faqHTML(f.a)}</div>${f.media?`<div class="faq-media">${f.mediaType==='video'?`<video controls src="${f.media}"></video>`:`<img src="${f.media}" alt="">`}</div>`:''}</details>`).join('');
  let cc=[];if(config.whatsapp)cc.push(`<a class="contactcard" target="_blank" href="https://wa.me/${config.whatsapp.replace(/\D/g,'')}"><b>WhatsApp</b><br><small>${esc(config.whatsapp)}</small></a>`);if(config.instagram)cc.push(`<a class="contactcard" target="_blank" href="https://instagram.com/${config.instagram.replace('@','')}"><b>Instagram</b><br><small>${esc(config.instagram)}</small></a>`);if(config.email)cc.push(`<a class="contactcard" href="mailto:${esc(config.email)}"><b>Correo</b><br><small>${esc(config.email)}</small></a>`);$('contactCards').innerHTML=cc.length?cc.join(''):'<div class="notice" style="grid-column:1/-1">Los datos de contacto se configuran desde Administración.</div>';
 }
 function toggleFav(id,e){e.stopPropagation();favorites=favorites.includes(id)?favorites.filter(x=>x!==id):[...favorites,id];save('favorites',favorites);render()}
