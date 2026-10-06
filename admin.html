@@ -261,7 +261,55 @@ function saveRequestAdmin(i){let r=requests[i],newStatus=$('rstatus_'+i).value,p
 function deleteRequest(i){if(confirm('¿Eliminar esta solicitud?')){requests=load('requests',requests);requests.splice(i,1);save('requests',requests);renderAdmin()}}
 function hideOrder(i){orders[i].hidden=true;save('orders',orders);renderAdmin()}
 function restoreOrder(i){orders[i].hidden=false;save('orders',orders);renderAdmin()}
-function deleteOrder(i){if(confirm('¿Eliminar definitivamente este pedido?')){orders=load('orders',orders);orders.splice(i,1);save('orders',orders);renderAdmin()}}
+async function deleteOrder(i){
+ const o=orders[i];if(!o)return;
+ if(!confirm(`¿Eliminar DEFINITIVAMENTE ${o.number}?\n\nSi este pedido afectó stock, descuento o ventas, el Admin intentará revertirlo antes de borrarlo.`))return;
+ try{
+  document.getElementById('mnCloudBadge').textContent='Nube: eliminando pedido…';
+
+  // Si el pedido llegó a descontar stock, lo devuelve antes de eliminarlo.
+  if(o.stockApplied){
+   const {data,error}=await mnCloud.from('products').select('*').order('created_at',{ascending:false});
+   if(error)throw error;
+   products=(data||[]).map(mnFromDb);
+   for(const it of (o.items||[])){
+    const p=products.find(x=>x.id===it.id);
+    if(!p||p.madeToOrder||it.size==='Personalizada'||it.id==='PERSONALIZADO')continue;
+    p.stock=p.stock||{};
+    p.stock[it.size]=Number(p.stock[it.size]||0)+Number(it.qty||1);
+    if(p.status==='Agotado')p.status='Disponible';
+   }
+   const rows=products.map(mnToDb);
+   if(rows.length){const {error:pe}=await mnCloud.from('products').upsert(rows,{onConflict:'id'});if(pe)throw pe;}
+   mnOriginalSetItem('mn_products',JSON.stringify(products));
+  }
+
+  // Si consumió un cupón, devuelve ese uso.
+  if(o.discountCode&&o.discountState==='Usado'){
+   discounts=load('discounts',discounts);
+   const d=discounts.find(x=>String(x.code||'').toUpperCase()===String(o.discountCode||'').toUpperCase());
+   if(d){d.used=Math.max(0,Number(d.used||0)-1);save('discounts',discounts);}
+  }
+
+  // Quita cualquier movimiento automático/manual vinculado exactamente al PED.
+  sales=load('sales',sales).filter(x=>String(x.order||'').toUpperCase()!==String(o.number||'').toUpperCase());
+  save('sales',sales);
+
+  // Borra la fila real de Supabase. Ya no reaparecerá al recargar.
+  const {error}=await mnCloud.from('mn_orders_cloud').delete().eq('order_number',o.number);
+  if(error)throw error;
+
+  orders=orders.filter(x=>x.number!==o.number);
+  mnOriginalSetItem('mn_orders',JSON.stringify(orders));
+  document.getElementById('mnCloudBadge').textContent='Nube: pedido eliminado ✓';
+  renderAdmin();
+ }catch(e){
+  console.error('Eliminar pedido:',e);
+  document.getElementById('mnCloudBadge').textContent='Nube: error';
+  alert('No se pudo eliminar el pedido. No se completó la limpieza: '+(e.message||e));
+  try{await mnRefreshAdminCloud();}catch(_){}
+ }
+}
 
 function generateDiscountCode(){let chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',s='MIS-';for(let i=0;i<6;i++)s+=chars[Math.floor(Math.random()*chars.length)];$('dcode').value=s}
 function discountForm(i){let d=i===undefined?null:discounts[i];$('modalContent').innerHTML=`<div class="eyebrow">PROMOCIÓN</div><h2 class="script">${d?'Editar':'Nuevo'} código</h2><div class="fields"><div class="field"><label>CÓDIGO *</label><div style="display:flex;gap:7px"><input id="dcode" value="${esc(d?.code||'')}" placeholder="MISTRIELLE20"><button class="btn alt sm" onclick="generateDiscountCode()">Generar</button></div></div><div class="field"><label>TIPO DE DESCUENTO</label><select id="dtype"><option value="percent" ${d?.type!=='fixed'?'selected':''}>Porcentaje</option><option value="fixed" ${d?.type==='fixed'?'selected':''}>Cantidad fija</option></select></div><div class="field"><label>DESCUENTO *</label><input id="dvalue" type="number" min="0" step=".01" value="${Number(d?.value||0)}"></div><div class="field"><label>LÍMITE TOTAL DE USOS</label><input id="dmax" type="number" min="0" step="1" value="${Number(d?.maxUses||0)}"><small style="color:var(--muted)">1 = código único. 0 = usos ilimitados.</small></div><div class="field"><label>FECHA DE VENCIMIENTO</label><input id="dexpires" type="date" value="${esc(d?.expires||'')}"></div><div class="field"><label>ESTADO</label><select id="dactive"><option value="true" ${d?.active!==false?'selected':''}>Activo</option><option value="false" ${d?.active===false?'selected':''}>Inactivo</option></select></div><div class="field full"><label>NOTA INTERNA</label><input id="dnote" value="${esc(d?.note||'')}" placeholder="Ej. Grupo UPN / Clienta especial / Octubre"></div></div><br><button class="btn" onclick="saveDiscount(${i===undefined?'-1':i})">Guardar código</button></div>`;openModal()}
