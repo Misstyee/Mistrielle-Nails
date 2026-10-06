@@ -258,7 +258,29 @@ async function saveProduct(id){let name=$('pn').value.trim(),price=Number($('pp'
 function deleteProduct(id){if(confirm('¿Eliminar definitivamente este producto? Si solo quieres retirarlo temporalmente de la tienda, usa estado Oculto.')){products=products.filter(x=>x.id!==id);save('products',products);let favs=load('favorites',[]).filter(x=>x!==id);save('favorites',favs);renderAdmin()}}
 
 function saveRequestAdmin(i){let r=requests[i],newStatus=$('rstatus_'+i).value,price=Number($('rprice_'+i).value||0);r.status=newStatus;r.reply=$('reply_'+i).value.trim();r.quotedPrice=price;if(newStatus==='Aceptada'&&price<=0)return alert('Antes de aceptar la solicitud, añade el precio acordado o cotizado.');if(newStatus==='Aceptada'&&!r.convertedOrder){orderCounter++;save('orderCounter',orderCounter);let num='PED-'+String(orderCounter).padStart(4,'0');let o={number:num,created:Date.now(),name:r.name,whatsapp:r.whatsapp,delivery:'Por acordar',address:'Solicitud personalizada '+r.number,notes:'Pedido creado automáticamente desde '+r.number+'. '+r.details,status:'Nuevo',stockApplied:false,items:[{key:Date.now(),id:'PERSONALIZADO',name:'Diseño personalizado '+r.number,image:r.image||'',price:price,form:r.form,length:r.length,size:'Personalizada',measures:[],qty:1}],total:price,sourceRequest:r.number,hidden:false};orders.unshift(o);r.convertedOrder=num;save('orders',orders)}else if(r.convertedOrder){let o=orders.find(x=>x.number===r.convertedOrder);if(o&&price>0){o.total=price;if(o.items?.length===1&&o.items[0].id==='PERSONALIZADO')o.items[0].price=price;save('orders',orders)}}save('requests',requests);alert(newStatus==='Aceptada'?`Solicitud aceptada por ${money(price)} y vinculada al pedido ${r.convertedOrder}.`:'Estado, precio y mensaje guardados.');renderAdmin()}
-function deleteRequest(i){if(confirm('¿Eliminar esta solicitud?')){requests=load('requests',requests);requests.splice(i,1);save('requests',requests);renderAdmin()}}
+async function deleteRequest(i){
+ const r=requests[i];if(!r)return;
+ if(!confirm(`¿Eliminar DEFINITIVAMENTE la solicitud ${r.number}?\n\nEsto borrará la solicitud de Supabase y del Admin. Si ya generó un pedido, ese pedido NO se eliminará automáticamente.`))return;
+ try{
+  const badge=document.getElementById('mnCloudBadge');
+  if(badge)badge.textContent='Nube: eliminando solicitud…';
+
+  const {error}=await mnCloud.from('mn_requests_cloud').delete().eq('request_number',r.number);
+  if(error)throw error;
+
+  requests=requests.filter(x=>x.number!==r.number);
+  mnOriginalSetItem('mn_requests',JSON.stringify(requests));
+
+  if(badge)badge.textContent='Nube: solicitud eliminada ✓';
+  renderAdmin();
+ }catch(e){
+  console.error('Eliminar solicitud:',e);
+  const badge=document.getElementById('mnCloudBadge');
+  if(badge)badge.textContent='Nube: error';
+  alert('No se pudo eliminar la solicitud: '+(e.message||e));
+  try{await mnRefreshAdminCloud();}catch(_){}
+ }
+}
 function hideOrder(i){orders[i].hidden=true;save('orders',orders);renderAdmin()}
 function restoreOrder(i){orders[i].hidden=false;save('orders',orders);renderAdmin()}
 async function deleteOrder(i){
