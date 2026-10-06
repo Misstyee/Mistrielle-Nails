@@ -336,7 +336,32 @@ async function deleteOrder(i){
 function generateDiscountCode(){let chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',s='MIS-';for(let i=0;i<6;i++)s+=chars[Math.floor(Math.random()*chars.length)];$('dcode').value=s}
 function discountForm(i){let d=i===undefined?null:discounts[i];$('modalContent').innerHTML=`<div class="eyebrow">PROMOCIÓN</div><h2 class="script">${d?'Editar':'Nuevo'} código</h2><div class="fields"><div class="field"><label>CÓDIGO *</label><div style="display:flex;gap:7px"><input id="dcode" value="${esc(d?.code||'')}" placeholder="MISTRIELLE20"><button class="btn alt sm" onclick="generateDiscountCode()">Generar</button></div></div><div class="field"><label>TIPO DE DESCUENTO</label><select id="dtype"><option value="percent" ${d?.type!=='fixed'?'selected':''}>Porcentaje</option><option value="fixed" ${d?.type==='fixed'?'selected':''}>Cantidad fija</option></select></div><div class="field"><label>DESCUENTO *</label><input id="dvalue" type="number" min="0" step=".01" value="${Number(d?.value||0)}"></div><div class="field"><label>LÍMITE TOTAL DE USOS</label><input id="dmax" type="number" min="0" step="1" value="${Number(d?.maxUses||0)}"><small style="color:var(--muted)">1 = código único. 0 = usos ilimitados.</small></div><div class="field"><label>FECHA DE VENCIMIENTO</label><input id="dexpires" type="date" value="${esc(d?.expires||'')}"></div><div class="field"><label>ESTADO</label><select id="dactive"><option value="true" ${d?.active!==false?'selected':''}>Activo</option><option value="false" ${d?.active===false?'selected':''}>Inactivo</option></select></div><div class="field full"><label>NOTA INTERNA</label><input id="dnote" value="${esc(d?.note||'')}" placeholder="Ej. Grupo UPN / Clienta especial / Octubre"></div></div><br><button class="btn" onclick="saveDiscount(${i===undefined?'-1':i})">Guardar código</button></div>`;openModal()}
 function saveDiscount(i){let code=$('dcode').value.trim().toUpperCase().replace(/\s+/g,''),type=$('dtype').value,value=Number($('dvalue').value||0),maxUses=Number($('dmax').value||0);if(!code||value<=0)return alert('Escribe un código y un descuento válido.');if(type==='percent'&&value>100)return alert('El porcentaje no puede ser mayor a 100%.');if(discounts.some((x,j)=>j!==i&&x.code===code))return alert('Ese código ya existe.');let old=i>=0?discounts[i]:{};let d={...old,code,type,value,maxUses,expires:$('dexpires').value,active:$('dactive').value==='true',note:$('dnote').value.trim(),used:Number(old.used||0)};if(i<0)discounts.unshift(d);else discounts[i]=d;save('discounts',discounts);closeModal();renderAdmin()}
-function deleteDiscount(i){if(confirm('¿Eliminar este código de descuento?')){discounts.splice(i,1);save('discounts',discounts);renderAdmin()}}
+async function deleteDiscount(i){
+ const d=discounts[i];if(!d)return;
+ const usedOrders=(orders||[]).filter(o=>String(o.discountCode||'').toUpperCase()===String(d.code||'').toUpperCase()&&o.discountState==='Usado').length;
+ const reservedOrders=(orders||[]).filter(o=>String(o.discountCode||'').toUpperCase()===String(d.code||'').toUpperCase()&&o.discountState==='Reservado'&&o.status!=='Cancelado').length;
+ const extra=(usedOrders||reservedOrders)?`\n\nHistorial relacionado: ${usedOrders} usado(s), ${reservedOrders} reservado(s).\nLos pedidos conservarán el dato histórico del código, pero el código dejará de estar disponible para nuevas compras.`:'';
+ if(!confirm(`¿Eliminar DEFINITIVAMENTE el código ${d.code}?${extra}`))return;
+ try{
+  const badge=document.getElementById('mnCloudBadge');
+  if(badge)badge.textContent='Nube: eliminando descuento…';
+
+  const {error}=await mnCloud.from('mn_discounts_cloud').delete().eq('code',String(d.code||'').toUpperCase());
+  if(error)throw error;
+
+  discounts=discounts.filter(x=>String(x.code||'').toUpperCase()!==String(d.code||'').toUpperCase());
+  mnOriginalSetItem('mn_discounts',JSON.stringify(discounts));
+
+  if(badge)badge.textContent='Nube: descuento eliminado ✓';
+  renderAdmin();
+ }catch(e){
+  console.error('Eliminar descuento:',e);
+  const badge=document.getElementById('mnCloudBadge');
+  if(badge)badge.textContent='Nube: error';
+  alert('No se pudo eliminar el código de descuento: '+(e.message||e));
+  try{await mnRefreshAdminCloud();}catch(_){}
+ }
+}
 function saveFreeShipping(){config={...config,freeShippingEnabled:$('fsEnabled').value==='true',freeShippingMode:$('fsMode').value,freeShippingAmount:Number($('fsAmount').value||0),freeShippingQty:Number($('fsQty').value||1)};save('config',config);alert('Regla de envío gratis guardada.');renderAdmin()}
 function saleForm(i){let s=i===undefined?null:sales[i],today=new Date().toISOString().slice(0,10);$('modalContent').innerHTML=`<div class="eyebrow">REGISTRO FINANCIERO</div><h2 class="script">${s?'Editar movimiento':'Registrar venta, costo o pérdida'}</h2><div class="fields"><div class="field"><label>FECHA</label><input id="sdate" type="date" value="${esc(s?.date||today)}"></div><div class="field"><label>PEDIDO (OPCIONAL)</label><input id="sorder" value="${esc(s?.order||'')}" placeholder="PED-0001"></div><div class="field full"><label>CONCEPTO *</label><input id="sconcept" value="${esc(s?.concept||'')}" placeholder="Venta set rojo / material perdido / envío..."></div><div class="field"><label>DINERO QUE ENTRÓ</label><input id="srev" type="number" step=".01" value="${s?.revenue??0}"></div><div class="field"><label>COSTO O DINERO PERDIDO</label><input id="scost" type="number" step=".01" value="${s?.cost??0}"></div><div class="field full"><label>NOTAS</label><textarea id="snotes">${esc(s?.notes||'')}</textarea></div></div><div class="notice" style="margin-top:12px">Resultado = ingreso − costo. Si solo perdiste dinero, deja ingreso en 0 y registra la pérdida en costo.</div><br><button class="btn" onclick="saveSale(${i===undefined?'-1':i})">Guardar registro</button>`;openModal()}
 function saveSale(i){let x={date:$('sdate').value,order:$('sorder').value.trim().toUpperCase(),concept:$('sconcept').value.trim(),revenue:Number($('srev').value||0),cost:Number($('scost').value||0),notes:$('snotes').value.trim()};if(!x.concept)return alert('Escribe el concepto.');if(i<0)sales.unshift(x);else sales[i]=x;save('sales',sales);closeModal();renderAdmin()}
