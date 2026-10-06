@@ -327,6 +327,13 @@ saveRequest=function(){
  const before=load('requests',requests).map(x=>x.number);mnLocalSaveRequest();setTimeout(async()=>{const after=load('requests',requests);const fresh=after.find(x=>!before.includes(x.number));if(!fresh)return;try{const {error}=await mnCloud.rpc('mn_create_request',{request_data:fresh});if(error)throw error;}catch(e){console.error(e);alert('La solicitud no pudo guardarse en la nube: '+e.message)}},50);
 };
 findTracking=async function(){let n=$('tn').value.trim().toUpperCase(),w=$('tw').value.replace(/\D/g,'');$('trackResult').innerHTML='<div class="notice">Consultando…</div>';try{const {data,error}=await mnCloud.rpc('mn_track',{record_number:n,customer_whatsapp:w});if(error)throw error;const x=data;if(!x){$('trackResult').innerHTML='<div class="notice">No encontramos un registro con esos datos.</div>';return;}if(n.startsWith('PED-')){$('trackResult').innerHTML=`<div class="box"><b>${esc(x.number)}</b><h3>Estado: ${esc(x.status)}</h3><p>${esc(x.delivery||'')} · ${esc(x.address||'')}</p>${x.discountCode?`<div class="notice"><b>Código ${esc(x.discountCode)}</b><br>Descuento: −${money(x.discountAmount)}<br>Estado: <b>${esc(x.discountState||'Aplicado')}</b></div>`:''}<p>Subtotal: ${money(x.subtotal||0)}</p><h3>Total final: ${money(x.total||0)}</h3></div>`;}else{$('trackResult').innerHTML=`<div class="box"><b>${esc(x.number)}</b><h3>Estado actual: ${esc(x.status)}</h3>${Number(x.quotedPrice||0)>0?`<div class="saleprice">${money(x.quotedPrice)}</div>`:''}${x.reply?`<div class="notice"><b>Mensaje de Mistrielle:</b><br>${esc(x.reply)}</div>`:''}${x.convertedOrder?`<p><b>Pedido creado:</b> ${esc(x.convertedOrder)}</p>`:''}</div>`;}}catch(e){$('trackResult').innerHTML='<div class="notice">No se pudo consultar: '+esc(e.message)+'</div>';}};
+async function mnRefreshPublicCloud(){
+ await Promise.allSettled([mnLoadCloudProducts(),mnLoadPublicState()]);
+}
 window.addEventListener('load',mnLoadPublicState);
+window.addEventListener('pageshow',()=>mnRefreshPublicCloud());
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')mnRefreshPublicCloud()});
+window.addEventListener('focus',()=>mnRefreshPublicCloud());
+
 </script>
 </body></html>
