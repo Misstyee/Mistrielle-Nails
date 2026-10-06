@@ -179,8 +179,8 @@ window.MN_SUPABASE_KEY='sb_publishable_5bOuzwywcvqzPEcGrQZEvw_2uEUUp2a';
 </script>
 </head><body class="admin">
 <div class="adminhead"><div class="row"><div><div class="eyebrow">MISTRIELLE NAILS · PRIVATE ATELIER</div><h1>Panel de Administración</h1><small style="color:var(--muted)">Catálogo, pedidos, solicitudes, stock y contenido.</small></div><a class="btn alt sm" href="https://misstyee.github.io/Mistrielle-Nails/">Volver a la tienda</a></div></div>
-<div class="adminwrap"><div class="tabs"><button class="tab active" data-tab="home">INICIO</button><button class="tab" data-tab="products">PRODUCTOS</button><button class="tab" data-tab="orders">PEDIDOS</button><button class="tab" data-tab="requests">SOLICITUDES</button><button class="tab" data-tab="sales">VENTAS / GANANCIAS</button><button class="tab" data-tab="discounts">DESCUENTOS / ENVÍO</button><button class="tab" data-tab="faq">PREGUNTAS FRECUENTES</button><button class="tab" data-tab="design">DISEÑO DE LA TIENDA</button><button class="tab" data-tab="options">CATEGORÍAS / TALLAS / FORMAS</button><button class="tab" data-tab="config">CONFIGURACIÓN / CONTACTO</button></div>
-<div id="home" class="panel active"></div><div id="products" class="panel"></div><div id="orders" class="panel"></div><div id="requests" class="panel"></div><div id="sales" class="panel"></div><div id="discounts" class="panel"></div><div id="faq" class="panel"></div><div id="design" class="panel"></div><div id="options" class="panel"></div><div id="config" class="panel"></div></div>
+<div class="adminwrap"><div class="tabs"><button class="tab active" data-tab="home">INICIO</button><button class="tab" data-tab="products">PRODUCTOS</button><button class="tab" data-tab="extras">EXTRAS / ACCESORIOS</button><button class="tab" data-tab="orders">PEDIDOS</button><button class="tab" data-tab="requests">SOLICITUDES</button><button class="tab" data-tab="sales">VENTAS / GANANCIAS</button><button class="tab" data-tab="discounts">DESCUENTOS / ENVÍO</button><button class="tab" data-tab="faq">PREGUNTAS FRECUENTES</button><button class="tab" data-tab="design">DISEÑO DE LA TIENDA</button><button class="tab" data-tab="options">CATEGORÍAS / TALLAS / FORMAS</button><button class="tab" data-tab="config">CONFIGURACIÓN / CONTACTO</button></div>
+<div id="home" class="panel active"></div><div id="products" class="panel"></div><div id="extras" class="panel"></div><div id="orders" class="panel"></div><div id="requests" class="panel"></div><div id="sales" class="panel"></div><div id="discounts" class="panel"></div><div id="faq" class="panel"></div><div id="design" class="panel"></div><div id="options" class="panel"></div><div id="config" class="panel"></div></div>
 <div id="modal" class="overlay"><div class="modal"><button class="close" onclick="closeModal()">×</button><div id="modalContent"></div></div></div><script>
 const DEFAULT={categories:['Sencillas','Francesas','Cat Eye','Chrome','Decoradas','3D','Diseños especiales','Personalizadas'],sizes:['XS','S','M','L','XL'],forms:['Almendrada','Bailarina','Cuadrada','Ovalada','Stiletto'],lengths:['Corto','Medio','Largo'],faqs:[
 {q:'¿Qué son las press-on nails?',a:'Son uñas postizas reutilizables que puedes colocar y retirar sin acudir al salón.'},
@@ -190,7 +190,7 @@ const DEFAULT={categories:['Sencillas','Francesas','Cat Eye','Chrome','Decoradas
 {q:'¿Cómo funcionan los envíos?',a:'Manejamos envío local y entrega en UPN según disponibilidad.'}
 ]};
 const load=(k,d)=>{try{return JSON.parse(localStorage.getItem('mn_'+k))??d}catch(e){return d}}, save=(k,v)=>localStorage.setItem('mn_'+k,JSON.stringify(v));
-let products=load('products',[]),orders=load('orders',[]),requests=load('requests',[]),discounts=load('discounts',[]),categories=load('categories',DEFAULT.categories),sizes=load('sizes',DEFAULT.sizes),forms=load('forms',DEFAULT.forms),lengths=load('lengths',DEFAULT.lengths),faqs=load('faqs',DEFAULT.faqs),config=load('config',{whatsapp:'',instagram:'',email:'',local:true,upn:true,national:false,welcome:'Un pequeño lujo hecho para tus manos.',heroSubtitle:'Uñas Press-On Personalizadas y a la Medida. Tu mejor opción.',heroButton:'Descubrir diseños',customTitle:'Hechas para ti',customText:'Tu idea. Tus medidas. Tu set. Creamos una manicura pensada especialmente para ti.',logo:'',heroImage:'',customImage:'',freeShippingEnabled:false,freeShippingMode:'amount',freeShippingAmount:600,freeShippingQty:3,shippingLabel:'Envío local',colorWine:'#3b0715',colorPink:'#f4cfd9',colorGold:'#c5a05a'});
+let products=load('products',[]),extras=load('extras',[]),orders=load('orders',[]),requests=load('requests',[]),discounts=load('discounts',[]),categories=load('categories',DEFAULT.categories),sizes=load('sizes',DEFAULT.sizes),forms=load('forms',DEFAULT.forms),lengths=load('lengths',DEFAULT.lengths),faqs=load('faqs',DEFAULT.faqs),config=load('config',{whatsapp:'',instagram:'',email:'',local:true,upn:true,national:false,welcome:'Un pequeño lujo hecho para tus manos.',heroSubtitle:'Uñas Press-On Personalizadas y a la Medida. Tu mejor opción.',heroButton:'Descubrir diseños',customTitle:'Hechas para ti',customText:'Tu idea. Tus medidas. Tu set. Creamos una manicura pensada especialmente para ti.',logo:'',heroImage:'',customImage:'',freeShippingEnabled:false,freeShippingMode:'amount',freeShippingAmount:600,freeShippingQty:3,shippingLabel:'Envío local',colorWine:'#3b0715',colorPink:'#f4cfd9',colorGold:'#c5a05a'});
 let cart=load('cart',[]),favorites=load('favorites',[]),orderCounter=load('orderCounter',0),requestCounter=load('requestCounter',0),idCounter=load('idCounter',0),sales=load('sales',[]);
 const $=id=>document.getElementById(id), money=n=>'$'+Number(n||0).toFixed(0), esc=s=>String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 function nextProductId(){
@@ -210,10 +210,12 @@ function designImagePreview(src,label,key){
 }
 
 function renderAdmin(){
- products=load('products',products);orders=load('orders',orders);requests=load('requests',requests);sales=load('sales',sales);discounts=load('discounts',discounts);faqs=load('faqs',faqs);config=load('config',config);
+ products=load('products',products);extras=load('extras',extras);orders=load('orders',orders);requests=load('requests',requests);sales=load('sales',sales);discounts=load('discounts',discounts);faqs=load('faqs',faqs);config=load('config',config);
  let visibleOrders=orders.filter(o=>!o.hidden), visibleRequests=requests.filter(r=>!r.hidden), delivered=sales.reduce((s,x)=>s+Number(x.revenue||0),0), profit=sales.reduce((s,x)=>s+(Number(x.revenue||0)-Number(x.cost||0)),0);
  $('home').innerHTML=`<div class="box"><div class="eyebrow">RESUMEN</div><h2 class="script">Administrar Mistrielle</h2><div class="stats"><div class="stat"><b>${products.length}</b><small>Productos</small></div><div class="stat"><b>${visibleOrders.length}</b><small>Pedidos actuales</small></div><div class="stat"><b>${visibleOrders.filter(x=>x.status==='Nuevo').length}</b><small>Nuevos</small></div><div class="stat"><b>${visibleRequests.length}</b><small>Solicitudes actuales</small></div><div class="stat"><b>${money(delivered)}</b><small>Ingresos registrados</small></div><div class="stat"><b>${money(profit)}</b><small>Ganancia / pérdida</small></div></div></div>`;
  $('products').innerHTML=`<div class="box"><div class="row"><h2 class="script">Productos</h2><button class="btn sm" onclick="productForm()">+ Nuevo producto</button></div><div class="tablewrap"><table><thead><tr><th>IMAGEN</th><th>PRODUCTO</th><th>ID</th><th>PRECIO</th><th>STOCK</th><th>ESTADO</th><th>ACCIONES</th></tr></thead><tbody>${products.map(p=>`<tr><td><div class="thumb">${p.images?.[0]?`<img class="thumb" src="${p.images[0]}">`:''}</div></td><td><b>${esc(p.name)}</b><br><small>${esc(p.keywords||'')}</small></td><td>${p.id}</td><td>${money(p.price)}</td><td>${p.madeToOrder?'Bajo pedido':sizes.map(s=>s+': '+(p.stock?.[s]||0)).join(' · ')}</td><td>${p.status}</td><td><button class="btn alt sm" onclick="productForm('${p.id}')">Editar</button> <button class="btn danger sm" onclick="deleteProduct('${p.id}')">Eliminar</button></td></tr>`).join('')}</tbody></table></div></div>`;
+ $('extras').innerHTML=`<div class="box"><div class="row"><div><h2 class="script">Extras y accesorios</h2><p style="color:var(--muted)">Complementos opcionales del pedido. El set ya incluye su kit de aplicación.</p></div><button class="btn sm" onclick="extraForm()">+ Nuevo extra</button></div><div class="tablewrap"><table><thead><tr><th>IMAGEN</th><th>EXTRA</th><th>PRECIO</th><th>STOCK</th><th>ESTADO</th><th>ACCIONES</th></tr></thead><tbody>${extras.length?extras.map((x,i)=>`<tr><td>${x.image?`<img src="${x.image}" class="thumb" alt="">`:'<div class="thumb"></div>'}</td><td><b>${esc(x.name)}</b><br><small>${esc(x.description||'')}</small></td><td>${money(x.price)}</td><td>${Number(x.stock||0)}</td><td>${x.active!==false?'Activo':'Oculto'}</td><td><button class="btn alt sm" onclick="extraForm(${i})">Editar</button> <button class="btn danger sm" onclick="deleteExtra(${i})">Eliminar</button></td></tr>`).join(''):`<tr><td colspan="6">Todavía no hay extras.</td></tr>`}</tbody></table></div></div>`;
+
  let orderView=window.mnOrderView||'active';
  let orderRows=orders.map((o,i)=>({o,i})).filter(x=>orderView==='all'||(orderView==='hidden'?!!x.o.hidden:!x.o.hidden));
  $('orders').innerHTML=`<div class="box"><div class="row"><div><h2 class="script">Pedidos recibidos</h2><small style="color:var(--muted)">${orders.filter(o=>!o.hidden).length} activos · ${orders.filter(o=>o.hidden).length} ocultos</small></div><div style="display:flex;gap:7px;flex-wrap:wrap"><button class="btn ${orderView==='active'?'':'alt'} sm" onclick="window.mnOrderView='active';renderAdmin()">Activos</button><button class="btn ${orderView==='hidden'?'':'alt'} sm" onclick="window.mnOrderView='hidden';renderAdmin()">Ocultos</button><button class="btn ${orderView==='all'?'':'alt'} sm" onclick="window.mnOrderView='all';renderAdmin()">Todos</button><button class="btn alt sm" onclick="mnRefreshAdminCloud(this)">↻ Actualizar nube</button></div></div><div class="tablewrap"><table><thead><tr><th>PEDIDO</th><th>CLIENTA</th><th>TOTAL</th><th>ENTREGA</th><th>ESTADO</th><th>DETALLE</th></tr></thead><tbody>${orderRows.length?orderRows.map(({o,i})=>`<tr><td><b>${o.number}</b><br><small>${new Date(o.created).toLocaleString()}</small>${o.hidden?'<br><small style="color:var(--gold2)">OCULTO</small>':''}</td><td>${esc(o.name)}<br>${esc(o.whatsapp)}</td><td>${o.discountCode?`<small>${money(o.subtotal??(Number(o.total||0)+Number(o.discountAmount||0)))} − ${money(o.discountAmount)}</small><br>`:''}<b>${money(o.total)}</b>${o.discountCode?`<br><small>${esc(o.discountCode)} · ${o.discountState==='Usado'?'USADO':'APLICADO'}</small>`:''}</td><td>${esc(o.delivery)}</td><td><select onchange="orderStatus(${i},this.value)">${['Nuevo','Confirmado','En preparación','Listo','Enviado','Entregado','Cancelado'].map(s=>`<option ${s===o.status?'selected':''}>${s}</option>`)}</select></td><td><button class="btn alt sm" onclick="orderDetail(${i})">Ver</button> ${o.hidden?`<button class="btn sm" onclick="restoreOrder(${i})">Restaurar</button>`:`<button class="btn alt sm" onclick="hideOrder(${i})">Ocultar</button>`} <button class="btn danger sm" onclick="deleteOrder(${i})">Eliminar</button></td></tr>`).join(''):`<tr><td colspan="6">No hay pedidos en esta vista.</td></tr>`}</tbody></table></div></div>`;
@@ -250,6 +252,27 @@ function removeOpt(k,i){
  if(k==='forms')products.forEach(p=>{if(Array.isArray(p.forms))p.forms=p.forms.filter(x=>x!==old)});
  if(k==='lengths')products.forEach(p=>{if(Array.isArray(p.lengths))p.lengths=p.lengths.filter(x=>x!==old)});
  save(k,a);save('products',products);renderAdmin();
+}
+function extraForm(i){
+ let x=i===undefined?null:extras[i];
+ $('modalContent').innerHTML=`<div class="eyebrow">COMPLEMENTO DEL PEDIDO</div><h2 class="script">${x?'Editar':'Nuevo'} extra</h2><div class="fields"><div class="field full"><label>NOMBRE *</label><input id="xname" value="${esc(x?.name||'')}" placeholder="Ej. Pegamento extra 2 g"></div><div class="field full"><label>DESCRIPCIÓN</label><input id="xdesc" value="${esc(x?.description||'')}" placeholder="Ej. Pegamento adicional para futuras aplicaciones"></div><div class="field"><label>PRECIO *</label><input id="xprice" type="number" min="0" step=".01" value="${Number(x?.price||0)}"></div><div class="field"><label>STOCK *</label><input id="xstock" type="number" min="0" step="1" value="${Number(x?.stock||0)}"></div><div class="field"><label>ESTADO</label><select id="xactive"><option value="true" ${x?.active!==false?'selected':''}>Activo</option><option value="false" ${x?.active===false?'selected':''}>Oculto</option></select></div><div class="field"><label>IMAGEN</label><input id="ximage" type="file" accept="image/*">${x?.image?`<div style="margin-top:8px"><small style="color:var(--muted)">IMAGEN ACTUAL</small><br><img src="${x.image}" style="width:110px;height:90px;object-fit:cover;border-radius:10px;border:1px solid var(--line)"></div>`:''}</div></div><br><button class="btn" onclick="saveExtra(${i===undefined?'-1':i})">Guardar extra</button>`;
+ openModal();
+}
+async function saveExtra(i){
+ const name=$('xname').value.trim(),description=$('xdesc').value.trim(),price=Number($('xprice').value||0),stock=Math.max(0,Math.floor(Number($('xstock').value||0))),active=$('xactive').value==='true';
+ if(!name||price<0)return alert('Escribe un nombre y precio válidos.');
+ let old=i>=0?extras[i]:null,image=old?.image||'';
+ const file=$('ximage')?.files?.[0];
+ try{if(file)image=await mnUploadImage(file,'extras')}catch(e){console.error(e);return alert('No se pudo subir la imagen del extra.')}
+ const id=old?.id||('EXTRA-'+Date.now().toString(36).toUpperCase());
+ const x={id,name,description,price,stock,active,image};
+ if(i<0)extras.push(x);else extras[i]=x;
+ save('extras',extras);closeModal();renderAdmin();
+}
+function deleteExtra(i){
+ const x=extras[i];if(!x)return;
+ if(!confirm(`¿Eliminar definitivamente el extra "${x.name}"?`))return;
+ extras.splice(i,1);save('extras',extras);renderAdmin();
 }
 function productForm(id){let p=id?products.find(x=>x.id===id):null;$('modalContent').innerHTML=`<div class="eyebrow">${p?'EDITAR':'NUEVO'} PRODUCTO</div><h2 class="script">${p?esc(p.name):'Agregar producto'}</h2><div class="fields"><div class="field"><label>NOMBRE *</label><input id="pn" value="${esc(p?.name||'')}"></div><div class="field"><label>PRECIO *</label><input id="pp" type="number" value="${p?.price||''}"></div><div class="field"><label>PRECIO PROMOCIONAL</label><input id="psale" type="number" value="${p?.salePrice||''}"></div><div class="field"><label>CATEGORÍA</label><select id="pc">${categories.map(x=>`<option ${x===p?.category?'selected':''}>${x}</option>`)}</select></div><div class="field full"><label>DESCRIPCIÓN</label><textarea id="pd">${esc(p?.description||'')}</textarea></div><div class="field full"><label>PALABRAS DE BÚSQUEDA / ETIQUETAS</label><input id="pkey" value="${esc(p?.keywords||'')}" placeholder="rosa, verano, flores, coquette, playa..."></div><div class="field"><label>ESTADO</label><select id="pst">${['Disponible','Agotado','Próximamente','Oculto'].map(x=>`<option ${x===p?.status?'selected':''}>${x}</option>`)}</select></div><div class="field"><label>MODALIDAD</label><select id="pmade" onchange="stockToggle()"><option value="stock" ${!p?.madeToOrder?'selected':''}>Stock disponible</option><option value="order" ${p?.madeToOrder?'selected':''}>Hecho bajo pedido</option></select></div><div class="field full" id="stockArea"><label>STOCK POR TALLA</label><div class="stockgrid">${sizes.map(s=>`<div><small>${s}</small><input class="stock" data-size="${s}" type="number" min="0" value="${p?.stock?.[s]??0}"></div>`).join('')}</div></div><div class="field full"><label>IMÁGENES (HASTA 3)</label><input id="pimgs" type="file" accept="image/*" multiple onchange="previewProductFiles(this)"><small style="display:block;color:var(--muted);margin-top:6px">El selector solo muestra archivos nuevos. Las imágenes ya guardadas aparecen debajo.</small><div id="pnewimgs" class="previewimgs"></div>${(p?.images||[]).length?`<small style="display:block;color:var(--muted);margin-top:9px">IMÁGENES ACTUALES</small><div class="previewimgs">${(p?.images||[]).map(x=>`<img src="${x}">`).join('')}</div>`:'<small style="display:block;color:var(--muted);margin-top:9px">Sin imágenes guardadas actualmente.</small>'}</div><div class="field full"><label>FORMAS DISPONIBLES</label><div class="chips">${forms.map(x=>`<label class="chip"><input class="pf" type="checkbox" value="${x}" ${(p?.forms||forms).includes(x)?'checked':''}> ${x}</label>`)}</div></div><div class="field full"><label>LARGOS</label><div class="chips">${lengths.map(x=>`<label class="chip"><input class="pl" type="checkbox" value="${x}" ${(p?.lengths||lengths).includes(x)?'checked':''}> ${x}</label>`)}</div></div><div class="field full"><label>TALLAS</label><div class="chips">${sizes.map(x=>`<label class="chip"><input class="psz" type="checkbox" value="${x}" ${(p?.sizes||sizes).includes(x)?'checked':''}> ${x}</label>`)}</div></div></div><br><button class="btn" onclick="saveProduct('${p?.id||''}')">Guardar producto</button>`;stockToggle();openModal()}
 function stockToggle(){if($('stockArea'))$('stockArea').style.display=$('pmade').value==='order'?'none':'block'}
@@ -375,13 +398,20 @@ async function deleteOrder(i){
    const {data,error}=await mnCloud.from('products').select('*').order('created_at',{ascending:false});
    if(error)throw error;
    products=(data||[]).map(mnFromDb);
+   extras=load('extras',extras);
    for(const it of (o.items||[])){
+    if(it.isExtra){
+     const x=extras.find(e=>e.id===it.id);
+     if(x)x.stock=Number(x.stock||0)+Number(it.qty||1);
+     continue;
+    }
     const p=products.find(x=>x.id===it.id);
     if(!p||p.madeToOrder||it.size==='Personalizada'||it.id==='PERSONALIZADO')continue;
     p.stock=p.stock||{};
     p.stock[it.size]=Number(p.stock[it.size]||0)+Number(it.qty||1);
     if(p.status==='Agotado')p.status='Disponible';
    }
+   save('extras',extras);
    const rows=products.map(mnToDb);
    if(rows.length){const {error:pe}=await mnCloud.from('products').upsert(rows,{onConflict:'id'});if(pe)throw pe;}
    mnOriginalSetItem('mn_products',JSON.stringify(products));
@@ -455,7 +485,16 @@ async function orderStatus(i,v){
      if(error)throw error;
      products=(data||[]).map(mnFromDb);
 
+     extras=load('extras',extras);
      for(const it of (o.items||[])){
+       if(it.isExtra){
+         const x=extras.find(e=>e.id===it.id);
+         if(!x)continue;
+         const available=Number(x.stock||0),qty=Number(it.qty||1);
+         if(qty>available)throw new Error(`No hay stock suficiente de ${x.name}. Disponible: ${available}.`);
+         x.stock=available-qty;
+         continue;
+       }
        const p=products.find(x=>x.id===it.id);
        if(!p || p.madeToOrder || it.size==='Personalizada' || it.id==='PERSONALIZADO')continue;
        p.stock=p.stock||{};
@@ -465,6 +504,7 @@ async function orderStatus(i,v){
        p.stock[it.size]=available-qty;
        if(sizes.every(s=>Number(p.stock[s]||0)<=0))p.status='Agotado';
      }
+     save('extras',extras);
 
      const rows=products.map(mnToDb);
      if(rows.length){
@@ -481,13 +521,20 @@ async function orderStatus(i,v){
      if(error)throw error;
      products=(data||[]).map(mnFromDb);
 
+     extras=load('extras',extras);
      for(const it of (o.items||[])){
+       if(it.isExtra){
+         const x=extras.find(e=>e.id===it.id);
+         if(x)x.stock=Number(x.stock||0)+Number(it.qty||1);
+         continue;
+       }
        const p=products.find(x=>x.id===it.id);
        if(!p || p.madeToOrder || it.size==='Personalizada' || it.id==='PERSONALIZADO')continue;
        p.stock=p.stock||{};
        p.stock[it.size]=Number(p.stock[it.size]||0)+Number(it.qty||1);
        if(p.status==='Agotado')p.status='Disponible';
      }
+     save('extras',extras);
 
      const rows=products.map(mnToDb);
      if(rows.length){
@@ -644,7 +691,7 @@ mnBoot();
 </script>
 <script>
 // V14.1: sincronización completa de datos operativos con Supabase.
-const mnStateKeys={faqs:true,config:true,categories:true,sizes:true,forms:true,lengths:true,sales:false};
+const mnStateKeys={faqs:true,config:true,categories:true,sizes:true,forms:true,lengths:true,extras:true,sales:false};
 function mnPayload(x){return JSON.parse(JSON.stringify(x));}
 async function mnUpsertCloud(table,row,conflict){const {error}=await mnCloud.from(table).upsert(row,{onConflict:conflict});if(error)throw error;}
 async function mnSyncCollection(k){
@@ -657,14 +704,14 @@ async function mnSyncCollection(k){
   }else if(k==='discounts'){
    for(const d of discounts) await mnUpsertCloud('mn_discounts_cloud',{code:String(d.code||'').toUpperCase(),payload:mnPayload(d),updated_at:new Date().toISOString()},'code');
   }else if(k in mnStateKeys){
-   const value=({faqs,config,categories,sizes,forms,lengths,sales})[k];
+   const value=({faqs,config,categories,sizes,forms,lengths,extras,sales})[k];
    await mnUpsertCloud('mn_store_state',{key:k,payload:mnPayload(value),public_read:!!mnStateKeys[k],updated_at:new Date().toISOString()},'key');
   }
   document.getElementById('mnCloudBadge').textContent='Nube: guardado ✓';
  }catch(e){console.error('Cloud sync '+k,e);document.getElementById('mnCloudBadge').textContent='Nube: error';}
 }
 const mnSetItemV141=localStorage.setItem.bind(localStorage);
-localStorage.setItem=function(k,v){mnSetItemV141(k,v);const short=k.startsWith('mn_')?k.slice(3):k;if(['orders','requests','discounts','faqs','config','categories','sizes','forms','lengths','sales'].includes(short)&&window.mnCloudReady)queueMicrotask(()=>mnSyncCollection(short));};
+localStorage.setItem=function(k,v){mnSetItemV141(k,v);const short=k.startsWith('mn_')?k.slice(3):k;if(['orders','requests','discounts','faqs','config','categories','sizes','forms','lengths','extras','sales'].includes(short)&&window.mnCloudReady)queueMicrotask(()=>mnSyncCollection(short));};
 async function mnLoadFullCloud(){
  // V14.5: cada módulo se carga de forma independiente.
  // Un fallo en solicitudes/descuentos/configuración ya no impide mostrar pedidos válidos.
@@ -730,6 +777,7 @@ async function mnLoadFullCloud(){
      if(x.key==='sizes')sizes=x.payload;
      if(x.key==='forms')forms=x.payload;
      if(x.key==='lengths')lengths=x.payload;
+     if(x.key==='extras')extras=Array.isArray(x.payload)?x.payload:[];
      if(x.key==='sales')sales=x.payload;
      mnOriginalSetItem('mn_'+x.key,JSON.stringify(x.payload));
    }
