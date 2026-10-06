@@ -171,6 +171,8 @@ tr:hover td{background:#2d0711}
 /* V11: lujo sin glifos decorativos */
 .ornament{display:none!important}
 .hero:before,.hero:after,.custom-luxe:after{content:none!important;display:none!important}
+#faqList details.box{font-size:16px}
+#faqList details.box summary{font-size:18px}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -210,6 +212,22 @@ function faqHTML(t){
   if(!line)out+='<div style="height:8px"></div>';else out+='<div style="margin:4px 0">'+line+'</div>';
  }if(list)out+='</ul>';return out;
 }
+function faqMediaItems(f){
+ return Array.isArray(f?.mediaItems)?f.mediaItems.filter(x=>x?.url):((f?.media)?[{url:f.media,type:f.mediaType||'image'}]:[]);
+}
+function openFaqImage(encoded){
+ const src=decodeURIComponent(encoded);
+ $('modalContent').innerHTML=`<div style="text-align:center"><img src="${src}" alt="Imagen ampliada" style="display:block;max-width:100%;max-height:82vh;margin:auto;object-fit:contain;border-radius:12px"><button class="btn alt" style="margin-top:12px" onclick="closeModal()">Cerrar</button></div>`;
+ openModal();
+}
+function faqMediaHTML(f){
+ const items=faqMediaItems(f);if(!items.length)return '';
+ return `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:16px">${items.map((m,i)=>m.type==='video'
+ ?`<video controls src="${m.url}" style="width:100%;max-height:560px;border-radius:12px;border:1px solid var(--line);background:#120208"></video>`
+ :`<button type="button" onclick="openFaqImage('${encodeURIComponent(m.url)}')" title="Abrir imagen" style="padding:0;border:1px solid var(--line);background:#16030a;border-radius:12px;overflow:hidden;cursor:zoom-in;min-height:300px"><img src="${m.url}" alt="Imagen de apoyo ${i+1}" style="display:block;width:100%;height:auto;max-height:620px;object-fit:contain;background:#16030a"></button>`
+ ).join('')}</div><small style="display:block;margin-top:7px;color:var(--muted)">Toca una imagen para verla en grande.</small>`;
+}
+
 let mnCardRotationTimer=null;
 function startCardRotations(){if(mnCardRotationTimer)clearInterval(mnCardRotationTimer);const cards=[...document.querySelectorAll('.mn-card-photo')];cards.forEach(el=>el.dataset.idx='0');mnCardRotationTimer=setInterval(()=>{cards.forEach(el=>{let imgs=[];try{imgs=JSON.parse(decodeURIComponent(el.dataset.images||'%5B%5D'))}catch(e){}if(imgs.length<2)return;let i=(Number(el.dataset.idx||0)+1)%imgs.length;el.dataset.idx=String(i);const im=el.querySelector('img');if(im){im.style.transition='opacity .3s ease';im.style.opacity='0';setTimeout(()=>{im.src=imgs[i];im.style.opacity='1'},120)}const badge=el.querySelector('span');if(badge)badge.textContent=`${i+1}/${imgs.length}`})},2800)}
 function render(){
@@ -232,7 +250,7 @@ function render(){
  if(sort==='asc')a.sort((x,y)=>(x.salePrice||x.price)-(y.salePrice||y.price)); if(sort==='desc')a.sort((x,y)=>(y.salePrice||y.price)-(x.salePrice||x.price)); if(sort==='new')a.sort((x,y)=>y.created-x.created);
  $('grid').innerHTML=a.length?a.map(p=>{let fav=favorites.includes(p.id);return `<article class="card"><button class="fav" onclick="toggleFav('${p.id}',event)" title="Favorito">${fav?'♥':'♡'}</button><div onclick="openProduct('${p.id}')"><div class="photo mn-card-photo" style="position:relative" data-images="${encodeURIComponent(JSON.stringify(p.images||[]))}">${img(p.images?.[0])}${(p.images||[]).length>1?`<span style="position:absolute;right:7px;bottom:7px;background:rgba(0,0,0,.58);color:white;border-radius:999px;padding:3px 7px;font-size:10px">1/${p.images.length}</span>`:''}</div><div class="cardbody"><span class="id">${p.id}</span><div class="name">${esc(p.name)}</div><div class="row">${priceHTML(p)}<span class="tag">${esc(p.status||'Disponible')}</span></div></div></div></article>`}).join(''):`<div class="empty">Todavía no hay productos publicados.</div>`;
  startCardRotations();$('cartBadge').textContent=cart.reduce((s,x)=>s+x.qty,0);let visibleFavs=favorites.filter(id=>products.some(p=>p.id===id&&p.status!=='Oculto'));$('favBadge').textContent=visibleFavs.length;
- $('faqList').innerHTML=faqs.map(f=>`<details class="box"><summary><b>${esc(f.q)}</b></summary><div style="color:var(--muted);margin-top:10px">${faqHTML(f.a)}</div>${f.media?`<div class="faq-media">${f.mediaType==='video'?`<video controls src="${f.media}"></video>`:`<img src="${f.media}" alt="">`}</div>`:''}</details>`).join('');
+ $('faqList').innerHTML=faqs.map(f=>`<details class="box"><summary><b>${esc(f.q)}</b></summary><div style="color:var(--muted);margin-top:10px;line-height:1.65;font-size:16px">${faqHTML(f.a)}</div>${faqMediaHTML(f)}</details>`).join('');
  let cc=[];if(config.whatsapp)cc.push(`<a class="contactcard" target="_blank" href="https://wa.me/${config.whatsapp.replace(/\D/g,'')}"><b>WhatsApp</b><br><small>${esc(config.whatsapp)}</small></a>`);if(config.instagram)cc.push(`<a class="contactcard" target="_blank" href="https://instagram.com/${config.instagram.replace('@','')}"><b>Instagram</b><br><small>${esc(config.instagram)}</small></a>`);if(config.email)cc.push(`<a class="contactcard" href="mailto:${esc(config.email)}"><b>Correo</b><br><small>${esc(config.email)}</small></a>`);$('contactCards').innerHTML=cc.length?cc.join(''):'<div class="notice" style="grid-column:1/-1">Los datos de contacto se configuran desde Administración.</div>';
 }
 function toggleFav(id,e){e.stopPropagation();favorites=favorites.includes(id)?favorites.filter(x=>x!==id):[...favorites,id];save('favorites',favorites);render()}
