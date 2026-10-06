@@ -327,7 +327,29 @@ placeOrder=async function(){
  const before=load('orders',orders).map(x=>x.number);
  mnLocalPlaceOrder();
  const after=load('orders',orders);const fresh=after.find(x=>!before.includes(x.number));if(!fresh)return;
- try{const {error}=await mnCloud.rpc('mn_create_order',{order_data:fresh});if(error)throw error;}catch(e){orders=after.filter(x=>x.number!==fresh.number);save('orders',orders);alert('El pedido no pudo guardarse en la nube. No se enviará como pedido válido. '+e.message);}
+ const oldNumber=fresh.number;
+ const waBtn=[...document.querySelectorAll('#modalContent a.btn')].find(a=>a.textContent.includes('WHATSAPP'));
+ if(waBtn){waBtn.style.pointerEvents='none';waBtn.style.opacity='.55';waBtn.textContent='GUARDANDO PEDIDO…';}
+ try{
+  const {data,error}=await mnCloud.rpc('mn_create_order',{order_data:fresh});if(error)throw error;
+  const cloudNumber=String(data||oldNumber).toUpperCase();
+  if(cloudNumber!==oldNumber){
+   fresh.number=cloudNumber;
+   orders=after.map(x=>x.number===oldNumber?{...x,number:cloudNumber}:x);
+   save('orders',orders);
+   const mc=$('modalContent');
+   if(mc)mc.innerHTML=mc.innerHTML.split(oldNumber).join(cloudNumber);
+  }
+  const btn=[...document.querySelectorAll('#modalContent a.btn')].find(a=>a.textContent.includes('GUARDANDO')||a.textContent.includes('WHATSAPP'));
+  if(btn){
+   if(btn.href)btn.href=btn.href.split(oldNumber).join(cloudNumber);
+   btn.style.pointerEvents='auto';btn.style.opacity='1';btn.textContent='FINALIZAR PEDIDO POR WHATSAPP';
+  }
+ }catch(e){
+  orders=after.filter(x=>x.number!==oldNumber);save('orders',orders);
+  const mc=$('modalContent');if(mc)mc.innerHTML='<div class="notice"><b>El pedido no pudo registrarse.</b><br>No se enviará como pedido válido. '+esc(e.message)+'</div>';
+  alert('El pedido no pudo guardarse en la nube. No se enviará como pedido válido. '+e.message);
+ }
 };
 const mnLocalSaveRequest=saveRequest;
 saveRequest=function(){
