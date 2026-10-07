@@ -216,7 +216,7 @@ function renderAdmin(){
  $('products').innerHTML=`<div class="box"><div class="row"><h2 class="script">Productos</h2><button class="btn sm" onclick="productForm()">+ Nuevo producto</button></div><div class="tablewrap"><table><thead><tr><th>IMAGEN</th><th>PRODUCTO</th><th>ID</th><th>PRECIO</th><th>STOCK</th><th>ESTADO</th><th>ACCIONES</th></tr></thead><tbody>${products.map(p=>`<tr><td><div class="thumb">${p.images?.[0]?`<img class="thumb" src="${p.images[0]}">`:''}</div></td><td><b>${esc(p.name)}</b><br><small>${esc(p.keywords||'')}</small></td><td>${p.id}</td><td>${money(p.price)}</td><td>${p.madeToOrder?'Bajo pedido':sizes.map(s=>s+': '+(p.stock?.[s]||0)).join(' · ')}</td><td>${p.status}</td><td><button class="btn alt sm" onclick="productForm('${p.id}')">Editar</button> <button class="btn danger sm" onclick="deleteProduct('${p.id}')">Eliminar</button></td></tr>`).join('')}</tbody></table></div></div>`;
  $('extras').innerHTML=`<div class="box"><div class="row"><div><h2 class="script">Extras y accesorios</h2><p style="color:var(--muted)">Complementos opcionales del pedido. El set ya incluye su kit de aplicación.</p></div><button class="btn sm" onclick="extraForm()">+ Nuevo extra</button></div><div class="tablewrap"><table><thead><tr><th>IMAGEN</th><th>EXTRA</th><th>PRECIO</th><th>STOCK</th><th>ESTADO</th><th>ACCIONES</th></tr></thead><tbody>${extras.length?extras.map((x,i)=>`<tr><td>${x.image?`<img src="${x.image}" class="thumb" alt="">`:'<div class="thumb"></div>'}</td><td><b>${esc(x.name)}</b><br><small>${esc(x.description||'')}</small></td><td>${money(x.price)}</td><td>${Number(x.stock||0)}</td><td>${x.active!==false?'Activo':'Oculto'}</td><td><button class="btn alt sm" onclick="extraForm(${i})">Editar</button> <button class="btn danger sm" onclick="deleteExtra(${i})">Eliminar</button></td></tr>`).join(''):`<tr><td colspan="6">Todavía no hay extras.</td></tr>`}</tbody></table></div></div>`;
 
- $('gallery').innerHTML=`<div class="box"><div class="row"><div><div class="eyebrow">THE MISTRIELLE EDIT</div><h2 class="script">Galería y portafolio</h2><p style="color:var(--muted)">Exhibe diseños anteriores sin convertirlos en productos. Las destacadas aparecen en el carrusel y todas las visibles en el portafolio.</p></div><button class="btn sm" onclick="galleryForm()">+ Añadir imagen</button></div><div class="fields" style="margin-top:16px"><div class="field"><label>VELOCIDAD DEL CARRUSEL (SEGUNDOS)</label><input id="gallerySpeed" type="number" min="1" max="30" step=".5" value="${Number(gallerySettings.speed||4)}"></div><div class="field"><label>TÍTULO</label><input id="galleryTitle" value="${esc(gallerySettings.title||'The Mistrielle Edit')}"></div><div class="field full"><label>SUBTÍTULO</label><input id="gallerySubtitle" value="${esc(gallerySettings.subtitle||'Una selección de diseños creados por Mistrielle.')}"></div><div class="field full"><label>RECOMPENSA POR FOTO</label><textarea id="galleryReward">${esc(gallerySettings.rewardText||'')}</textarea><small style="color:var(--muted)">Aquí solo muestras la invitación; tú decides qué cupón regalar.</small></div></div><button class="btn alt sm" style="margin:12px 0 20px" onclick="saveGallerySettings()">Guardar configuración</button>${galleryItems.length?galleryItems.map((g,i)=>`<div class="cartitem">${g.image?`<img class="thumb" src="${g.image}" alt="">`:'<div class="thumb"></div>'}<div><b>${esc(g.title||'Diseño Mistrielle')}</b><br><small>${esc((g.tags||[]).join(' · '))}</small><br><small>${g.active!==false?'VISIBLE':'OCULTA'} · ${g.featured!==false?'EN CARRUSEL':'SOLO PORTAFOLIO'}</small></div><div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end">${i>0?`<button class="btn alt sm" onclick="moveGallery(${i},-1)">↑ Subir</button>`:''}${i<galleryItems.length-1?`<button class="btn alt sm" onclick="moveGallery(${i},1)">↓ Bajar</button>`:''}<button class="btn alt sm" onclick="galleryForm(${i})">Editar</button><button class="btn danger sm" onclick="deleteGallery(${i})">Eliminar</button></div></div>`).join(''):'<div class="empty">Todavía no has añadido imágenes de exhibición.</div>'}</div>`;
+ $('gallery').innerHTML=`<div class="box"><div class="row"><div><div class="eyebrow">THE MISTRIELLE EDIT</div><h2 class="script">Galería y portafolio</h2><p style="color:var(--muted)">Exhibe diseños anteriores sin convertirlos en productos. Las destacadas aparecen en el carrusel y todas las visibles en el portafolio.</p></div><button class="btn sm" onclick="galleryForm()">+ Añadir imagen</button></div><div class="fields" style="margin-top:16px"><div class="field"><label>VELOCIDAD DEL CARRUSEL (SEGUNDOS)</label><input id="gallerySpeed" type="number" min="1" max="30" step=".5" value="${Number(gallerySettings.speed||4)}"></div><div class="field"><label>TÍTULO</label><input id="galleryTitle" value="${esc(gallerySettings.title||'The Mistrielle Edit')}"></div><div class="field full"><label>SUBTÍTULO</label><input id="gallerySubtitle" value="${esc(gallerySettings.subtitle||'Una selección de diseños creados por Mistrielle.')}"></div><div class="field full"><label>RECOMPENSA POR FOTO</label><textarea id="galleryReward">${esc(gallerySettings.rewardText||'')}</textarea><small style="color:var(--muted)">Aquí solo muestras la invitación; tú decides qué cupón regalar.</small></div></div><button class="btn alt sm" style="margin:12px 0 20px" onclick="saveGallerySettings()">Guardar configuración</button>${galleryItems.length?galleryItems.map((g,i)=>`<div class="cartitem">${g.image?`<img class="thumb" src="${g.image}" alt="">`:'<div class="thumb"></div>'}<div><b>${esc(g.title||'Diseño Mistrielle')}</b><br><small>${esc([...(g.groups?.colors||[]),...(g.groups?.designs||[]),...(g.groups?.effects||[]),...(g.tags||[])].slice(0,6).join(' · '))}</small><br><small>${g.active!==false?'VISIBLE':'OCULTA'} · ${g.featured!==false?'EN CARRUSEL':'SOLO PORTAFOLIO'} · ENCUADRE ${Number(g.focusX??50)}% / ${Number(g.focusY??50)}%</small></div><div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end">${i>0?`<button class="btn alt sm" onclick="moveGallery(${i},-1)">↑ Subir</button>`:''}${i<galleryItems.length-1?`<button class="btn alt sm" onclick="moveGallery(${i},1)">↓ Bajar</button>`:''}<button class="btn alt sm" onclick="galleryForm(${i})">Editar</button><button class="btn danger sm" onclick="deleteGallery(${i})">Eliminar</button></div></div>`).join(''):'<div class="empty">Todavía no has añadido imágenes de exhibición.</div>'}</div>`;
 
  let orderView=window.mnOrderView||'active';
  let orderRows=orders.map((o,i)=>({o,i})).filter(x=>orderView==='all'||(orderView==='hidden'?!!x.o.hidden:!x.o.hidden));
@@ -255,25 +255,76 @@ function removeOpt(k,i){
  if(k==='lengths')products.forEach(p=>{if(Array.isArray(p.lengths))p.lengths=p.lengths.filter(x=>x!==old)});
  save(k,a);save('products',products);renderAdmin();
 }
+function galleryCsv(arr){return (Array.isArray(arr)?arr:[]).join(', ')}
+function galleryGroup(g,key){
+ const v=g?.groups?.[key];
+ return Array.isArray(v)?v:[];
+}
 function galleryPreviewCurrent(g){
  if(!g?.image)return '<div style="margin-top:8px;color:var(--muted);font-size:12px">Sin imagen guardada actualmente.</div>';
- return `<div style="margin-top:10px"><small style="color:var(--muted)">IMAGEN ACTUAL</small><br><img src="${g.image}" alt="" style="display:block;margin-top:6px;width:min(100%,320px);max-height:280px;object-fit:contain;border-radius:12px;border:1px solid var(--line);background:#16030a"></div>`;
+ const x=Number(g.focusX??50),y=Number(g.focusY??50);
+ return `<div style="margin-top:12px"><small style="color:var(--muted)">IMAGEN ACTUAL · VISTA DEL CARRUSEL</small><div style="margin-top:6px;width:min(100%,340px);aspect-ratio:1/1;border-radius:14px;border:1px solid var(--line);overflow:hidden;background:#16030a"><img id="galleryFocusPreview" src="${g.image}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:${x}% ${y}%"></div><small style="display:block;margin-top:6px;color:var(--muted)">La imagen completa seguirá viéndose al abrirla. Estos controles solo cambian el encuadre de las miniaturas y el carrusel.</small></div>`;
 }
 function galleryForm(i){
- let g=i===undefined?null:galleryItems[i];
- $('modalContent').innerHTML=`<div class="eyebrow">PORTAFOLIO MISTRIELLE</div><h2 class="script">${g?'Editar imagen':'Nueva imagen de exhibición'}</h2><div class="fields"><div class="field full"><label>IMAGEN *</label><label for="galleryImage" class="btn alt sm" style="display:inline-block;cursor:pointer">Elegir imagen</label><input id="galleryImage" type="file" accept="image/*" style="display:none" onchange="previewGalleryImage(this)"><div id="galleryNewPreview" style="margin-top:10px"></div>${galleryPreviewCurrent(g)}</div><div class="field full"><label>TÍTULO (OPCIONAL)</label><input id="galleryItemTitle" value="${esc(g?.title||'')}" placeholder="Ej. Halloween 3D"></div><div class="field full"><label>CLASIFICACIONES / ETIQUETAS</label><input id="galleryTags" value="${esc((g?.tags||[]).join(', '))}" placeholder="Gel 3D, Halloween, Diseño especial, Rosa"><small style="color:var(--muted)">Sepáralas por comas. Se convierten en filtros del portafolio.</small></div><div class="field"><label>VISIBLE EN PORTAFOLIO</label><select id="galleryActive"><option value="true" ${g?.active!==false?'selected':''}>Sí</option><option value="false" ${g?.active===false?'selected':''}>No</option></select></div><div class="field"><label>MOSTRAR EN CARRUSEL</label><select id="galleryFeatured"><option value="true" ${g?.featured!==false?'selected':''}>Sí</option><option value="false" ${g?.featured===false?'selected':''}>No, solo portafolio</option></select></div></div><br><button class="btn" onclick="saveGalleryItem(${i===undefined?'-1':i})">Guardar imagen</button>`;
+ let g=i===undefined?null:galleryItems[i],gx=Number(g?.focusX??50),gy=Number(g?.focusY??50);
+ $('modalContent').innerHTML=`<div class="eyebrow">PORTAFOLIO MISTRIELLE</div><h2 class="script">${g?'Editar imagen':'Nueva imagen de exhibición'}</h2><div class="fields">
+ <div class="field full"><label>IMAGEN *</label><label for="galleryImage" class="btn alt sm" style="display:inline-block;cursor:pointer">Elegir imagen</label><input id="galleryImage" type="file" accept="image/*" style="display:none" onchange="previewGalleryImage(this)"><div id="galleryNewPreview" style="margin-top:10px"></div>${galleryPreviewCurrent(g)}</div>
+ <div class="field full"><label>TÍTULO (OPCIONAL)</label><input id="galleryItemTitle" value="${esc(g?.title||'')}" placeholder="Ej. Halloween 3D"></div>
+
+ <div class="field full"><div class="eyebrow">CLASIFICACIÓN DEL PORTAFOLIO</div><small style="color:var(--muted)">Puedes poner varias opciones separadas por comas. Así el portafolio las agrupa y no muestra una pared interminable de etiquetas.</small></div>
+ <div class="field"><label>COLORES</label><input id="galleryColors" value="${esc(galleryCsv(galleryGroup(g,'colors')))}" placeholder="Rosa, Blanco, Dorado"></div>
+ <div class="field"><label>DISEÑOS / TEMAS</label><input id="galleryDesigns" value="${esc(galleryCsv(galleryGroup(g,'designs')))}" placeholder="Flores, Hello Kitty, Halloween"></div>
+ <div class="field"><label>EFECTOS / ACABADOS</label><input id="galleryEffects" value="${esc(galleryCsv(galleryGroup(g,'effects')))}" placeholder="Gel 3D, Cat Eye, Chrome, Blooming Gel"></div>
+ <div class="field"><label>FORMAS</label><input id="galleryShapes" value="${esc(galleryCsv(galleryGroup(g,'shapes')))}" placeholder="Cuadrada, Almendrada, Stiletto"></div>
+ <div class="field"><label>LARGOS</label><input id="galleryLengths" value="${esc(galleryCsv(galleryGroup(g,'lengths')))}" placeholder="Corto, Medio, Largo"></div>
+ <div class="field"><label>TEMPORADAS / OCASIONES</label><input id="galleryOccasions" value="${esc(galleryCsv(galleryGroup(g,'occasions')))}" placeholder="Verano, Navidad, San Valentín"></div>
+ <div class="field full"><label>PALABRAS CLAVE EXTRA</label><input id="galleryTags" value="${esc((g?.tags||[]).join(', '))}" placeholder="Snoopy, perlas, líneas, moño..."><small style="color:var(--muted)">Sirven para el buscador aunque no necesiten convertirse en botones visibles.</small></div>
+
+ <div class="field full"><div class="eyebrow">ENCUADRE DE LA MINIATURA</div><small style="color:var(--muted)">Mueve el punto de enfoque para elegir qué parte de la foto se ve en el carrusel. La foto original no se recorta ni modifica.</small></div>
+ <div class="field"><label>HORIZONTAL · <span id="focusXLabel">${gx}%</span></label><input id="galleryFocusX" type="range" min="0" max="100" value="${gx}" oninput="previewGalleryFocus()"></div>
+ <div class="field"><label>VERTICAL · <span id="focusYLabel">${gy}%</span></label><input id="galleryFocusY" type="range" min="0" max="100" value="${gy}" oninput="previewGalleryFocus()"></div>
+
+ <div class="field"><label>VISIBLE EN PORTAFOLIO</label><select id="galleryActive"><option value="true" ${g?.active!==false?'selected':''}>Sí</option><option value="false" ${g?.active===false?'selected':''}>No</option></select></div>
+ <div class="field"><label>MOSTRAR EN CARRUSEL</label><select id="galleryFeatured"><option value="true" ${g?.featured!==false?'selected':''}>Sí</option><option value="false" ${g?.featured===false?'selected':''}>No, solo portafolio</option></select></div>
+ </div><br><button class="btn" onclick="saveGalleryItem(${i===undefined?'-1':i})">Guardar imagen</button>`;
  openModal();
 }
 function previewGalleryImage(input){
- const box=$('galleryNewPreview'),file=input?.files?.[0];if(!box)return;box.innerHTML='';if(!file)return;
- const url=URL.createObjectURL(file);
- box.innerHTML=`<small style="color:var(--muted)">VISTA PREVIA</small><br><img src="${url}" alt="" style="display:block;margin-top:6px;width:min(100%,320px);max-height:280px;object-fit:contain;border-radius:12px;border:1px solid var(--line);background:#16030a">`;
+ const box=$('galleryNewPreview'),file=input?.files?.[0];if(!box)return;box.innerHTML='';
+ if(!file)return;
+ const url=URL.createObjectURL(file),x=Number($('galleryFocusX')?.value||50),y=Number($('galleryFocusY')?.value||50);
+ box.innerHTML=`<small style="color:var(--muted)">VISTA PREVIA · CARRUSEL</small><div style="margin-top:6px;width:min(100%,340px);aspect-ratio:1/1;border-radius:14px;border:1px solid var(--line);overflow:hidden;background:#16030a"><img id="galleryNewFocusPreview" src="${url}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:${x}% ${y}%"></div>`;
 }
+function previewGalleryFocus(){
+ const x=Number($('galleryFocusX')?.value||50),y=Number($('galleryFocusY')?.value||50);
+ if($('focusXLabel'))$('focusXLabel').textContent=x+'%';
+ if($('focusYLabel'))$('focusYLabel').textContent=y+'%';
+ for(const id of ['galleryFocusPreview','galleryNewFocusPreview']){const im=$(id);if(im)im.style.objectPosition=`${x}% ${y}%`}
+}
+function gallerySplit(id){return ($(id)?.value||'').split(',').map(x=>x.trim()).filter(Boolean)}
 async function saveGalleryItem(i){
  let old=i>=0?galleryItems[i]:null,file=$('galleryImage')?.files?.[0],image=old?.image||'';
  if(!file&&!image)return alert('Selecciona una imagen.');
  try{if(file)image=await mnUploadImage(file,'gallery')}catch(e){console.error(e);return alert('No se pudo subir la imagen a Storage.')}
- const item={id:old?.id||('GAL-'+Date.now().toString(36).toUpperCase()),image,title:$('galleryItemTitle').value.trim(),tags:$('galleryTags').value.split(',').map(x=>x.trim()).filter(Boolean),active:$('galleryActive').value==='true',featured:$('galleryFeatured').value==='true',created:old?.created||Date.now()};
+ const item={
+  id:old?.id||('GAL-'+Date.now().toString(36).toUpperCase()),
+  image,
+  title:$('galleryItemTitle').value.trim(),
+  tags:gallerySplit('galleryTags'),
+  groups:{
+   colors:gallerySplit('galleryColors'),
+   designs:gallerySplit('galleryDesigns'),
+   effects:gallerySplit('galleryEffects'),
+   shapes:gallerySplit('galleryShapes'),
+   lengths:gallerySplit('galleryLengths'),
+   occasions:gallerySplit('galleryOccasions')
+  },
+  focusX:Number($('galleryFocusX')?.value||50),
+  focusY:Number($('galleryFocusY')?.value||50),
+  active:$('galleryActive').value==='true',
+  featured:$('galleryFeatured').value==='true',
+  created:old?.created||Date.now()
+ };
  if(i<0)galleryItems.push(item);else galleryItems[i]=item;
  save('galleryItems',galleryItems);closeModal();renderAdmin();
 }
