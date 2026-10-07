@@ -221,7 +221,7 @@ function renderAdmin(){
  let orderView=window.mnOrderView||'active';
  let orderRows=orders.map((o,i)=>({o,i})).filter(x=>orderView==='all'||(orderView==='hidden'?!!x.o.hidden:!x.o.hidden));
  $('orders').innerHTML=`<div class="box"><div class="row"><div><h2 class="script">Pedidos recibidos</h2><small style="color:var(--muted)">${orders.filter(o=>!o.hidden).length} activos · ${orders.filter(o=>o.hidden).length} ocultos</small></div><div style="display:flex;gap:7px;flex-wrap:wrap"><button class="btn ${orderView==='active'?'':'alt'} sm" onclick="window.mnOrderView='active';renderAdmin()">Activos</button><button class="btn ${orderView==='hidden'?'':'alt'} sm" onclick="window.mnOrderView='hidden';renderAdmin()">Ocultos</button><button class="btn ${orderView==='all'?'':'alt'} sm" onclick="window.mnOrderView='all';renderAdmin()">Todos</button><button class="btn alt sm" onclick="mnRefreshAdminCloud(this)">↻ Actualizar nube</button></div></div><div class="tablewrap"><table><thead><tr><th>PEDIDO</th><th>CLIENTA</th><th>TOTAL</th><th>ENTREGA</th><th>ESTADO</th><th>DETALLE</th></tr></thead><tbody>${orderRows.length?orderRows.map(({o,i})=>`<tr><td><b>${o.number}</b><br><small>${new Date(o.created).toLocaleString()}</small>${o.hidden?'<br><small style="color:var(--gold2)">OCULTO</small>':''}</td><td>${esc(o.name)}<br>${esc(o.whatsapp)}</td><td>${o.discountCode?`<small>${money(o.subtotal??(Number(o.total||0)+Number(o.discountAmount||0)))} − ${money(o.discountAmount)}</small><br>`:''}<b>${money(o.total)}</b>${o.discountCode?`<br><small>${esc(o.discountCode)} · ${o.discountState==='Usado'?'USADO':'APLICADO'}</small>`:''}</td><td>${esc(o.delivery)}</td><td><select onchange="orderStatus(${i},this.value)">${['Nuevo','Confirmado','En preparación','Listo','Enviado','Entregado','Cancelado'].map(s=>`<option ${s===o.status?'selected':''}>${s}</option>`)}</select></td><td><button class="btn alt sm" onclick="orderDetail(${i})">Ver</button> ${o.hidden?`<button class="btn sm" onclick="restoreOrder(${i})">Restaurar</button>`:`<button class="btn alt sm" onclick="hideOrder(${i})">Ocultar</button>`} <button class="btn danger sm" onclick="deleteOrder(${i})">Eliminar</button></td></tr>`).join(''):`<tr><td colspan="6">No hay pedidos en esta vista.</td></tr>`}</tbody></table></div></div>`;
- $('requests').innerHTML=`<div class="box"><h2 class="script">Solicitudes personalizadas</h2>${requests.length?requests.map((r,i)=>`<div class="cartitem">${r.image?`<img class="thumb" src="${r.image}">`:'<div class="thumb"></div>'}<div><b>${r.number} · ${esc(r.name)}</b><br><small>${esc(r.whatsapp)} · ${esc(r.form)} · ${esc(r.length)}</small><p>${esc(r.details)}</p>${r.discountCodeRequested?`<div class="notice"><b>Cupón solicitado: ${esc(r.discountCodeRequested)}</b>${Number(r.discountAmount||0)>0?`<br>Descuento aplicado: −${money(r.discountAmount)} · <b>Total final: ${money(r.finalPrice||0)}</b>`:'<br><small>Se validará al aceptar la solicitud.</small>'}</div>`:''}${r.convertedOrder?`<div class="notice">Convertida en pedido: <b>${esc(r.convertedOrder)}</b>${Number(r.finalPrice||r.quotedPrice||0)>0?` · Total final: <b>${money(r.finalPrice||r.quotedPrice)}</b>`:''}</div>`:''}<div class="field"><label>PRECIO COTIZADO (ANTES DEL DESCUENTO)</label><input id="rprice_${i}" type="number" min="0" step=".01" value="${Number(r.quotedPrice||0)}" placeholder="Ej. 320"><small style="color:var(--muted)">Este es el precio base. Si la clienta envió un cupón válido, el descuento se calculará al aceptar la solicitud y el pedido se creará con el total final.</small></div><div class="field"><label>RESPUESTA VISIBLE PARA LA CLIENTA</label><textarea id="reply_${i}" placeholder="Ej. Sí podemos realizarlo. El precio sería de $320.">${esc(r.reply||'')}</textarea></div></div><div><select id="rstatus_${i}">${['Nueva','En revisión','Cotizada','Aceptada','Rechazada','Cerrada'].map(s=>`<option ${s===r.status?'selected':''}>${s}</option>`)}</select><br><button class="btn sm" style="margin-top:8px" onclick="saveRequestAdmin(${i})">Guardar estado y mensaje</button><br><button class="btn danger sm" style="margin-top:8px" onclick="deleteRequest(${i})">Eliminar</button></div></div>`).join(''):'<div class="empty">No hay solicitudes.</div>'}</div>`;
+ $('requests').innerHTML=`<div class="box"><h2 class="script">Solicitudes personalizadas</h2>${requests.length?requests.map((r,i)=>`<div class="cartitem">${r.image?`<img class="thumb" src="${r.image}">`:'<div class="thumb"></div>'}<div><b>${r.number} · ${esc(r.name)}</b><br><small>${esc(r.whatsapp)} · ${esc(r.form)} · ${esc(r.length)}</small><p>${esc(r.details)}</p>${(r.requestExtras||[]).length?`<div class="notice"><b>Complementos solicitados:</b><br>${r.requestExtras.map(x=>`${esc(x.name)} × ${Number(x.qty||1)} · ${money(Number(x.price||0)*Number(x.qty||1))}`).join('<br>')}<br><b>Total extras: ${money((r.requestExtras||[]).reduce((s,x)=>s+Number(x.price||0)*Number(x.qty||1),0))}</b></div>`:''}${r.discountCodeRequested?`<div class="notice"><b>Cupón solicitado: ${esc(r.discountCodeRequested)}</b>${Number(r.discountAmount||0)>0?`<br>Descuento aplicado: −${money(r.discountAmount)} · <b>Total final: ${money(r.finalPrice||0)}</b>`:'<br><small>Se validará al aceptar la solicitud.</small>'}</div>`:''}${r.convertedOrder?`<div class="notice">Convertida en pedido: <b>${esc(r.convertedOrder)}</b>${Number(r.finalPrice||r.quotedPrice||0)>0?` · Total final: <b>${money(r.finalPrice||r.quotedPrice)}</b>`:''}</div>`:''}<div class="field"><label>PRECIO DEL DISEÑO (SIN EXTRAS NI DESCUENTO)</label><input id="rprice_${i}" type="number" min="0" step=".01" value="${Number(r.quotedPrice||0)}" placeholder="Ej. 320"><small style="color:var(--muted)">Este es solo el precio del diseño. Los complementos solicitados se sumarán automáticamente y después se aplicará el cupón, si corresponde.</small></div><div class="field"><label>RESPUESTA VISIBLE PARA LA CLIENTA</label><textarea id="reply_${i}" placeholder="Ej. Sí podemos realizarlo. El precio sería de $320.">${esc(r.reply||'')}</textarea></div></div><div><select id="rstatus_${i}">${['Nueva','En revisión','Cotizada','Aceptada','Rechazada','Cerrada'].map(s=>`<option ${s===r.status?'selected':''}>${s}</option>`)}</select><br><button class="btn sm" style="margin-top:8px" onclick="saveRequestAdmin(${i})">Guardar estado y mensaje</button><br><button class="btn danger sm" style="margin-top:8px" onclick="deleteRequest(${i})">Eliminar</button></div></div>`).join(''):'<div class="empty">No hay solicitudes.</div>'}</div>`;
  $('discounts').innerHTML=`<div class="box"><div class="row"><div><div class="eyebrow">PROMOCIONES</div><h2 class="script">Códigos de descuento</h2><p style="color:var(--muted)">Aplicado = reservado por un pedido nuevo. Usado = pedido/pago confirmado.</p></div><button class="btn sm" onclick="discountForm()">+ Nuevo código</button></div><div class="tablewrap"><table><thead><tr><th>CÓDIGO</th><th>DESCUENTO</th><th>RESERVADOS</th><th>USADOS</th><th>LÍMITE</th><th>VENCE</th><th>ESTADO</th><th>ACCIONES</th></tr></thead><tbody>${discounts.length?discounts.map((d,i)=>{let reserved=orders.filter(o=>o.discountCode===d.code&&o.discountState==='Reservado'&&o.status!=='Cancelado').length;return `<tr><td><b>${esc(d.code)}</b><br><small>${esc(d.note||'')}</small></td><td>${d.type==='percent'?`${Number(d.value)}%`:money(d.value)}</td><td>${reserved}</td><td><b>${Number(d.used||0)}</b></td><td>${Number(d.maxUses||0)>0?Number(d.maxUses):'∞'}</td><td>${esc(d.expires||'Sin fecha')}</td><td>${d.active?'Activo':'Inactivo'}</td><td><button class="btn alt sm" onclick="discountForm(${i})">Editar</button> <button class="btn danger sm" onclick="deleteDiscount(${i})">Eliminar</button></td></tr>`}).join(''):`<tr><td colspan="8">Todavía no hay códigos.</td></tr>`}</tbody></table></div><h3 class="script" style="margin-top:28px">Códigos usados</h3><div class="tablewrap"><table><thead><tr><th>PEDIDO</th><th>CÓDIGO</th><th>DESCUENTO</th><th>CLIENTA</th><th>CONFIRMADO</th></tr></thead><tbody>${orders.filter(o=>o.discountCode&&o.discountState==='Usado').length?orders.filter(o=>o.discountCode&&o.discountState==='Usado').map(o=>`<tr><td>${o.number}</td><td><b>${esc(o.discountCode)}</b></td><td>−${money(o.discountAmount)}</td><td>${esc(o.name)}</td><td>${o.discountConfirmedAt?new Date(o.discountConfirmedAt).toLocaleString():'Confirmado'}</td></tr>`).join(''):`<tr><td colspan="5">Todavía no hay códigos confirmados como usados.</td></tr>`}</tbody></table></div><hr style="border-color:var(--line);margin:28px 0"><div class="eyebrow">REGLA DE ENTREGA</div><h2 class="script">Envío gratis</h2><div class="fields"><div class="field"><label>ACTIVAR</label><select id="fsEnabled"><option value="false" ${!config.freeShippingEnabled?'selected':''}>Desactivado</option><option value="true" ${config.freeShippingEnabled?'selected':''}>Activado</option></select></div><div class="field"><label>SE ACTIVA POR</label><select id="fsMode"><option value="amount" ${config.freeShippingMode!=='qty'?'selected':''}>Monto mínimo comprado</option><option value="qty" ${config.freeShippingMode==='qty'?'selected':''}>Cantidad de productos</option></select></div><div class="field"><label>MONTO MÍNIMO</label><input id="fsAmount" type="number" min="0" step=".01" value="${Number(config.freeShippingAmount||600)}"></div><div class="field"><label>CANTIDAD MÍNIMA DE PRODUCTOS</label><input id="fsQty" type="number" min="1" step="1" value="${Number(config.freeShippingQty||3)}"></div></div><br><button class="btn" onclick="saveFreeShipping()">Guardar regla de envío</button></div>`; $('sales').innerHTML=`<div class="box"><div class="row"><div><div class="eyebrow">REGISTRO REAL</div><h2 class="script">Ventas, costos y ganancias</h2></div><button class="btn sm" onclick="saleForm()">+ Registrar movimiento</button></div><div class="stats"><div class="stat"><b>${money(sales.reduce((s,x)=>s+Number(x.revenue||0),0))}</b><small>Ingresos</small></div><div class="stat"><b>${money(sales.reduce((s,x)=>s+Number(x.cost||0),0))}</b><small>Costos / pérdidas</small></div><div class="stat"><b>${money(sales.reduce((s,x)=>s+Number(x.revenue||0)-Number(x.cost||0),0))}</b><small>Resultado neto</small></div></div><br><div class="tablewrap"><table><thead><tr><th>FECHA</th><th>CONCEPTO</th><th>PEDIDO</th><th>INGRESO</th><th>COSTO</th><th>GANANCIA / PÉRDIDA</th><th>ACCIÓN</th></tr></thead><tbody>${sales.map((s,i)=>`<tr><td>${esc(s.date)}</td><td>${esc(s.concept)}</td><td>${esc(s.order||'-')}</td><td>${money(s.revenue)}</td><td>${money(s.cost)}</td><td><b>${money(Number(s.revenue||0)-Number(s.cost||0))}</b></td><td><button class="btn alt sm" onclick="saleForm(${i})">Editar</button> <button class="btn danger sm" onclick="sales.splice(${i},1);save('sales',sales);renderAdmin()">Eliminar</button></td></tr>`).join('')}</tbody></table></div></div>`;
  $('faq').innerHTML=`<div class="box"><div class="row"><h2 class="script">Preguntas frecuentes</h2><button class="btn sm" onclick="faqForm()">+ Agregar</button></div>${faqs.map((f,i)=>`<div class="cartitem"><div></div><div><b>${esc(f.q)}</b><div style="white-space:pre-wrap;margin-top:8px;color:var(--muted)">${faqPreview(f.a)}</div>${faqMediaList(f).length?`<small style="display:block;margin-top:7px;color:var(--gold2)">📎 ${faqMediaList(f).length} archivo(s) visual(es) guardado(s)</small>`:''}</div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
 ${i>0?`<button class="btn alt sm" onclick="moveFaq(${i},-1)" title="Subir esta pregunta">↑ Subir</button>`:''}
@@ -385,23 +385,37 @@ async function mnValidateRequestCoupon(code,subtotal){
 }
 async function saveRequestAdmin(i){
  let r=requests[i],newStatus=$('rstatus_'+i).value,price=Number($('rprice_'+i).value||0);
- if(newStatus==='Aceptada'&&price<=0)return alert('Antes de aceptar la solicitud, añade el precio acordado o cotizado.');
+ if(newStatus==='Aceptada'&&price<=0)return alert('Antes de aceptar la solicitud, añade el precio del diseño.');
  r.status=newStatus;r.reply=$('reply_'+i).value.trim();r.quotedPrice=price;
  try{
+  const requestedExtras=Array.isArray(r.requestExtras)?r.requestExtras:[];
+  const extrasSubtotal=requestedExtras.reduce((s,x)=>s+Number(x.price||0)*Number(x.qty||1),0);
+  r.extraSubtotal=extrasSubtotal;
+
   if(newStatus==='Aceptada'&&!r.convertedOrder){
-   let promo={code:'',amount:0,total:price,discount:null};
-   if(r.discountCodeRequested)promo=await mnValidateRequestCoupon(r.discountCodeRequested,price);
+   extras=load('extras',extras);
+   for(const it of requestedExtras){
+    const live=extras.find(x=>x.id===it.id);
+    if(!live||live.active===false)throw new Error(`El complemento "${it.name}" ya no está disponible.`);
+    if(Number(it.qty||1)>Number(live.stock||0))throw new Error(`No hay suficiente stock de ${it.name}. Disponible: ${Number(live.stock||0)}.`);
+   }
+
+   const subtotal=price+extrasSubtotal;
+   let promo={code:'',amount:0,total:subtotal,discount:null};
+   if(r.discountCodeRequested)promo=await mnValidateRequestCoupon(r.discountCodeRequested,subtotal);
 
    r.discountAmount=promo.amount;r.finalPrice=promo.total;
    if(promo.discount){r.discountType=promo.discount.type;r.discountValue=Number(promo.discount.value||0);}
+
+   let orderItems=[{key:Date.now(),id:'PERSONALIZADO',name:'Diseño personalizado '+r.number,image:r.image||'',price:price,form:r.form,length:r.length,size:'Personalizada',measures:[],qty:1}];
+   orderItems.push(...requestedExtras.map((x,k)=>({key:Date.now()+k+1,id:x.id,name:x.name,image:x.image||'',price:Number(x.price||0),qty:Number(x.qty||1),isExtra:true,form:'',length:'',size:''})));
 
    let o={
     number:'',created:Date.now(),name:r.name,whatsapp:r.whatsapp,
     delivery:'Por acordar',address:'Solicitud personalizada '+r.number,
     notes:'Pedido creado automáticamente desde '+r.number+'. '+r.details,
-    status:'Nuevo',stockApplied:false,
-    items:[{key:Date.now(),id:'PERSONALIZADO',name:'Diseño personalizado '+r.number,image:r.image||'',price:price,form:r.form,length:r.length,size:'Personalizada',measures:[],qty:1}],
-    subtotal:price,discountCode:promo.code||'',discountAmount:Number(promo.amount||0),
+    status:'Nuevo',stockApplied:false,items:orderItems,
+    subtotal,discountCode:promo.code||'',discountAmount:Number(promo.amount||0),
     discountState:promo.code?'Reservado':'',discountType:promo.discount?.type||'',
     discountValue:Number(promo.discount?.value||0),total:Number(promo.total),
     sourceRequest:r.number,hidden:false
@@ -412,26 +426,30 @@ async function saveRequestAdmin(i){
    o.number=String(num||'').toUpperCase();
    if(!o.number)throw new Error('Supabase no devolvió el número del pedido.');
    orders.unshift(o);r.convertedOrder=o.number;save('orders',orders);
+
   }else if(r.convertedOrder&&price>0){
    let o=orders.find(x=>x.number===r.convertedOrder);
    if(o){
-    let amount=0;
+    const extraItems=(o.items||[]).filter(x=>x.isExtra);
+    const currentExtraSubtotal=extraItems.reduce((s,x)=>s+Number(x.price||0)*Number(x.qty||1),0);
+    let base=price+currentExtraSubtotal,amount=0;
     if(o.discountCode){
      const type=o.discountType||r.discountType,value=Number(o.discountValue??r.discountValue??0);
-     amount=Math.max(0,Math.min(price,type==='percent'?price*(value/100):value));
+     amount=Math.max(0,Math.min(base,type==='percent'?base*(value/100):value));
     }
-    const total=Math.max(0,price-amount);
-    o.subtotal=price;o.discountAmount=amount;o.total=total;
-    if(o.items?.length===1&&o.items[0].id==='PERSONALIZADO')o.items[0].price=price;
-    r.discountAmount=amount;r.finalPrice=total;save('orders',orders);
+    const total=Math.max(0,base-amount);
+    o.subtotal=base;o.discountAmount=amount;o.total=total;
+    const personal=(o.items||[]).find(x=>x.id==='PERSONALIZADO');if(personal)personal.price=price;
+    r.extraSubtotal=currentExtraSubtotal;r.discountAmount=amount;r.finalPrice=total;save('orders',orders);
    }
   }else{
-   r.finalPrice=price;
+   r.finalPrice=price+extrasSubtotal;
   }
 
   save('requests',requests);
+  const subtotalLabel=money(price+extrasSubtotal);
   alert(newStatus==='Aceptada'
-   ?`Solicitud aceptada por ${money(price)}${r.discountCodeRequested&&Number(r.discountAmount||0)>0?` − ${money(r.discountAmount)} de cupón = ${money(r.finalPrice)}`:''} y vinculada al pedido ${r.convertedOrder}.`
+   ?`Solicitud aceptada. Diseño ${money(price)}${extrasSubtotal?` + extras ${money(extrasSubtotal)} = ${subtotalLabel}`:''}${Number(r.discountAmount||0)>0?` − descuento ${money(r.discountAmount)} = ${money(r.finalPrice)}`:''}. Pedido ${r.convertedOrder}.`
    :'Estado, precio y mensaje guardados.');
   renderAdmin();
  }catch(e){
