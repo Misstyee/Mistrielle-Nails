@@ -226,13 +226,72 @@ function deleteActivity(id){activityLog=(activityLog||[]).filter(x=>String(x.id)
 function clearActivity(){if(!confirm('¿Limpiar TODO el historial de actividad? No borra pedidos, productos ni reseñas.'))return;activityLog=[];save('activityLog',activityLog);renderAdmin()}
 function mnActivityHTML(limit=30){const items=mnBuildActivity().slice(0,limit);return items.length?`<div class="mn-activity">${items.map(x=>`<div class="mn-activity-item"><div class="mn-activity-time">${new Date(x.t).toLocaleString('es-MX',{dateStyle:'medium',timeStyle:'short'})}</div><div><b>${esc(x.label)}</b><br><button class="btn alt sm" style="margin-top:5px" onclick="openAdminTab('${x.tab}')">Abrir</button> <button class="btn danger sm" style="margin-top:5px" onclick="deleteActivity('${x.id}')">Eliminar del historial</button></div></div>`).join('')}</div>`:'<div class="empty">No hay actividad guardada.</div>'}
 
+function rewardPortfolioItem(r){
+ if(!r?.image)return null;
+ let item=r.portfolioItemId?galleryItems.find(x=>x.id===r.portfolioItemId):null;
+ if(!item){
+  item={
+   id:'GAL-'+Date.now().toString(36).toUpperCase(),
+   image:r.image,
+   title:r.name?`Mistrielle de ${r.name}`:'Foto de clienta Mistrielle',
+   tags:['Foto de clienta','Mistrielle real'],
+   groups:{colors:[],designs:['Clientas Mistrielle'],effects:[],shapes:[],lengths:[],occasions:[]},
+   focusX:50,focusY:50,zoom:1,active:true,featured:false,created:Date.now(),
+   sourceRewardId:r.id
+  };
+  galleryItems.unshift(item);
+ }else{
+  item.image=r.image;item.active=true;
+ }
+ r.portfolioItemId=item.id;
+ return item;
+}
+function approveRewardForPortfolio(i){
+ const r=photoRewards[i];if(!r)return;
+ if(!r.image)return alert('Este registro no tiene foto. Edítalo y añade una imagen primero.');
+ const item=rewardPortfolioItem(r);
+ r.portfolioApproved=true;
+ r.portfolioApprovedAt=r.portfolioApprovedAt||Date.now();
+ r.status=r.rewarded?'Recompensada':'Aprobada para portafolio';
+ save('galleryItems',galleryItems);
+ save('photoRewards',photoRewards);
+ logActivity(`Foto de ${r.name||'Clienta'} aprobada y enviada al portafolio`,'gallery',item?.id||'');
+ renderAdmin();
+ alert('Foto aprobada ✓ Ya fue añadida a Galería / Portafolio. Puedes editar allí su título, filtros, encuadre y si aparece en el carrusel.');
+}
+function generateRewardCouponFor(r){
+ if(!r)return '';
+ if(r.rewardCode)return r.rewardCode;
+ const pct=Math.min(100,Math.max(1,Number(storeOps.photoRewardPercent||10)));
+ const uses=Math.max(1,Math.floor(Number(storeOps.photoRewardMaxUses||1)));
+ const days=Math.max(1,Math.floor(Number(storeOps.photoRewardDays||30)));
+ const prefix=(storeOps.photoRewardPrefix||'MIST-FOTO').toUpperCase().replace(/[^A-Z0-9-]/g,'').replace(/-+/g,'-').replace(/^-|-$/g,'').slice(0,18)||'MIST-FOTO';
+ let code=`${prefix}-${Math.random().toString(36).slice(2,7).toUpperCase()}`;
+ while(discounts.some(d=>String(d.code||'').toUpperCase()===code))code=`${prefix}-${Math.random().toString(36).slice(2,7).toUpperCase()}`;
+ const exp=new Date();exp.setDate(exp.getDate()+days);
+ const d={code,type:'percent',value:pct,maxUses:uses,expires:exp.toISOString().slice(0,10),active:true,note:`Recompensa por foto · ${r.name||'Clienta'}`,used:0,generated:true,source:'photoReward',generatedAt:new Date().toISOString()};
+ discounts.unshift(d);
+ r.rewardCode=code;
+ r.rewardPercent=pct;
+ r.rewardUses=uses;
+ r.rewardExpires=d.expires;
+ r.reward=`${code} · ${pct}% · ${uses} uso(s)`;
+ save('discounts',discounts);
+ logActivity(`Cupón ${code} generado para ${r.name||'Clienta'}`,'discounts',code);
+ return code;
+}
 function createRewardCoupon(i){
  const r=photoRewards[i];if(!r)return;
+ if(!r.portfolioApproved)return alert('Primero aprueba la foto para el portafolio. Ese es el paso 2 del flujo.');
+ if(r.rewardCode)return alert(`Este registro ya tiene cupón: ${r.rewardCode}`);
  const code=generateRewardCouponFor(r);
- r.status='Recompensada';r.rewardedAt=r.rewardedAt||Date.now();
- save('photoRewards',photoRewards);renderAdmin();alert(`Cupón creado: ${code}`)
+ r.rewarded=true;
+ r.rewardedAt=Date.now();
+ r.status='Recompensada';
+ save('photoRewards',photoRewards);
+ renderAdmin();
+ alert(`Cupón creado ✓\n\n${code}\n${r.rewardPercent}% · ${r.rewardUses} uso(s) · vence ${r.rewardExpires}`);
 }
-
 window.mnSafeState={src:'',zoom:1,x:0,y:0,drag:false,sx:0,sy:0};
 function mnSafeOpen(src){if(!src)return;window.mnSafeState={src,zoom:1,x:0,y:0,drag:false,sx:0,sy:0};$('mnSafeImg').src=src;mnSafeApply();$('mnSafeViewer').classList.add('open')}
 function mnSafeClose(){$('mnSafeViewer')?.classList.remove('open')}
@@ -357,7 +416,23 @@ function renderAdmin(){
 
  $('operations').innerHTML=`<div class="box"><div class="eyebrow">CONTROL DE TIENDA</div><h2 class="script">Operación</h2><div class="fields"><div class="field"><label>TIENDA</label><select id="opStore"><option value="true" ${storeOps.storeOpen!==false?'selected':''}>Abierta</option><option value="false" ${storeOps.storeOpen===false?'selected':''}>Mantenimiento</option></select></div><div class="field"><label>AGENDA PERSONALIZADOS</label><select id="opCustom"><option value="true" ${storeOps.customOpen!==false?'selected':''}>Abierta</option><option value="false" ${storeOps.customOpen===false?'selected':''}>Cerrada</option></select></div><div class="field full"><label>TÍTULO DE MANTENIMIENTO</label><input id="opMaintTitle" value="${esc(storeOps.maintenanceTitle||'')}"></div><div class="field full"><label>MENSAJE DE MANTENIMIENTO</label><textarea id="opMaintMsg">${esc(storeOps.maintenanceMessage||'')}</textarea></div><div class="field"><label>CUPOS PERSONALIZADOS</label><input id="opSlots" type="number" min="0" value="${Number(storeOps.customSlots||0)}"><small style="color:var(--muted)">Bajan al aceptar una solicitud y se devuelven si ese pedido personalizado se cancela.</small></div><div class="field"><label>TEXTO DE CUPOS</label><input id="opSlotsLabel" value="${esc(storeOps.customSlotsLabel||'espacios disponibles')}"></div><div class="field"><label>TIEMPO GENERAL PREPARACIÓN</label><input id="opPrep" value="${esc(storeOps.defaultPrep||'3–5 días hábiles')}"></div><div class="field"><label>BANNER</label><select id="opBanner"><option value="false" ${!storeOps.bannerEnabled?'selected':''}>Desactivado</option><option value="true" ${storeOps.bannerEnabled?'selected':''}>Activado</option></select></div><div class="field full"><label>TEXTO BANNER</label><input id="opBannerText" value="${esc(storeOps.bannerText||'')}"></div><div class="field"><label>BOTÓN BANNER</label><input id="opBannerBtn" value="${esc(storeOps.bannerButtonText||'')}"></div><div class="field"><label>DESTINO</label><select id="opBannerTarget"><option value="">Sin botón</option><option value="campana" ${storeOps.bannerTarget==='campana'?'selected':''}>Campaña / reclamar código</option><option value="personalizadas" ${storeOps.bannerTarget==='personalizadas'?'selected':''}>Personalizadas</option><option value="catalogo" ${storeOps.bannerTarget==='catalogo'?'selected':''}>Catálogo</option><option value="portafolio" ${storeOps.bannerTarget==='portafolio'?'selected':''}>Portafolio</option></select></div><div class="field"><label>RECOMPENSA POR FOTO</label><select id="opPhoto"><option value="false" ${!storeOps.photoRewardEnabled?'selected':''}>Desactivada</option><option value="true" ${storeOps.photoRewardEnabled?'selected':''}>Activada</option></select></div><div class="field"><label>CUPÓN AUTOMÁTICO</label><select id="opPhotoAuto"><option value="true" ${storeOps.photoRewardAuto!==false?'selected':''}>Sí, al marcar Recompensada</option><option value="false" ${storeOps.photoRewardAuto===false?'selected':''}>No, manual</option></select></div><div class="field full"><label>MENSAJE RECOMPENSA</label><textarea id="opPhotoText">${esc(storeOps.photoRewardText||'')}</textarea></div><div class="field"><label>DESCUENTO PREDETERMINADO (%)</label><input id="opPhotoPct" type="number" min="1" max="100" value="${Number(storeOps.photoRewardPercent||10)}"></div><div class="field"><label>USOS POR CÓDIGO</label><input id="opPhotoUses" type="number" min="1" value="${Math.max(1,Number(storeOps.photoRewardMaxUses||1))}"></div><div class="field"><label>VIGENCIA (DÍAS)</label><input id="opPhotoDays" type="number" min="1" value="${Math.max(1,Number(storeOps.photoRewardDays||30))}"></div><div class="field"><label>PREFIJO</label><input id="opPhotoPrefix" value="${esc(storeOps.photoRewardPrefix||'MIST-FOTO')}" placeholder="MIST-FOTO"></div></div><br><button class="btn" onclick="saveStoreOps()">Guardar operación</button></div>`;
 
- $('rewards').innerHTML=`<div class="box"><div class="row"><div><div class="eyebrow">CLIENTAS · CONTENIDO REAL</div><h2 class="script">Recompensas por foto</h2><p style="color:var(--muted)">Registra las fotos recibidas por WhatsApp y qué recompensa entregaste.</p></div><button class="btn sm" onclick="photoRewardForm()">+ Registrar foto</button></div><div class="stats"><div class="stat"><b>${photoRewards.length}</b><small>Registros</small></div><div class="stat"><b>${photoRewards.filter(x=>x.status==='Pendiente').length}</b><small>Pendientes</small></div><div class="stat"><b>${photoRewards.filter(x=>x.status==='Recompensada').length}</b><small>Recompensadas</small></div></div>${photoRewards.length?photoRewards.map((r,i)=>`<div class="cartitem">${r.image?`<img class="thumb" src="${r.image}" alt="">`:'<div class="thumb"></div>'}<div><b>${esc(r.name||'Clienta')}</b><br><small>${esc(r.whatsapp||'')} · ${esc(r.date||'')}</small><p>${esc(r.note||'')}</p>${r.reward?`<div class="notice"><b>Recompensa:</b> ${esc(r.reward)}${r.rewardExpires?`<br><small>Vence: ${esc(r.rewardExpires)}</small>`:''}</div>`:''}</div><div><span class="statuspill">${esc(r.status||'Pendiente')}</span><br><button class="btn alt sm" style="margin-top:7px" onclick="photoRewardForm(${i})">Editar</button> ${!r.rewardCode?`<button class="btn sm" style="margin-top:7px" onclick="createRewardCoupon(${i})">Generar cupón</button>`:''} <button class="btn danger sm" style="margin-top:7px" onclick="deletePhotoReward(${i})">Eliminar</button></div></div>`).join(''):'<div class="empty">Todavía no hay fotos registradas.</div>'}</div>`;
+ $('rewards').innerHTML=`<div class="box">
+ <div class="row"><div><div class="eyebrow">CLIENTAS · CONTENIDO REAL</div><h2 class="script">Recompensas por foto</h2><p style="color:var(--muted)">Flujo real: Pendiente → Portafolio aprobado → Cupón → Recompensada.</p></div><button class="btn sm" onclick="photoRewardForm()">+ Registrar foto</button></div>
+ <div class="stats"><div class="stat"><b>${photoRewards.length}</b><small>Registros</small></div><div class="stat"><b>${photoRewards.filter(x=>!x.portfolioApproved&&!x.rewarded).length}</b><small>Pendientes</small></div><div class="stat"><b>${photoRewards.filter(x=>x.portfolioApproved).length}</b><small>En portafolio</small></div><div class="stat"><b>${photoRewards.filter(x=>x.rewarded).length}</b><small>Recompensadas</small></div></div>
+ ${photoRewards.length?photoRewards.map((r,i)=>`<div class="cartitem">
+  ${r.image?`<img class="thumb" src="${r.image}" alt="">`:'<div class="thumb"></div>'}
+  <div><b>${esc(r.name||'Clienta')}</b><br><small>${esc(r.whatsapp||'')} · ${esc(r.date||'')}</small><p>${esc(r.note||'')}</p>
+   <div style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0"><span class="statuspill">${r.portfolioApproved?'Portafolio ✓':'Pendiente'}</span>${r.rewarded?'<span class="statuspill">Recompensada ✓</span>':''}</div>
+   ${r.rewardCode?`<div class="notice"><b>Cupón:</b> ${esc(r.rewardCode)} · ${Number(r.rewardPercent||0)}% · ${Number(r.rewardUses||1)} uso(s)<br><small>Vence: ${esc(r.rewardExpires||'')}</small></div>`:''}
+  </div>
+  <div>
+   <button class="btn alt sm" style="margin-top:7px" onclick="photoRewardForm(${i})">Editar</button>
+   ${!r.portfolioApproved?`<button class="btn sm" style="margin-top:7px" onclick="approveRewardForPortfolio(${i})">2. Aprobar para portafolio</button>`:`<button class="btn alt sm" style="margin-top:7px" onclick="openAdminTab('gallery')">Ver en portafolio</button>`}
+   ${r.portfolioApproved&&!r.rewarded?`<button class="btn sm" style="margin-top:7px" onclick="createRewardCoupon(${i})">3. Generar cupón</button>`:''}
+   <button class="btn danger sm" style="margin-top:7px" onclick="deletePhotoReward(${i})">Eliminar</button>
+  </div>
+ </div>`).join(''):'<div class="empty">Todavía no hay fotos registradas.</div>'}
+ </div>`;
 
  const activeSeason=seasonThemes.find(x=>x.id===activeSeasonId);
  $('seasons').innerHTML=`<div class="box"><div class="row"><div><div class="eyebrow">SELLO DE TEMPORADA</div><h2 class="script">Temporadas</h2></div><button class="btn sm" onclick="seasonForm()">+ Nueva temporada</button></div>${activeSeason?`<div class="notice"><b>Activa:</b> ${esc(activeSeason.name)}</div>`:'<div class="notice">Se usa el diseño normal.</div>'}${seasonThemes.length?seasonThemes.map((s,i)=>`<div class="cartitem">${s.heroImage?`<img class="thumb" src="${s.heroImage}">`:'<div class="thumb"></div>'}<div><b>${esc(s.name)}</b><br><small>${esc(s.badge||'')}</small></div><div><button class="btn ${s.id===activeSeasonId?'danger':'alt'} sm" onclick="setSeason('${s.id===activeSeasonId?'':s.id}')">${s.id===activeSeasonId?'Desactivar':'Activar'}</button> <button class="btn alt sm" onclick="seasonForm(${i})">Editar</button> <button class="btn danger sm" onclick="deleteSeason(${i})">Eliminar</button></div></div>`).join(''):'<div class="empty">Aún no hay temas guardados.</div>'}</div>`;
@@ -956,21 +1031,46 @@ async function saveDesign(){let logo,hero,custom;try{[logo,hero,custom]=await Pr
 function resetDesign(){if(!confirm('¿Restablecer los colores y textos visuales? Tus productos y pedidos no se tocarán.'))return;config={...config,colorWine:'#3b0715',colorPink:'#f4cfd9',colorGold:'#c5a05a',welcome:'Un pequeño lujo hecho para tus manos.',heroSubtitle:'Uñas Press-On Personalizadas y a la Medida. Tu mejor opción.',heroButton:'Descubrir diseños',customTitle:'Hechas para ti',customText:'Tu idea. Tus medidas. Tu set. Creamos una manicura pensada especialmente para ti.',logo:'',heroImage:'',customImage:''};save('config',config);renderAdmin()}
 function photoRewardForm(i){
  const r=i===undefined?null:photoRewards[i],today=new Date().toISOString().slice(0,10);
- $('modalContent').innerHTML=`<div class="eyebrow">RECOMPENSA POR FOTO</div><h2 class="script">${r?'Editar':'Registrar foto de clienta'}</h2><div class="fields"><div class="field"><label>NOMBRE</label><input id="prname" value="${esc(r?.name||'')}"></div><div class="field"><label>WHATSAPP</label><input id="prwa" value="${esc(r?.whatsapp||'')}"></div><div class="field"><label>FECHA</label><input id="prdate" type="date" value="${esc(r?.date||today)}"></div><div class="field"><label>ESTADO</label><select id="prstatus">${['Pendiente','Aprobada para portafolio','Recompensada','No aplica'].map(x=>`<option ${x===r?.status?'selected':''}>${x}</option>`)}</select></div><div class="field full"><label>RECOMPENSA / CÓDIGO</label><input id="prreward" value="${esc(r?.reward||'')}" placeholder="Ej. MIST-FOTO10 · 10%"></div><div class="field full"><label>NOTAS</label><textarea id="prnote">${esc(r?.note||'')}</textarea></div><div class="field full"><label>FOTO (OPCIONAL)</label><label class="btn alt sm" for="primg" style="display:inline-block">Elegir foto</label><input id="primg" type="file" accept="image/*" style="display:none">${r?.image?`<img src="${r.image}" style="display:block;margin-top:8px;width:min(100%,300px);max-height:240px;object-fit:contain;border:1px solid var(--line);border-radius:10px">`:''}</div></div><br><button class="btn" onclick="savePhotoReward(${i===undefined?'-1':i})">Guardar registro</button>`;openModal()
+ const current=r?.rewarded?'Recompensada':r?.portfolioApproved?'Aprobada para portafolio':(r?.status||'Pendiente');
+ $('modalContent').innerHTML=`<div class="eyebrow">RECOMPENSA POR FOTO</div><h2 class="script">${r?'Editar':'Registrar'} foto de clienta</h2>
+ <div class="notice"><b>Flujo:</b> 1. Guardar foto pendiente → 2. Aprobar para portafolio → 3. Generar cupón → 4. Recompensada.</div>
+ <div class="fields">
+  <div class="field"><label>NOMBRE</label><input id="prname" value="${esc(r?.name||'')}"></div>
+  <div class="field"><label>WHATSAPP</label><input id="prwa" value="${esc(r?.whatsapp||'')}"></div>
+  <div class="field"><label>FECHA</label><input id="prdate" type="date" value="${esc(r?.date||today)}"></div>
+  <div class="field"><label>ESTADO ACTUAL</label><input value="${esc(current)}" disabled></div>
+  <div class="field full"><label>NOTAS</label><textarea id="prnote">${esc(r?.note||'')}</textarea></div>
+  <div class="field full"><label>FOTO *</label><label class="btn alt sm" for="primg" style="display:inline-block">Elegir foto</label><input id="primg" type="file" accept="image/*" style="display:none">${r?.image?`<img src="${r.image}" style="display:block;margin-top:8px;width:min(100%,300px);max-height:240px;object-fit:contain;border:1px solid var(--line);border-radius:10px">`:''}<small style="display:block;color:var(--muted);margin-top:6px">Necesitas una foto para poder aprobarla para el portafolio.</small></div>
+ </div><br><button class="btn" onclick="savePhotoReward(${i===undefined?'-1':i})">Guardar registro</button>`;openModal()
 }
 async function savePhotoReward(i){
- const old=i>=0?photoRewards[i]:{},file=$('primg')?.files?.[0];let image=old.image||'',oldStatus=old.status||'';
+ const old=i>=0?photoRewards[i]:{},file=$('primg')?.files?.[0];let image=old.image||'';
  try{if(file)image=await mnUploadImage(file,'customer-rewards')}catch(e){return alert('No se pudo subir la foto.')}
- const r={...old,id:old.id||('RWD-'+Date.now().toString(36).toUpperCase()),name:$('prname').value.trim(),whatsapp:$('prwa').value.trim(),date:$('prdate').value,status:$('prstatus').value,reward:$('prreward').value.trim(),note:$('prnote').value.trim(),image};
+ if(!image)return alert('Añade una foto antes de guardar el registro.');
+ const r={...old,
+  id:old.id||('RWD-'+Date.now().toString(36).toUpperCase()),
+  name:$('prname').value.trim(),
+  whatsapp:$('prwa').value.trim(),
+  date:$('prdate').value,
+  note:$('prnote').value.trim(),
+  image,
+  status:old.rewarded?'Recompensada':old.portfolioApproved?'Aprobada para portafolio':'Pendiente',
+  portfolioApproved:!!old.portfolioApproved,
+  rewarded:!!old.rewarded
+ };
  if(i<0)photoRewards.unshift(r);else photoRewards[i]=r;
- if(r.status==='Recompensada'&&storeOps.photoRewardAuto!==false&&!r.rewardCode)generateRewardCouponFor(r);
- if(r.status==='Recompensada'&&!r.rewardedAt)r.rewardedAt=Date.now();
  save('photoRewards',photoRewards);
- if(i<0)logActivity(`Foto/recompensa registrada · ${r.name||'Clienta'} · ${r.status}`,'rewards',r.id);
- else if(oldStatus!==r.status)logActivity(`Recompensa de ${r.name||'Clienta'} cambió de ${oldStatus||'Sin estado'} a ${r.status}`,'rewards',r.id);
+ if(i<0)logActivity(`Foto registrada · ${r.name||'Clienta'} · Pendiente`,'rewards',r.id);
  closeModal();renderAdmin()
 }
-function deletePhotoReward(i){if(!photoRewards[i])return;if(!confirm('¿Eliminar este registro?'))return;photoRewards.splice(i,1);save('photoRewards',photoRewards);renderAdmin()}
+function deletePhotoReward(i){
+ const r=photoRewards[i];if(!r)return;
+ if(!confirm('¿Eliminar este registro de recompensa?'))return;
+ if(r.portfolioItemId&&confirm('Esta foto también está en el portafolio. ¿Quieres quitarla del portafolio también?')){
+  galleryItems=galleryItems.filter(g=>g.id!==r.portfolioItemId);save('galleryItems',galleryItems);
+ }
+ photoRewards.splice(i,1);save('photoRewards',photoRewards);renderAdmin()
+}
 function saveStoreOps(){storeOps={...storeOps,storeOpen:$('opStore').value==='true',maintenanceTitle:$('opMaintTitle').value.trim(),maintenanceMessage:$('opMaintMsg').value.trim(),customOpen:$('opCustom').value==='true',customSlots:Math.max(0,Math.floor(Number($('opSlots').value||0))),customSlotsLabel:$('opSlotsLabel').value.trim()||'espacios disponibles',defaultPrep:$('opPrep').value.trim()||'3–5 días hábiles',bannerEnabled:$('opBanner').value==='true',bannerText:$('opBannerText').value.trim(),bannerButtonText:$('opBannerBtn').value.trim(),bannerTarget:$('opBannerTarget').value,photoRewardEnabled:$('opPhoto').value==='true',photoRewardText:$('opPhotoText').value.trim(),photoRewardPercent:Math.min(100,Math.max(1,Number($('opPhotoPct').value||10))),photoRewardMaxUses:Math.max(1,Math.floor(Number($('opPhotoUses').value||1))),photoRewardDays:Math.max(1,Math.floor(Number($('opPhotoDays').value||30))),photoRewardPrefix:($('opPhotoPrefix').value.trim().toUpperCase().replace(/[^A-Z0-9-]/g,'')||'MIST-FOTO').slice(0,18),photoRewardAuto:$('opPhotoAuto').value==='true'};save('storeOps',storeOps);alert('Operación guardada.');renderAdmin()}
 function applyAutomaticLabels(){
  const counts={};for(const o of orders.filter(o=>o.status!=='Cancelado'))for(const it of (o.items||[])){if(it.isExtra||it.id==='PERSONALIZADO')continue;counts[it.id]=(counts[it.id]||0)+Number(it.qty||1)}
