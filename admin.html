@@ -178,7 +178,7 @@ window.MN_SUPABASE_URL='https://sjevqvcpkdpaeuxjxhlq.supabase.co';
 window.MN_SUPABASE_KEY='sb_publishable_5bOuzwywcvqzPEcGrQZEvw_2uEUUp2a';
 </script>
 </head><body class="admin">
-<div class="adminhead"><div class="row"><div><div class="eyebrow">MISTRIELLE NAILS · PRIVATE ATELIER</div><h1>Panel de Administración</h1><small style="color:var(--muted)">Catálogo, pedidos, solicitudes, stock y contenido.</small></div><a class="btn alt sm" href="https://misstyee.github.io/Mistrielle-Nails/">Volver a la tienda</a></div></div>
+<div class="adminhead"><div class="row"><div><div class="eyebrow">MISTRIELLE NAILS · PRIVATE ATELIER</div><h1>Panel de Administración</h1><small style="color:var(--muted)">Catálogo, pedidos, solicitudes, stock y contenido.</small></div><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><a class="btn alt sm" href="https://misstyee.github.io/Mistrielle-Nails/">Volver a la tienda</a><button class="btn danger sm" type="button" onclick="mnLogout()">Cerrar sesión</button></div></div></div>
 <div class="adminwrap"><div class="tabs"><button class="tab active" data-tab="home">INICIO</button><button class="tab" data-tab="products">PRODUCTOS</button><button class="tab" data-tab="extras">EXTRAS / ACCESORIOS</button><button class="tab" data-tab="gallery">GALERÍA / PORTAFOLIO</button><button class="tab" data-tab="orders">PEDIDOS</button><button class="tab" data-tab="requests">SOLICITUDES</button><button class="tab" data-tab="sales">VENTAS / GANANCIAS</button><button class="tab" data-tab="discounts">DESCUENTOS / ENVÍO</button><button class="tab" data-tab="faq">PREGUNTAS FRECUENTES</button><button class="tab" data-tab="design">DISEÑO DE LA TIENDA</button><button class="tab" data-tab="options">CATEGORÍAS / TALLAS / FORMAS</button><button class="tab" data-tab="config">CONFIGURACIÓN / CONTACTO</button></div>
 <div id="home" class="panel active"></div><div id="products" class="panel"></div><div id="extras" class="panel"></div><div id="gallery" class="panel"></div><div id="orders" class="panel"></div><div id="requests" class="panel"></div><div id="sales" class="panel"></div><div id="discounts" class="panel"></div><div id="faq" class="panel"></div><div id="design" class="panel"></div><div id="options" class="panel"></div><div id="config" class="panel"></div></div>
 <div id="modal" class="overlay"><div class="modal"><button class="close" onclick="closeModal()">×</button><div id="modalContent"></div></div></div><script>
@@ -747,7 +747,7 @@ renderAdmin();
 <style>
 #mnAuthGate{position:fixed;inset:0;z-index:99999;background:#17050b;display:flex;align-items:center;justify-content:center;padding:24px;font-family:inherit}.mn-login{width:min(430px,100%);background:#fff7f7;border:1px solid #c5a05a;padding:28px;border-radius:18px;box-shadow:0 25px 80px #0008;color:#3b0715}.mn-login h2{margin:0 0 8px;font-size:30px}.mn-login p{color:#735c64}.mn-login input{width:100%;box-sizing:border-box;margin:7px 0 12px;padding:12px;border:1px solid #d8c7cb;border-radius:10px}.mn-login button{width:100%;padding:12px;border:0;border-radius:10px;background:#3b0715;color:white;font-weight:700;cursor:pointer}#mnAuthError{color:#a11635;min-height:20px;font-size:13px;margin-top:10px}.mn-cloud-badge{position:fixed;right:12px;bottom:12px;z-index:9998;background:#17050b;color:#f4cfd9;border:1px solid #c5a05a;padding:7px 10px;border-radius:999px;font-size:11px}
 </style>
-<div id="mnAuthGate"><div class="mn-login"><div style="letter-spacing:.18em;font-size:11px">MISTRIELLE NAILS</div><h2>Administración</h2><p>Inicia sesión con tu cuenta administradora.</p><label>Correo</label><input id="mnLoginEmail" type="email" autocomplete="username"><label>Contraseña</label><input id="mnLoginPassword" type="password" autocomplete="current-password"><button id="mnLoginBtn">Entrar</button><div id="mnAuthError"></div></div></div><div class="mn-cloud-badge" id="mnCloudBadge">Nube: conectando…</div>
+<div id="mnAuthGate"><div class="mn-login"><div style="letter-spacing:.18em;font-size:11px">MISTRIELLE NAILS</div><h2>Administración</h2><p>Inicia sesión con tu cuenta administradora. La sesión se cerrará automáticamente después de 12 horas.</p><label>Correo</label><input id="mnLoginEmail" type="email" autocomplete="username"><label>Contraseña</label><input id="mnLoginPassword" type="password" autocomplete="current-password"><button id="mnLoginBtn">Entrar</button><div id="mnAuthError"></div></div></div><div class="mn-cloud-badge" id="mnCloudBadge">Nube: conectando…</div>
 <script>
 const mnCloud = window.supabase.createClient(window.MN_SUPABASE_URL, window.MN_SUPABASE_KEY);
 const MN_IMAGE_BUCKET='mistrielle-images';
@@ -780,9 +780,80 @@ async function mnSyncProducts(){
 // Conserva V13.1 localmente y, cuando cambia Productos, replica el catálogo a Supabase.
 const mnOriginalSetItem=localStorage.setItem.bind(localStorage);
 localStorage.setItem=function(k,v){mnOriginalSetItem(k,v);if(k==='mn_products'&&window.mnCloudReady)queueMicrotask(mnSyncProducts);};
-async function mnOpenAdmin(){await mnCheckAdmin();document.getElementById('mnAuthGate').style.display='none';window.mnCloudReady=false;await mnLoadCloudProducts();window.mnCloudReady=true;document.getElementById('mnCloudBadge').textContent='Nube: conectada ✓';}
-async function mnBoot(){const {data}=await mnCloud.auth.getSession();if(data.session){try{await mnOpenAdmin();}catch(e){await mnCloud.auth.signOut();document.getElementById('mnAuthError').textContent=e.message;}}}
-document.getElementById('mnLoginBtn').onclick=async()=>{const b=document.getElementById('mnLoginBtn'),err=document.getElementById('mnAuthError');err.textContent='';b.disabled=true;b.textContent='Entrando…';try{const email=document.getElementById('mnLoginEmail').value.trim(),password=document.getElementById('mnLoginPassword').value;const {error}=await mnCloud.auth.signInWithPassword({email,password});if(error)throw error;await mnOpenAdmin();}catch(e){err.textContent=e.message||'No se pudo iniciar sesión.';}finally{b.disabled=false;b.textContent='Entrar';}};
+const MN_ADMIN_SESSION_KEY='mn_admin_login_at';
+const MN_ADMIN_SESSION_MS=12*60*60*1000;
+let mnSessionTimer=null;
+
+function mnSessionAge(){
+ const t=Number(localStorage.getItem(MN_ADMIN_SESSION_KEY)||0);
+ return t?Date.now()-t:Infinity;
+}
+function mnSessionStillValid(){return mnSessionAge()<MN_ADMIN_SESSION_MS}
+function mnStartSessionClock(){
+ if(mnSessionTimer)clearInterval(mnSessionTimer);
+ mnSessionTimer=setInterval(()=>{if(!mnSessionStillValid())mnExpireSession()},60000);
+}
+async function mnOpenAdmin(){
+ await mnCheckAdmin();
+ document.getElementById('mnAuthGate').style.display='none';
+ window.mnCloudReady=false;
+ await mnLoadCloudProducts();
+ window.mnCloudReady=true;
+ document.getElementById('mnCloudBadge').textContent='Nube: conectada ✓';
+ mnStartSessionClock();
+}
+async function mnExpireSession(){
+ if(mnSessionTimer){clearInterval(mnSessionTimer);mnSessionTimer=null}
+ window.mnCloudReady=false;
+ localStorage.removeItem(MN_ADMIN_SESSION_KEY);
+ try{await mnCloud.auth.signOut()}catch(e){console.error('Cierre automático:',e)}
+ document.getElementById('mnAuthGate').style.display='grid';
+ document.getElementById('mnAuthError').textContent='Tu sesión de Administración venció después de 12 horas. Inicia sesión de nuevo.';
+ document.getElementById('mnLoginPassword').value='';
+ document.getElementById('mnCloudBadge').textContent='Nube: sesión cerrada';
+}
+async function mnLogout(){
+ if(!confirm('¿Cerrar sesión de Administración? Tus productos, pedidos, solicitudes y configuración NO se borrarán.'))return;
+ if(mnSessionTimer){clearInterval(mnSessionTimer);mnSessionTimer=null}
+ window.mnCloudReady=false;
+ localStorage.removeItem(MN_ADMIN_SESSION_KEY);
+ try{await mnCloud.auth.signOut()}catch(e){console.error('Cerrar sesión:',e)}
+ location.reload();
+}
+async function mnBoot(){
+ const {data}=await mnCloud.auth.getSession();
+ if(!data.session)return;
+ // Las sesiones creadas antes de esta actualización no tienen reloj de 12 horas:
+ // se cierran una vez para empezar el control desde un inicio de sesión real.
+ if(!localStorage.getItem(MN_ADMIN_SESSION_KEY)){
+  await mnCloud.auth.signOut();
+  document.getElementById('mnAuthError').textContent='Por seguridad, inicia sesión nuevamente. A partir de ahora durará 12 horas.';
+  document.getElementById('mnCloudBadge').textContent='Nube: sesión cerrada';
+  return;
+ }
+ if(!mnSessionStillValid()){await mnExpireSession();return}
+ try{await mnOpenAdmin()}catch(e){
+  localStorage.removeItem(MN_ADMIN_SESSION_KEY);
+  await mnCloud.auth.signOut();
+  document.getElementById('mnAuthError').textContent=e.message;
+ }
+}
+document.getElementById('mnLoginBtn').onclick=async()=>{
+ const b=document.getElementById('mnLoginBtn'),err=document.getElementById('mnAuthError');
+ err.textContent='';b.disabled=true;b.textContent='Entrando…';
+ try{
+  const email=document.getElementById('mnLoginEmail').value.trim(),password=document.getElementById('mnLoginPassword').value;
+  const {error}=await mnCloud.auth.signInWithPassword({email,password});
+  if(error)throw error;
+  localStorage.setItem(MN_ADMIN_SESSION_KEY,String(Date.now()));
+  await mnOpenAdmin();
+ }catch(e){
+  localStorage.removeItem(MN_ADMIN_SESSION_KEY);
+  err.textContent=e.message||'No se pudo iniciar sesión.';
+ }finally{b.disabled=false;b.textContent='Entrar'}
+};
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&localStorage.getItem(MN_ADMIN_SESSION_KEY)&&!mnSessionStillValid())mnExpireSession()});
+window.addEventListener('focus',()=>{if(localStorage.getItem(MN_ADMIN_SESSION_KEY)&&!mnSessionStillValid())mnExpireSession()});
 mnBoot();
 </script>
 <script>
