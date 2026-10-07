@@ -174,15 +174,27 @@ tr:hover td{background:#2d0711}
 #faqList details.box{font-size:16px}
 #faqList details.box summary{font-size:18px}
 
-.mn-gallery-carousel{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(210px,1fr);gap:12px;overflow:hidden;scroll-behavior:smooth}
-.mn-gallery-card{position:relative;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#180309;min-height:260px;cursor:pointer}
+.mn-carousel-shell{position:relative}
+.mn-gallery-carousel{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(210px,1fr);gap:12px;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth;scroll-snap-type:x mandatory;scrollbar-width:none;padding:2px}
+.mn-gallery-carousel::-webkit-scrollbar{display:none}
+.mn-gallery-card{position:relative;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#180309;min-height:260px;cursor:pointer;scroll-snap-align:start}
 .mn-gallery-card img{width:100%;height:300px;object-fit:cover;display:block}
 .mn-gallery-card .meta{position:absolute;left:0;right:0;bottom:0;padding:34px 12px 11px;background:linear-gradient(transparent,rgba(10,0,4,.88));color:#fff}
+.mn-carousel-arrow{position:absolute;z-index:4;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;border:1px solid var(--gold);background:rgba(35,4,13,.88);color:var(--pink);font-size:30px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.mn-carousel-arrow.left{left:8px}.mn-carousel-arrow.right{right:8px}
 .mn-portfolio-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
 .mn-portfolio-card{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#180309;cursor:pointer}
 .mn-portfolio-card img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}.mn-portfolio-card .pbody{padding:10px 12px}
+.mn-full-portfolio{display:none;position:fixed;inset:0;z-index:2200;background:linear-gradient(180deg,#16030a,#29050f 55%,#120207);overflow:auto;color:var(--text)}
+.mn-full-portfolio.open{display:block}
+.mn-full-head{position:sticky;top:0;z-index:5;background:rgba(22,3,10,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:14px 18px;display:flex;gap:16px;align-items:center}
+.mn-full-inner{max-width:1180px;margin:auto;padding:24px 18px 70px}
+.mn-filter-groups{display:grid;gap:10px;margin-top:14px}
+.mn-filter-groups details{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(50,5,18,.45)}
+.mn-filter-groups summary{cursor:pointer;font-weight:700;letter-spacing:.04em}
+.mn-filter-chips{display:flex;gap:7px;flex-wrap:wrap;padding-top:10px}
 @media(max-width:800px){.mn-gallery-carousel{grid-auto-columns:72%}.mn-gallery-card img{height:290px}.mn-portfolio-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:480px){.mn-gallery-carousel{grid-auto-columns:78%}.mn-gallery-card img{height:280px}.mn-portfolio-grid{gap:9px}}
+@media(max-width:480px){.mn-gallery-carousel{grid-auto-columns:78%}.mn-gallery-card img{height:280px}.mn-portfolio-grid{gap:9px}.mn-carousel-arrow{width:38px;height:38px;font-size:26px}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -192,12 +204,20 @@ window.MN_SUPABASE_KEY='sb_publishable_5bOuzwywcvqzPEcGrQZEvw_2uEUUp2a';
 </head><body>
 <div class="top">PRESS-ON NAILS · HECHAS PARA TI</div><header><div class="head"><button class="icon" onclick="document.getElementById('catalogo').scrollIntoView()">⌕</button><div class="brand" id="brandLogo"><b>Mistrielle Nails</b><small>PRESS ON NAILS</small></div><div><button class="icon" onclick="openFavorites()">♡<span id="favBadge" class="badge">0</span></button><button class="icon" onclick="openCart()">🛍<span id="cartBadge" class="badge">0</span></button></div></div><nav><a href="#inicio">Inicio</a><a href="#catalogo">Catálogo</a><a href="#personalizadas">Personalizadas</a><a href="#portafolio">Portafolio</a><a href="#faq">Preguntas frecuentes</a><a href="#contacto">Contacto</a><a href="javascript:tracking()">Mis pedidos / solicitudes</a></nav></header>
 <section id="inicio" class="hero"><div class="hero-inner"><div class="eyebrow">MISTRIELLE NAILS · PERSONAL LUXURY</div><h1>Un pequeño lujo hecho para tus manos.</h1><p id="heroSubtitle">Uñas Press-On Personalizadas y a la Medida. Tu mejor opción.</p><button id="heroButton" class="btn gold" onclick="document.getElementById('catalogo').scrollIntoView()">Descubrir diseños</button> <button class="btn alt" onclick="openCustom()">Crear las mías</button></div></section>
-<section id="mistrielleEdit" style="padding:32px 18px 8px"><div style="max-width:1180px;margin:auto"><div class="section-title" style="margin-bottom:16px"><div class="eyebrow">PORTFOLIO PREVIEW</div><h2 id="galleryPublicTitle">The Mistrielle Edit</h2><p id="galleryPublicSubtitle">Una selección de diseños creados por Mistrielle.</p></div><div id="galleryCarousel" class="mn-gallery-carousel"></div><div style="text-align:center;margin-top:14px"><button class="btn alt" onclick="document.getElementById('portafolio').scrollIntoView()">Ver portafolio completo</button></div></div></section>
+<section id="mistrielleEdit" style="padding:32px 18px 8px"><div style="max-width:1180px;margin:auto"><div class="section-title" style="margin-bottom:16px"><div class="eyebrow">PORTFOLIO PREVIEW</div><h2 id="galleryPublicTitle">The Mistrielle Edit</h2><p id="galleryPublicSubtitle">Una selección de diseños creados por Mistrielle.</p></div><div class="mn-carousel-shell"><button class="mn-carousel-arrow left" type="button" onclick="moveGalleryCarousel(-1)" aria-label="Anterior">‹</button><div id="galleryCarousel" class="mn-gallery-carousel"></div><button class="mn-carousel-arrow right" type="button" onclick="moveGalleryCarousel(1)" aria-label="Siguiente">›</button></div><div style="text-align:center;margin-top:14px"><button class="btn alt" onclick="openFullPortfolio()">Ver portafolio completo</button></div></div></section>
 <main><section id="catalogo"><div class="section-title"><h2>Encuentra tu próximo set</h2><p>Busca también por color, temporada, estilo o cualquier palabra de la descripción.</p></div><div class="filters"><input id="search" oninput="render()" placeholder="Buscar: rosa, verano, flores, cat eye..."><select id="catFilter" onchange="render()"></select><select id="sort" onchange="render()"><option value="new">Más recientes</option><option value="asc">Precio menor</option><option value="desc">Precio mayor</option></select></div><div id="grid" class="grid"></div></section>
 <section id="personalizadas" style="padding-top:60px"><div class="box custom-luxe" id="customLuxe" style="text-align:center"><div class="eyebrow" style="color:var(--gold2)">EL CORAZÓN DE MISTRIELLE</div><h2 id="customTitle" class="script">Hechas para ti</h2><p id="customText">Tu idea. Tus medidas. Tu set. Envíanos una referencia, una ocasión, un personaje o simplemente los colores que imaginas y creamos una manicura única para ti.</p><div class="custom-process"><div>01 · Inspírate</div><div>02 · Envíanos tu idea</div><div>03 · Recibe tu cotización</div><div>04 · Creamos tu set</div></div><button class="btn gold" onclick="openCustom()">QUIERO MI DISEÑO PERSONALIZADO</button> <button class="btn alt" onclick="tracking()">Ver mi solicitud</button></div></section>
-<section id="portafolio" style="padding-top:60px"><div class="section-title"><div class="eyebrow">PORTAFOLIO</div><h2>Diseños Mistrielle</h2><p>Explora estilos, acabados y temporadas que hemos creado.</p></div><div id="portfolioFilters" class="filters" style="justify-content:center"></div><div id="portfolioGrid" class="mn-portfolio-grid"></div><div id="galleryRewardBox" class="notice" style="max-width:780px;margin:24px auto 0;text-align:center"></div></section>
+<section id="portafolio" style="padding-top:60px"><div class="section-title"><div class="eyebrow">PORTAFOLIO</div><h2>Diseños Mistrielle</h2><p>Una pequeña muestra. El portafolio completo tiene buscador y filtros por tipo.</p></div><div id="portfolioPreviewGrid" class="mn-portfolio-grid"></div><div style="text-align:center;margin-top:18px"><button class="btn gold" onclick="openFullPortfolio()">Mostrar portafolio completo</button></div><div id="galleryRewardBox" class="notice" style="max-width:780px;margin:24px auto 0;text-align:center"></div></section>
 <section id="faq" style="padding-top:55px"><div class="section-title"><h2>Preguntas frecuentes</h2></div><div id="faqList"></div></section>
 </main><footer id="contacto"><div class="section-title"><h2>Contacto</h2><p>Escríbenos por el medio que prefieras.</p></div><div id="contactCards" class="contactcards"></div></footer>
+<section id="portfolioFullView" class="mn-full-portfolio">
+ <div class="mn-full-head"><button class="btn alt" onclick="closeFullPortfolio()">← Regresar a la tienda</button><div><div class="eyebrow">MISTRIELLE PORTFOLIO</div><h2 class="script" style="margin:3px 0">Portafolio completo</h2></div></div>
+ <div class="mn-full-inner">
+  <div class="field"><label>BUSCAR EN EL PORTAFOLIO</label><input id="portfolioSearch" oninput="renderFullPortfolio()" placeholder="Ej. Halloween, rosa, gel 3D, Snoopy..."></div>
+  <div id="portfolioFilterGroups" class="mn-filter-groups"></div>
+  <div id="portfolioFullGrid" class="mn-portfolio-grid" style="margin-top:18px"></div>
+ </div>
+</section>
 <div id="modal" class="overlay"><div class="modal"><button class="close" onclick="closeModal()">×</button><div id="modalContent"></div></div></div><script>
 const DEFAULT={categories:['Sencillas','Francesas','Cat Eye','Chrome','Decoradas','3D','Diseños especiales','Personalizadas'],sizes:['XS','S','M','L','XL'],forms:['Almendrada','Bailarina','Cuadrada','Ovalada','Stiletto'],lengths:['Corto','Medio','Largo'],faqs:[
 {q:'¿Qué son las press-on nails?',a:'Son uñas postizas reutilizables que puedes colocar y retirar sin acudir al salón.'},
@@ -242,27 +262,81 @@ function faqMediaHTML(f){
 
 let mnCardRotationTimer=null;
 function startCardRotations(){if(mnCardRotationTimer)clearInterval(mnCardRotationTimer);const cards=[...document.querySelectorAll('.mn-card-photo')];cards.forEach(el=>el.dataset.idx='0');mnCardRotationTimer=setInterval(()=>{cards.forEach(el=>{let imgs=[];try{imgs=JSON.parse(decodeURIComponent(el.dataset.images||'%5B%5D'))}catch(e){}if(imgs.length<2)return;let i=(Number(el.dataset.idx||0)+1)%imgs.length;el.dataset.idx=String(i);const im=el.querySelector('img');if(im){im.style.transition='opacity .3s ease';im.style.opacity='0';setTimeout(()=>{im.src=imgs[i];im.style.opacity='1'},120)}const badge=el.querySelector('span');if(badge)badge.textContent=`${i+1}/${imgs.length}`})},2800)}
-let mnGalleryTimer=null,mnGalleryFilter='';
+let mnGalleryTimer=null,mnGalleryFilter='',mnGalleryFilterGroup='',mnPortfolioSearch='';
 function visibleGallery(){return (galleryItems||[]).filter(x=>x&&x.image&&x.active!==false)}
 function featuredGallery(){let a=visibleGallery().filter(x=>x.featured!==false);return a.length?a:visibleGallery()}
-function galleryTagText(g){return (g.tags||[]).slice(0,3).join(' · ')}
+function galleryAllTerms(g){
+ const gr=g.groups||{};
+ return [...(gr.colors||[]),...(gr.designs||[]),...(gr.effects||[]),...(gr.shapes||[]),...(gr.lengths||[]),...(gr.occasions||[]),...(g.tags||[])];
+}
+function galleryTagText(g){return galleryAllTerms(g).slice(0,3).join(' · ')}
+function galleryObjectPosition(g){return `${Number(g.focusX??50)}% ${Number(g.focusY??50)}%`}
+function galleryCardHTML(g,cls='mn-portfolio-card'){
+ return `<article class="${cls}" onclick="openGalleryItem('${g.id}')"><img src="${g.image}" alt="${esc(g.title||'Diseño Mistrielle')}" style="object-position:${galleryObjectPosition(g)}">${cls==='mn-gallery-card'?`<div class="meta"><b>${esc(g.title||'Diseño Mistrielle')}</b>${galleryTagText(g)?`<br><small>${esc(galleryTagText(g))}</small>`:''}</div>`:`<div class="pbody"><b>${esc(g.title||'Diseño Mistrielle')}</b>${galleryTagText(g)?`<br><small>${esc(galleryTagText(g))}</small>`:''}</div>`}</article>`;
+}
+function portfolioPreviewLimit(){const w=window.innerWidth;return w<600?4:(w<1000?6:8)}
+function renderPortfolioPreview(){
+ const grid=$('portfolioPreviewGrid');if(!grid)return;
+ const a=visibleGallery().slice(0,portfolioPreviewLimit());
+ grid.innerHTML=a.length?a.map(g=>galleryCardHTML(g)).join(''):'<div class="empty" style="grid-column:1/-1">Próximamente verás aquí diseños Mistrielle.</div>';
+}
+function galleryGroups(){
+ const defs=[['colors','Colores'],['designs','Diseños / temas'],['effects','Efectos / acabados'],['shapes','Formas'],['lengths','Largos'],['occasions','Temporadas / ocasiones']];
+ return defs.map(([key,label])=>({key,label,values:[...new Set(visibleGallery().flatMap(g=>g.groups?.[key]||[]).filter(Boolean))]})).filter(x=>x.values.length);
+}
+function renderFullPortfolio(){
+ const grid=$('portfolioFullGrid'),filters=$('portfolioFilterGroups');if(!grid||!filters)return;
+ const query=String($('portfolioSearch')?.value||'').trim().toLowerCase();
+ const groups=galleryGroups();
+ filters.innerHTML=groups.map(gr=>`<details ${mnGalleryFilterGroup===gr.key?'open':''}><summary>${esc(gr.label)}${mnGalleryFilterGroup===gr.key&&mnGalleryFilter?` · ${esc(mnGalleryFilter)}`:''}</summary><div class="mn-filter-chips"><button class="btn ${mnGalleryFilterGroup===gr.key&&!mnGalleryFilter?'':'alt'} sm" onclick="setGalleryFilter('${gr.key}','')">Todos</button>${gr.values.map(v=>`<button class="btn ${mnGalleryFilterGroup===gr.key&&mnGalleryFilter===v?'':'alt'} sm" onclick="setGalleryFilter('${gr.key}','${encodeURIComponent(v)}')">${esc(v)}</button>`).join('')}</div></details>`).join('')+`<details ${mnGalleryFilterGroup==='keywords'?'open':''}><summary>Más palabras clave</summary><div class="mn-filter-chips"><small style="color:var(--muted)">Estas palabras se encuentran con el buscador para no llenar la pantalla de botones.</small></div></details>`;
+ let a=visibleGallery();
+ if(mnGalleryFilterGroup&&mnGalleryFilter){
+  a=a.filter(g=>(g.groups?.[mnGalleryFilterGroup]||[]).includes(mnGalleryFilter));
+ }
+ if(query){
+  a=a.filter(g=>[g.title,...galleryAllTerms(g)].join(' ').toLowerCase().includes(query));
+ }
+ grid.innerHTML=a.length?a.map(g=>galleryCardHTML(g)).join(''):'<div class="empty" style="grid-column:1/-1">No encontré diseños con esos filtros.</div>';
+}
 function renderGallery(){
- const title=$('galleryPublicTitle'),sub=$('galleryPublicSubtitle'),car=$('galleryCarousel'),grid=$('portfolioGrid'),filters=$('portfolioFilters'),reward=$('galleryRewardBox');
- if(title)title.textContent=gallerySettings.title||'The Mistrielle Edit';if(sub)sub.textContent=gallerySettings.subtitle||'Una selección de diseños creados por Mistrielle.';
+ const title=$('galleryPublicTitle'),sub=$('galleryPublicSubtitle'),car=$('galleryCarousel'),reward=$('galleryRewardBox');
+ if(title)title.textContent=gallerySettings.title||'The Mistrielle Edit';
+ if(sub)sub.textContent=gallerySettings.subtitle||'Una selección de diseños creados por Mistrielle.';
  const featured=featuredGallery();
- if(car)car.innerHTML=featured.length?featured.map(g=>`<article class="mn-gallery-card" onclick="openGalleryItem('${g.id}')"><img src="${g.image}" alt="${esc(g.title||'Diseño Mistrielle')}"><div class="meta"><b>${esc(g.title||'Diseño Mistrielle')}</b>${galleryTagText(g)?`<br><small>${esc(galleryTagText(g))}</small>`:''}</div></article>`).join(''):'<div class="empty">Próximamente verás aquí una selección de diseños Mistrielle.</div>';
- const all=visibleGallery(),tags=[...new Set(all.flatMap(g=>g.tags||[]).filter(Boolean))];
- if(filters)filters.innerHTML=`<button class="btn ${mnGalleryFilter?'alt':''} sm" onclick="setGalleryFilter('')">Todos</button>`+tags.map(t=>`<button class="btn ${mnGalleryFilter===t?'':'alt'} sm" onclick="setGalleryFilter('${encodeURIComponent(t)}')">${esc(t)}</button>`).join('');
- const shown=mnGalleryFilter?all.filter(g=>(g.tags||[]).includes(mnGalleryFilter)):all;
- if(grid)grid.innerHTML=shown.length?shown.map(g=>`<article class="mn-portfolio-card" onclick="openGalleryItem('${g.id}')"><img src="${g.image}" alt="${esc(g.title||'Diseño Mistrielle')}"><div class="pbody"><b>${esc(g.title||'Diseño Mistrielle')}</b>${galleryTagText(g)?`<br><small>${esc(galleryTagText(g))}</small>`:''}</div></article>`).join(''):'<div class="empty" style="grid-column:1/-1">No hay imágenes en esta clasificación todavía.</div>';
+ if(car)car.innerHTML=featured.length?featured.map(g=>galleryCardHTML(g,'mn-gallery-card')).join(''):'<div class="empty">Próximamente verás aquí una selección de diseños Mistrielle.</div>';
  if(reward){reward.style.display=gallerySettings.rewardText?'block':'none';reward.innerHTML=gallerySettings.rewardText?`<b>Comparte tu Mistrielle ✨</b><br>${esc(gallerySettings.rewardText)}`:''}
+ renderPortfolioPreview();
+ if($('portfolioFullView')?.classList.contains('open'))renderFullPortfolio();
  startGalleryAutoplay();
 }
-function setGalleryFilter(encoded){mnGalleryFilter=encoded?decodeURIComponent(encoded):'';renderGallery()}
-function startGalleryAutoplay(){if(mnGalleryTimer)clearInterval(mnGalleryTimer);const car=$('galleryCarousel'),items=featuredGallery();if(!car||items.length<2)return;const ms=Math.max(1000,Number(gallerySettings.speed||4)*1000);mnGalleryTimer=setInterval(()=>{const first=car.querySelector('.mn-gallery-card');if(!first)return;const step=first.getBoundingClientRect().width+12;const atEnd=car.scrollLeft+car.clientWidth>=car.scrollWidth-step/2;car.scrollTo({left:atEnd?0:car.scrollLeft+step,behavior:'smooth'});},ms)}
+function setGalleryFilter(group,encoded){mnGalleryFilterGroup=group||'';mnGalleryFilter=encoded?decodeURIComponent(encoded):'';renderFullPortfolio()}
+function moveGalleryCarousel(dir){
+ const car=$('galleryCarousel'),first=car?.querySelector('.mn-gallery-card');if(!car||!first)return;
+ const step=first.getBoundingClientRect().width+12;
+ car.scrollBy({left:dir*step,behavior:'smooth'});
+ startGalleryAutoplay();
+}
+function startGalleryAutoplay(){
+ if(mnGalleryTimer)clearInterval(mnGalleryTimer);
+ const car=$('galleryCarousel'),items=featuredGallery();if(!car||items.length<2)return;
+ const ms=Math.max(1000,Number(gallerySettings.speed||4)*1000);
+ mnGalleryTimer=setInterval(()=>{const first=car.querySelector('.mn-gallery-card');if(!first)return;const step=first.getBoundingClientRect().width+12;const atEnd=car.scrollLeft+car.clientWidth>=car.scrollWidth-step/2;car.scrollTo({left:atEnd?0:car.scrollLeft+step,behavior:'smooth'});},ms);
+}
+function openFullPortfolio(){
+ const v=$('portfolioFullView');if(!v)return;
+ v.classList.add('open');document.body.style.overflow='hidden';mnGalleryFilter='';mnGalleryFilterGroup='';
+ if($('portfolioSearch'))$('portfolioSearch').value='';
+ renderFullPortfolio();v.scrollTop=0;
+}
+function closeFullPortfolio(){const v=$('portfolioFullView');if(v)v.classList.remove('open');document.body.style.overflow='';}
 function openGalleryItem(id){const all=visibleGallery(),idx=all.findIndex(x=>x.id===id);if(idx<0)return;showGalleryLightbox(idx)}
-function showGalleryLightbox(idx){const all=visibleGallery();if(!all.length)return;idx=(idx+all.length)%all.length;const g=all[idx];$('modalContent').innerHTML=`<div style="text-align:center"><div class="eyebrow">MISTRIELLE PORTFOLIO</div><h2 class="script">${esc(g.title||'Diseño Mistrielle')}</h2><img src="${g.image}" alt="" style="display:block;max-width:100%;max-height:68vh;margin:10px auto;border-radius:14px;object-fit:contain"><div style="color:var(--muted);margin-bottom:12px">${esc(galleryTagText(g))}</div><div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap"><button class="btn alt" onclick="showGalleryLightbox(${idx-1})">← Anterior</button><button class="btn alt" onclick="showGalleryLightbox(${idx+1})">Siguiente →</button><button class="btn gold" onclick="requestInspired('${g.id}')">Quiero algo inspirado en este diseño</button></div></div>`;openModal()}
+function showGalleryLightbox(idx){
+ const all=visibleGallery();if(!all.length)return;idx=(idx+all.length)%all.length;const g=all[idx];
+ $('modalContent').innerHTML=`<div style="text-align:center"><div class="eyebrow">MISTRIELLE PORTFOLIO</div><h2 class="script">${esc(g.title||'Diseño Mistrielle')}</h2><img src="${g.image}" alt="" style="display:block;max-width:100%;max-height:68vh;margin:10px auto;border-radius:14px;object-fit:contain"><div style="color:var(--muted);margin-bottom:12px">${esc(galleryTagText(g))}</div><div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap"><button class="btn alt" onclick="showGalleryLightbox(${idx-1})">← Anterior</button><button class="btn alt" onclick="showGalleryLightbox(${idx+1})">Siguiente →</button><button class="btn gold" onclick="requestInspired('${g.id}')">Quiero algo inspirado en este diseño</button></div></div>`;
+ openModal();
+}
 function requestInspired(id){const g=visibleGallery().find(x=>x.id===id);window.mnGalleryInspiration=g||null;closeModal();openCustom();setTimeout(()=>{const rd=$('rd');if(rd&&g)rd.value=`Me gustaría un diseño inspirado en "${g.title||'este diseño del portafolio'}".`;},0)}
+window.addEventListener('resize',()=>{clearTimeout(window.mnGalleryResizeTimer);window.mnGalleryResizeTimer=setTimeout(()=>{renderPortfolioPreview()},150)});
 function render(){
  document.documentElement.style.setProperty('--wine',config.colorWine||'#3b0715');
  document.documentElement.style.setProperty('--pink',config.colorPink||'#f4cfd9');
