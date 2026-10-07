@@ -182,6 +182,19 @@ tr:hover td{background:#2d0711}
 .mn-stock-alert{border:1px solid #a15d4c;background:rgba(161,93,76,.08);border-radius:10px;padding:9px 10px;margin:7px 0}.tabs.mn-filtered .tab{display:none}.tabs.mn-filtered .tab.mn-group-visible{display:inline-flex}
 @media(max-width:650px){.mn-admin-search{min-width:100%}.mn-activity-item{grid-template-columns:1fr}.mn-chart-row{grid-template-columns:90px 1fr 32px}}
 .overlay{z-index:1000!important}.overlay.open{z-index:1000!important}.modal{position:relative;z-index:1001!important}
+
+.mn-img-tools{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.mn-img-viewer,.mn-img-editor{position:fixed;inset:0;z-index:2500;background:rgba(10,0,4,.94);display:none;place-items:center;padding:18px}
+.mn-img-viewer.open,.mn-img-editor.open{display:grid}
+.mn-img-stage{position:relative;width:min(92vw,980px);height:min(78vh,760px);overflow:hidden;border:1px solid var(--line);border-radius:16px;background:#100208;touch-action:none}
+.mn-img-stage img{position:absolute;left:50%;top:50%;max-width:none;max-height:none;user-select:none;-webkit-user-drag:none;transform-origin:center center}
+.mn-img-panel{width:min(92vw,980px);background:#2b0610;border:1px solid var(--line);border-radius:16px;padding:14px}
+.mn-img-preview-box{width:min(92vw,760px);aspect-ratio:1/1;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:#120208;margin:auto}
+.mn-img-preview-box img{width:100%;height:100%;object-fit:cover;transform-origin:center center}
+.mn-img-controls{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.mn-img-controls .field{margin:0}
+.mn-activity-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+@media(max-width:700px){.mn-img-controls{grid-template-columns:1fr}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -201,7 +214,7 @@ const DEFAULT={categories:['Sencillas','Francesas','Cat Eye','Chrome','Decoradas
 {q:'¿Cómo funcionan los envíos?',a:'Manejamos envío local y entrega en UPN según disponibilidad.'}
 ]};
 const load=(k,d)=>{try{return JSON.parse(localStorage.getItem('mn_'+k))??d}catch(e){return d}}, save=(k,v)=>localStorage.setItem('mn_'+k,JSON.stringify(v));
-let products=load('products',[]),extras=load('extras',[]),galleryItems=load('galleryItems',[]),gallerySettings=load('gallerySettings',{speed:4,title:'The Mistrielle Edit',subtitle:'Una selección de diseños creados por Mistrielle.',rewardText:'¿Ya usaste tus Mistrielle? Envíanos una foto usando tus uñas y recibe un descuento para tu próxima compra.'}),discountCampaigns=load('discountCampaigns',[]),productMeta=load('productMeta',{}),storeOps=load('storeOps',{storeOpen:true,maintenanceTitle:'Estamos preparando algo bonito',maintenanceMessage:'La tienda está temporalmente en mantenimiento. Volvemos muy pronto.',bannerEnabled:false,bannerText:'',bannerButtonText:'',bannerTarget:'',customOpen:true,customSlots:5,customSlotsLabel:'espacios disponibles',defaultPrep:'3–5 días hábiles',photoRewardEnabled:false,photoRewardText:'Envíanos una foto usando tus Mistrielle y recibe un descuento en tu próxima compra.',photoRewardPercent:10,photoRewardMaxUses:1,photoRewardDays:30,photoRewardPrefix:'MIST-FOTO',photoRewardAuto:true}),seasonThemes=load('seasonThemes',[]),activeSeasonId=load('activeSeasonId',''),photoRewards=load('photoRewards',[]),activityLog=load('activityLog',[]),orders=load('orders',[]),requests=load('requests',[]),discounts=load('discounts',[]),categories=load('categories',DEFAULT.categories),sizes=load('sizes',DEFAULT.sizes),forms=load('forms',DEFAULT.forms),lengths=load('lengths',DEFAULT.lengths),faqs=load('faqs',DEFAULT.faqs),config=load('config',{whatsapp:'',instagram:'',email:'',local:true,upn:true,national:false,welcome:'Un pequeño lujo hecho para tus manos.',heroSubtitle:'Uñas Press-On Personalizadas y a la Medida. Tu mejor opción.',heroButton:'Descubrir diseños',customTitle:'Hechas para ti',customText:'Tu idea. Tus medidas. Tu set. Creamos una manicura pensada especialmente para ti.',logo:'',heroImage:'',customImage:'',freeShippingEnabled:false,freeShippingMode:'amount',freeShippingAmount:600,freeShippingQty:3,shippingLabel:'Envío local',colorWine:'#3b0715',colorPink:'#f4cfd9',colorGold:'#c5a05a'});
+let products=load('products',[]),extras=load('extras',[]),galleryItems=load('galleryItems',[]),gallerySettings=load('gallerySettings',{speed:4,title:'The Mistrielle Edit',subtitle:'Una selección de diseños creados por Mistrielle.',rewardText:'¿Ya usaste tus Mistrielle? Envíanos una foto usando tus uñas y recibe un descuento para tu próxima compra.'}),discountCampaigns=load('discountCampaigns',[]),productMeta=load('productMeta',{}),storeOps=load('storeOps',{storeOpen:true,maintenanceTitle:'Estamos preparando algo bonito',maintenanceMessage:'La tienda está temporalmente en mantenimiento. Volvemos muy pronto.',bannerEnabled:false,bannerText:'',bannerButtonText:'',bannerTarget:'',customOpen:true,customSlots:5,customSlotsLabel:'espacios disponibles',defaultPrep:'3–5 días hábiles',photoRewardEnabled:false,photoRewardText:'Envíanos una foto usando tus Mistrielle y recibe un descuento en tu próxima compra.',photoRewardPercent:10,photoRewardMaxUses:1,photoRewardDays:30,photoRewardPrefix:'MIST-FOTO',photoRewardAuto:true}),seasonThemes=load('seasonThemes',[]),activeSeasonId=load('activeSeasonId',''),photoRewards=load('photoRewards',[]),activityLog=load('activityLog',[]),imageSettings=load('imageSettings',{}),orders=load('orders',[]),requests=load('requests',[]),discounts=load('discounts',[]),categories=load('categories',DEFAULT.categories),sizes=load('sizes',DEFAULT.sizes),forms=load('forms',DEFAULT.forms),lengths=load('lengths',DEFAULT.lengths),faqs=load('faqs',DEFAULT.faqs),config=load('config',{whatsapp:'',instagram:'',email:'',local:true,upn:true,national:false,welcome:'Un pequeño lujo hecho para tus manos.',heroSubtitle:'Uñas Press-On Personalizadas y a la Medida. Tu mejor opción.',heroButton:'Descubrir diseños',customTitle:'Hechas para ti',customText:'Tu idea. Tus medidas. Tu set. Creamos una manicura pensada especialmente para ti.',logo:'',heroImage:'',customImage:'',freeShippingEnabled:false,freeShippingMode:'amount',freeShippingAmount:600,freeShippingQty:3,shippingLabel:'Envío local',colorWine:'#3b0715',colorPink:'#f4cfd9',colorGold:'#c5a05a'});
 let cart=load('cart',[]),favorites=load('favorites',[]),orderCounter=load('orderCounter',0),requestCounter=load('requestCounter',0),idCounter=load('idCounter',0),sales=load('sales',[]);
 const $=id=>document.getElementById(id), money=n=>'$'+Number(n||0).toFixed(0), esc=s=>String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
@@ -214,32 +227,13 @@ function logActivity(label,tab='home',ref=''){
  activityLog=activityLog.slice(0,250);save('activityLog',activityLog)
 }
 function mnBuildActivity(){
- const items=(activityLog||[]).map(x=>({t:mnDateValue(x.t),label:x.label||'',tab:x.tab||'home'}));
- for(const o of orders)items.push({t:mnDateValue(o.created||o.createdAt),label:`Pedido ${o.number||''} creado · ${o.name||'Clienta'}`,tab:'orders'});
- for(const r of requests)items.push({t:mnDateValue(r.created||r.createdAt),label:`Solicitud ${r.number||''} creada · ${r.name||'Clienta'}`,tab:'requests'});
- for(const d of discounts)if(d.generatedAt)items.push({t:mnDateValue(d.generatedAt),label:`Código ${d.code||''} generado${d.sourceCampaignName?' · '+d.sourceCampaignName:''}`,tab:'discounts'});
- for(const r of (window.mnReviews||[]))items.push({t:mnDateValue(r.created_at),label:`Reseña recibida de ${r.name||'Clienta'} para ${r.product_name||'producto'}`,tab:'reviews'});
- return items.filter(x=>x.t).sort((a,b)=>b.t-a.t).slice(0,120)
+ return (activityLog||[]).map((x,i)=>({t:mnDateValue(x.t),label:x.label||'',tab:x.tab||'home',id:x.id||String(i)})).filter(x=>x.t).sort((a,b)=>b.t-a.t).slice(0,250)
 }
-function mnActivityHTML(limit=30){const items=mnBuildActivity().slice(0,limit);return items.length?`<div class="mn-activity">${items.map(x=>`<div class="mn-activity-item"><div class="mn-activity-time">${new Date(x.t).toLocaleString('es-MX',{dateStyle:'medium',timeStyle:'short'})}</div><div><b>${esc(x.label)}</b><br><button class="btn alt sm" style="margin-top:5px" onclick="openAdminTab('${x.tab}')">Abrir</button></div></div>`).join('')}</div>`:'<div class="empty">Todavía no hay actividad con fecha registrada.</div>'}
-function mnBars(rows,key='ordered'){const max=Math.max(1,...rows.map(x=>Number(x[key]||0)));return rows.length?rows.map(x=>`<div class="mn-chart-row"><small>${esc(x.name||x.id||'')}</small><div class="mn-chart-track"><div class="mn-chart-fill" style="width:${Math.max(4,Number(x[key]||0)/max*100)}%"></div></div><b>${Number(x[key]||0)}</b></div>`).join(''):'<div class="empty">Sin datos todavía.</div>'}
-function lowStockHTML(){const rows=[];for(const p of products.filter(p=>!p.madeToOrder&&p.status!=='Oculto'))for(const s of sizes){const n=Number(p.stock?.[s]||0);if(n<=1)rows.push({p,s,n})}return rows.length?rows.slice(0,30).map(x=>`<div class="mn-stock-alert"><b>${esc(x.p.name)}</b> · ${esc(x.s)} · ${x.n===0?'AGOTADA':'1 unidad'}</div>`).join(''):'<div class="notice">No hay tallas en 0 o 1 unidad.</div>'}
-function generateRewardCouponFor(r){
- if(!r)return '';
- if(r.rewardCode)return r.rewardCode;
- const pct=Math.min(100,Math.max(1,Number(storeOps.photoRewardPercent||10)));
- const uses=Math.max(1,Math.floor(Number(storeOps.photoRewardMaxUses||1)));
- const days=Math.max(1,Math.floor(Number(storeOps.photoRewardDays||30)));
- const prefix=(storeOps.photoRewardPrefix||'MIST-FOTO').toUpperCase().replace(/[^A-Z0-9-]/g,'').replace(/-+/g,'-').replace(/^-|-$/g,'').slice(0,18)||'MIST-FOTO';
- let code=`${prefix}-${Math.random().toString(36).slice(2,7).toUpperCase()}`;
- while(discounts.some(d=>String(d.code||'').toUpperCase()===code))code=`${prefix}-${Math.random().toString(36).slice(2,7).toUpperCase()}`;
- const exp=new Date();exp.setDate(exp.getDate()+days);
- const d={code,type:'percent',value:pct,maxUses:uses,expires:exp.toISOString().slice(0,10),active:true,note:`Recompensa por foto · ${r.name||'Clienta'}`,used:0,generated:true,source:'photoReward',generatedAt:new Date().toISOString()};
- discounts.unshift(d);
- r.rewardCode=code;r.rewardPercent=pct;r.rewardUses=uses;r.rewardExpires=d.expires;r.reward=`${code} · ${pct}% · ${uses} uso(s)`;
- save('discounts',discounts);
- logActivity(`Cupón ${code} generado por recompensa de foto · ${r.name||'Clienta'}`,'rewards',r.id||'');
- return code
+function deleteActivity(id){activityLog=(activityLog||[]).filter(x=>String(x.id)!==String(id));save('activityLog',activityLog);renderAdmin()}
+function clearActivity(){if(!confirm('¿Limpiar TODO el historial de actividad? Esto no borra pedidos, reseñas ni productos.'))return;activityLog=[];save('activityLog',activityLog);renderAdmin()}
+function mnActivityHTML(limit=30){
+ const items=mnBuildActivity().slice(0,limit);
+ return items.length?`<div class="mn-activity">${items.map(x=>`<div class="mn-activity-item"><div class="mn-activity-time">${new Date(x.t).toLocaleString('es-MX',{dateStyle:'medium',timeStyle:'short'})}</div><div><b>${esc(x.label)}</b><div class="mn-activity-actions"><button class="btn alt sm" onclick="openAdminTab('${x.tab}')">Abrir</button><button class="btn danger sm" onclick="deleteActivity('${x.id}')">Eliminar del historial</button></div></div></div>`).join('')}</div>`:'<div class="empty">No hay actividad guardada.</div>'
 }
 function createRewardCoupon(i){
  const r=photoRewards[i];if(!r)return;
@@ -247,6 +241,71 @@ function createRewardCoupon(i){
  r.status='Recompensada';r.rewardedAt=r.rewardedAt||Date.now();
  save('photoRewards',photoRewards);renderAdmin();alert(`Cupón creado: ${code}`)
 }
+
+window.mnPendingImageSettings=window.mnPendingImageSettings||{};
+window.mnEditorTarget=null;
+window.mnViewerState={src:'',zoom:1,x:0,y:0,drag:false,sx:0,sy:0};
+
+function mnFileKey(f){return f?`${f.name}|${f.size}|${f.lastModified}`:''}
+function mnImageSetting(src){return imageSettings?.[src]||{x:50,y:50,zoom:1}}
+function mnPendingSetting(file){return window.mnPendingImageSettings[mnFileKey(file)]||{x:50,y:50,zoom:1}}
+
+function mnOpenImageViewer(src,allowAdjust=true){
+ if(!src)return;const v=$('mnImageViewer'),im=$('mnImageViewerImg'),btn=$('mnViewerAdjustBtn');if(!v||!im)return;
+ window.mnViewerState={src,zoom:1,x:0,y:0,drag:false,sx:0,sy:0};im.src=src;btn.style.display=allowAdjust?'inline-block':'none';mnViewerApply();v.classList.add('open')
+}
+function mnCloseImageViewer(){const v=$('mnImageViewer');if(v)v.classList.remove('open')}
+function mnViewerApply(){const s=window.mnViewerState,im=$('mnImageViewerImg');if(!im)return;im.style.transform=`translate(calc(-50% + ${s.x}px),calc(-50% + ${s.y}px)) scale(${s.zoom})`;im.style.maxWidth=s.zoom<=1?'92%':'none';im.style.maxHeight=s.zoom<=1?'92%':'none';if(s.zoom<=1){im.style.width='auto';im.style.height='auto'}}
+function mnViewerZoom(d){const s=window.mnViewerState;s.zoom=Math.min(5,Math.max(.5,s.zoom+d));mnViewerApply()}
+function mnViewerReset(){window.mnViewerState.zoom=1;window.mnViewerState.x=0;window.mnViewerState.y=0;mnViewerApply()}
+function mnViewerAdjust(){const src=window.mnViewerState.src;mnCloseImageViewer();mnOpenImageEditorUrl(src)}
+
+(function(){
+ const st=()=>$('mnImageViewerStage');
+ document.addEventListener('pointerdown',e=>{const s=st();if(!s||!$('mnImageViewer')?.classList.contains('open')||!s.contains(e.target))return;window.mnViewerState.drag=true;window.mnViewerState.sx=e.clientX-window.mnViewerState.x;window.mnViewerState.sy=e.clientY-window.mnViewerState.y});
+ document.addEventListener('pointermove',e=>{if(!window.mnViewerState.drag)return;window.mnViewerState.x=e.clientX-window.mnViewerState.sx;window.mnViewerState.y=e.clientY-window.mnViewerState.sy;mnViewerApply()});
+ document.addEventListener('pointerup',()=>window.mnViewerState.drag=false);
+ document.addEventListener('wheel',e=>{const s=st();if(!s||!$('mnImageViewer')?.classList.contains('open')||!s.contains(e.target))return;e.preventDefault();mnViewerZoom(e.deltaY>0?-.15:.15)},{passive:false});
+})();
+
+function mnOpenImageEditorUrl(src){
+ if(!src)return;window.mnEditorTarget={type:'url',src};const s=mnImageSetting(src);mnOpenImageEditorBase(src,s)
+}
+function mnOpenImageEditorFile(inputId,index=0){
+ const input=$(inputId),file=input?.files?.[index];if(!file)return alert('Primero selecciona una imagen.');
+ const src=URL.createObjectURL(file);window.mnEditorTarget={type:'file',file,inputId,index,src};mnOpenImageEditorBase(src,mnPendingSetting(file))
+}
+function mnOpenImageEditorBase(src,s){
+ $('mnImageEditorImg').src=src;$('mnEditX').value=Number(s.x??50);$('mnEditY').value=Number(s.y??50);$('mnEditZoom').value=Number(s.zoom??1);mnEditorPreview();$('mnImageEditor').classList.add('open')
+}
+function mnCloseImageEditor(){$('mnImageEditor')?.classList.remove('open')}
+function mnEditorPreview(){const x=Number($('mnEditX').value),y=Number($('mnEditY').value),z=Number($('mnEditZoom').value);$('mnEditXLabel').textContent=x+'%';$('mnEditYLabel').textContent=y+'%';$('mnEditZoomLabel').textContent=z.toFixed(2)+'x';const im=$('mnImageEditorImg');im.style.objectPosition=`${x}% ${y}%`;im.style.transform=`scale(${z})`}
+function mnEditorCenter(){$('mnEditX').value=50;$('mnEditY').value=50;mnEditorPreview()}
+function mnEditorReset(){$('mnEditX').value=50;$('mnEditY').value=50;$('mnEditZoom').value=1;mnEditorPreview()}
+function mnSaveImageAdjust(){
+ const t=window.mnEditorTarget;if(!t)return;
+ const s={x:Number($('mnEditX').value),y:Number($('mnEditY').value),zoom:Number($('mnEditZoom').value)};
+ if(t.type==='url'){imageSettings[t.src]=s;save('imageSettings',imageSettings);renderAdmin()}
+ else if(t.type==='file'){window.mnPendingImageSettings[mnFileKey(t.file)]=s;mnRefreshFileTools($(t.inputId))}
+ mnCloseImageEditor()
+}
+function mnApplyAdminImageSetting(im){
+ if(!im?.src||im.dataset.mnAdjusted==='1')return;const s=mnImageSetting(im.src);im.dataset.mnAdjusted='1';im.style.cursor='zoom-in';
+ im.addEventListener('click',e=>{e.stopPropagation();mnOpenImageViewer(im.src,true)});
+ if(im.style.objectFit==='cover'||getComputedStyle(im).objectFit==='cover'){im.style.objectPosition=`${s.x}% ${s.y}%`;im.style.transform=`scale(${s.zoom})`;im.style.transformOrigin='center'}
+}
+function mnRefreshFileTools(input){
+ if(!input)return;let box=input.parentElement?.querySelector(`.mn-img-tools[data-for="${input.id}"]`);
+ if(box)box.remove();
+ const files=[...(input.files||[])].filter(f=>f.type.startsWith('image/'));if(!files.length)return;
+ box=document.createElement('div');box.className='mn-img-tools';box.dataset.for=input.id;
+ files.forEach((f,i)=>{const b=document.createElement('button');b.type='button';b.className='btn alt sm';b.textContent=`Ajustar ${files.length>1?'imagen '+(i+1):'imagen'}`;b.onclick=()=>mnOpenImageEditorFile(input.id,[...(input.files||[])].indexOf(f));box.appendChild(b)});
+ input.insertAdjacentElement('afterend',box)
+}
+document.addEventListener('change',e=>{const input=e.target;if(!(input instanceof HTMLInputElement)||input.type!=='file')return;setTimeout(()=>mnRefreshFileTools(input),0)},true);
+const mnImgObs=new MutationObserver(()=>document.querySelectorAll('#modal img,.panel img').forEach(mnApplyAdminImageSetting));
+mnImgObs.observe(document.body,{childList:true,subtree:true});
+setTimeout(()=>document.querySelectorAll('#modal img,.panel img').forEach(mnApplyAdminImageSetting),300);
 function nextProductId(){
  const used=(products||[]).map(p=>Number(String(p.id||'').match(/^MN-(\d+)$/)?.[1]||0));
  idCounter=Math.max(Number(idCounter||0),...used)+1;
@@ -264,7 +323,7 @@ function designImagePreview(src,label,key){
 }
 
 function renderAdmin(){
- products=load('products',products);extras=load('extras',extras);galleryItems=load('galleryItems',galleryItems);gallerySettings=load('gallerySettings',gallerySettings);discountCampaigns=load('discountCampaigns',discountCampaigns);productMeta=load('productMeta',productMeta);storeOps=load('storeOps',storeOps);seasonThemes=load('seasonThemes',seasonThemes);activeSeasonId=load('activeSeasonId',activeSeasonId);photoRewards=load('photoRewards',photoRewards);activityLog=load('activityLog',activityLog);orders=load('orders',orders);requests=load('requests',requests);sales=load('sales',sales);discounts=load('discounts',discounts);faqs=load('faqs',faqs);config=load('config',config);
+ products=load('products',products);extras=load('extras',extras);galleryItems=load('galleryItems',galleryItems);gallerySettings=load('gallerySettings',gallerySettings);discountCampaigns=load('discountCampaigns',discountCampaigns);productMeta=load('productMeta',productMeta);storeOps=load('storeOps',storeOps);seasonThemes=load('seasonThemes',seasonThemes);activeSeasonId=load('activeSeasonId',activeSeasonId);photoRewards=load('photoRewards',photoRewards);activityLog=load('activityLog',activityLog);imageSettings=load('imageSettings',imageSettings);orders=load('orders',orders);requests=load('requests',requests);sales=load('sales',sales);discounts=load('discounts',discounts);faqs=load('faqs',faqs);config=load('config',config);
  let visibleOrders=orders.filter(o=>!o.hidden), visibleRequests=requests.filter(r=>!r.hidden), delivered=sales.reduce((s,x)=>s+Number(x.revenue||0),0), profit=sales.reduce((s,x)=>s+(Number(x.revenue||0)-Number(x.cost||0)),0);
  const lowStock=products.filter(p=>!p.madeToOrder&&p.status!=='Oculto'&&Object.values(p.stock||{}).reduce((s,n)=>s+Number(n||0),0)<=3);
  const pendingReviews=(window.mnReviews||[]).filter(r=>r.status==='pending').length;
@@ -276,7 +335,7 @@ function renderAdmin(){
   storeOps.customOpen!==false&&Number(storeOps.customSlots||0)<=1?`Queda ${Number(storeOps.customSlots||0)} cupo de personalizados`:null
  ].filter(Boolean);
  $('home').innerHTML=`<div class="box"><div class="eyebrow">RESUMEN</div><h2 class="script">Administrar Mistrielle</h2><div class="stats"><div class="stat"><b>${products.length}</b><small>Productos</small></div><div class="stat"><b>${visibleOrders.length}</b><small>Pedidos actuales</small></div><div class="stat"><b>${visibleOrders.filter(x=>x.status==='Nuevo').length}</b><small>Nuevos</small></div><div class="stat"><b>${visibleRequests.length}</b><small>Solicitudes actuales</small></div><div class="stat"><b>${money(delivered)}</b><small>Ingresos registrados</small></div><div class="stat"><b>${money(profit)}</b><small>Ganancia / pérdida</small></div></div><div class="notice" style="margin-top:16px"><b>Tienda:</b> ${storeOps.storeOpen!==false?'ABIERTA':'EN MANTENIMIENTO'} · <b>Personalizados:</b> ${storeOps.customOpen!==false?`${Number(storeOps.customSlots||0)} ${esc(storeOps.customSlotsLabel||'espacios disponibles')}`:'AGENDA CERRADA'}${activeSeasonId?` · <b>Temporada:</b> ${esc(seasonThemes.find(x=>x.id===activeSeasonId)?.name||'Activa')}`:''}</div></div><div class="box"><div class="eyebrow">HOY EN MISTRIELLE</div><h2 class="script">Qué necesita tu atención</h2>${todayTasks.length?todayTasks.map(x=>`<div class="notice" style="margin:8px 0">• ${esc(x)}</div>`).join(''):'<div class="notice"><b>Todo bajo control.</b> No hay pendientes obvios ahora mismo.</div>'}<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn alt sm" onclick="document.querySelector('[data-tab=orders]').click()">Ver pedidos</button><button class="btn alt sm" onclick="document.querySelector('[data-tab=requests]').click()">Ver solicitudes</button><button class="btn alt sm" onclick="document.querySelector('[data-tab=stats]').click()">Ver estadísticas</button></div></div><div class="grid2" style="margin-top:18px"><div class="box"><h3>Stock crítico</h3>${lowStockHTML()}</div><div class="box"><h3>Actividad reciente</h3>${mnActivityHTML(8)}</div></div>`;
- $('activity').innerHTML=`<div class="box"><div class="eyebrow">HISTORIAL</div><h2 class="script">Actividad reciente</h2><p style="color:var(--muted)">Pedidos, solicitudes, códigos, reseñas y recompensas con fecha registrada.</p>${mnActivityHTML(50)}</div>`;
+ $('activity').innerHTML=`<div class="box"><div class="eyebrow">HISTORIAL</div><div class="row"><div><h2 class="script">Actividad reciente</h2><p style="color:var(--muted)">Cambios registrados por el Admin.</p></div><button class="btn danger sm" onclick="clearActivity()">Limpiar actividad</button></div>${mnActivityHTML(50)}</div>`;
  $('products').innerHTML=`<div class="box"><div class="row"><h2 class="script">Productos</h2><button class="btn sm" onclick="productForm()">+ Nuevo producto</button></div><div class="tablewrap"><table><thead><tr><th>IMAGEN</th><th>PRODUCTO</th><th>ID</th><th>PRECIO</th><th>STOCK</th><th>ESTADO</th><th>ACCIONES</th></tr></thead><tbody>${products.map(p=>`<tr><td><div class="thumb">${p.images?.[0]?`<img class="thumb" src="${p.images[0]}">`:''}</div></td><td><b>${esc(p.name)}</b><br><small>${esc(p.keywords||'')}</small></td><td>${p.id}</td><td>${money(p.price)}</td><td>${p.madeToOrder?'Bajo pedido':sizes.map(s=>s+': '+(p.stock?.[s]||0)).join(' · ')}</td><td>${p.status}</td><td><button class="btn alt sm" onclick="productForm('${p.id}')">Editar</button> <button class="btn danger sm" onclick="deleteProduct('${p.id}')">Eliminar</button></td></tr>`).join('')}</tbody></table></div></div>`;
  $('extras').innerHTML=`<div class="box"><div class="row"><div><h2 class="script">Extras y accesorios</h2><p style="color:var(--muted)">Complementos opcionales del pedido. El set ya incluye su kit de aplicación.</p></div><button class="btn sm" onclick="extraForm()">+ Nuevo extra</button></div><div class="tablewrap"><table><thead><tr><th>IMAGEN</th><th>EXTRA</th><th>PRECIO</th><th>STOCK</th><th>ESTADO</th><th>ACCIONES</th></tr></thead><tbody>${extras.length?extras.map((x,i)=>`<tr><td>${x.image?`<img src="${x.image}" class="thumb" alt="">`:'<div class="thumb"></div>'}</td><td><b>${esc(x.name)}</b><br><small>${esc(x.description||'')}</small></td><td>${money(x.price)}</td><td>${Number(x.stock||0)}</td><td>${x.active!==false?'Activo':'Oculto'}</td><td><button class="btn alt sm" onclick="extraForm(${i})">Editar</button> <button class="btn danger sm" onclick="deleteExtra(${i})">Eliminar</button></td></tr>`).join(''):`<tr><td colspan="6">Todavía no hay extras.</td></tr>`}</tbody></table></div></div>`;
 
@@ -338,7 +397,7 @@ function renderAdmin(){
  $('seasons').innerHTML=`<div class="box"><div class="row"><div><div class="eyebrow">SELLO DE TEMPORADA</div><h2 class="script">Temporadas</h2></div><button class="btn sm" onclick="seasonForm()">+ Nueva temporada</button></div>${activeSeason?`<div class="notice"><b>Activa:</b> ${esc(activeSeason.name)}</div>`:'<div class="notice">Se usa el diseño normal.</div>'}${seasonThemes.length?seasonThemes.map((s,i)=>`<div class="cartitem">${s.heroImage?`<img class="thumb" src="${s.heroImage}">`:'<div class="thumb"></div>'}<div><b>${esc(s.name)}</b><br><small>${esc(s.badge||'')}</small></div><div><button class="btn ${s.id===activeSeasonId?'danger':'alt'} sm" onclick="setSeason('${s.id===activeSeasonId?'':s.id}')">${s.id===activeSeasonId?'Desactivar':'Activar'}</button> <button class="btn alt sm" onclick="seasonForm(${i})">Editar</button> <button class="btn danger sm" onclick="deleteSeason(${i})">Eliminar</button></div></div>`).join(''):'<div class="empty">Aún no hay temas guardados.</div>'}</div>`;
 
  const rv=window.mnReviews||[];
- $('reviews').innerHTML=`<div class="box"><div class="row"><div><div class="eyebrow">OPINIONES</div><h2 class="script">Reseñas</h2><p style="color:var(--muted)">Llegan pendientes; tú decides qué se publica.</p></div><button class="btn alt sm" onclick="mnRefreshReviews()">↻ Actualizar</button></div>${rv.length?rv.map(r=>`<div class="cartitem"><div>${'★'.repeat(Number(r.rating||0))}${'☆'.repeat(5-Number(r.rating||0))}</div><div><b>${esc(r.name||'Clienta')}</b> · <small>${esc(r.product_name||r.product_id||'')}</small><p>${esc(r.comment||'')}</p>${r.image_data?`<img src="${r.image_data}" alt="Foto de reseña" style="display:block;width:min(220px,100%);max-height:220px;object-fit:contain;border:1px solid var(--line);border-radius:10px;margin:8px 0">`:''}<small>${esc(r.status||'pending')}</small></div><div><button class="btn sm" onclick="moderateReview(${r.id},'approved')">Publicar</button> <button class="btn alt sm" onclick="moderateReview(${r.id},'hidden')">Ocultar</button> <button class="btn danger sm" onclick="moderateReview(${r.id},'deleted')">Eliminar</button></div></div>`).join(''):'<div class="empty">Pulsa Actualizar para cargar reseñas.</div>'}</div>`;
+ $('reviews').innerHTML=`<div class="box"><div class="row"><div><div class="eyebrow">OPINIONES</div><h2 class="script">Reseñas</h2><p style="color:var(--muted)">Llegan pendientes; tú decides qué se publica.</p></div><button class="btn alt sm" onclick="mnRefreshReviews()">↻ Actualizar</button></div>${rv.length?rv.map(r=>`<div class="cartitem"><div>${'★'.repeat(Number(r.rating||0))}${'☆'.repeat(5-Number(r.rating||0))}</div><div><b>${esc(r.name||'Clienta')}</b> · <small>${esc(r.product_name||r.product_id||'')}</small><p>${esc(r.comment||'')}</p>${r.image_data?`<img src="${r.image_data}" alt="Foto de reseña" style="display:block;width:min(220px,100%);max-height:220px;object-fit:contain;border:1px solid var(--line);border-radius:10px;margin:8px 0">`:''}<small>${esc(r.status||'pending')}</small></div><div><button class="btn sm" onclick="moderateReview(${r.id},'approved')">Publicar</button> <button class="btn alt sm" onclick="moderateReview(${r.id},'hidden')">Ocultar</button> <button class="btn danger sm" onclick="moderateReview(${r.id},'deleted')">Eliminar definitivamente</button></div></div>`).join(''):'<div class="empty">Pulsa Actualizar para cargar reseñas.</div>'}</div>`;
 
 $('sales').innerHTML=`<div class="box"><div class="row"><div><div class="eyebrow">REGISTRO REAL</div><h2 class="script">Ventas, costos y ganancias</h2></div><button class="btn sm" onclick="saleForm()">+ Registrar movimiento</button></div><div class="stats"><div class="stat"><b>${money(sales.reduce((s,x)=>s+Number(x.revenue||0),0))}</b><small>Ingresos</small></div><div class="stat"><b>${money(sales.reduce((s,x)=>s+Number(x.cost||0),0))}</b><small>Costos / pérdidas</small></div><div class="stat"><b>${money(sales.reduce((s,x)=>s+Number(x.revenue||0)-Number(x.cost||0),0))}</b><small>Resultado neto</small></div></div><br><div class="tablewrap"><table><thead><tr><th>FECHA</th><th>CONCEPTO</th><th>PEDIDO</th><th>INGRESO</th><th>COSTO</th><th>GANANCIA / PÉRDIDA</th><th>ACCIÓN</th></tr></thead><tbody>${sales.map((s,i)=>`<tr><td>${esc(s.date)}</td><td>${esc(s.concept)}</td><td>${esc(s.order||'-')}</td><td>${money(s.revenue)}</td><td>${money(s.cost)}</td><td><b>${money(Number(s.revenue||0)-Number(s.cost||0))}</b></td><td><button class="btn alt sm" onclick="saleForm(${i})">Editar</button> <button class="btn danger sm" onclick="sales.splice(${i},1);save('sales',sales);renderAdmin()">Eliminar</button></td></tr>`).join('')}</tbody></table></div></div>`;
  $('faq').innerHTML=`<div class="box"><div class="row"><h2 class="script">Preguntas frecuentes</h2><button class="btn sm" onclick="faqForm()">+ Agregar</button></div>${faqs.map((f,i)=>`<div class="cartitem"><div></div><div><b>${esc(f.q)}</b><div style="white-space:pre-wrap;margin-top:8px;color:var(--muted)">${faqPreview(f.a)}</div>${faqMediaList(f).length?`<small style="display:block;margin-top:7px;color:var(--gold2)">📎 ${faqMediaList(f).length} archivo(s) visual(es) guardado(s)</small>`:''}</div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
@@ -400,7 +459,7 @@ function galleryForm(i){
 
  <div class="field full"><div class="eyebrow">ENCUADRE DE LA MINIATURA</div><small style="color:var(--muted)">Mueve el punto de enfoque para elegir qué parte de la foto se ve en el carrusel. La foto original no se recorta ni modifica.</small></div>
  <div class="field"><label>HORIZONTAL · <span id="focusXLabel">${gx}%</span></label><input id="galleryFocusX" type="range" min="0" max="100" value="${gx}" oninput="previewGalleryFocus()"></div>
- <div class="field"><label>VERTICAL · <span id="focusYLabel">${gy}%</span></label><input id="galleryFocusY" type="range" min="0" max="100" value="${gy}" oninput="previewGalleryFocus()"></div>
+ <div class="field"><label>VERTICAL · <span id="focusYLabel">${gy}%</span></label><input id="galleryFocusY" type="range" min="0" max="100" value="${gy}" oninput="previewGalleryFocus()"></div><div class="field"><label>ZOOM · <span id="focusZoomLabel">${Number(g?.zoom??1).toFixed(2)}x</span></label><input id="galleryZoom" type="range" min="1" max="2.5" step=".05" value="${Number(g?.zoom??1)}" oninput="previewGalleryFocus()"></div>
 
  <div class="field"><label>VISIBLE EN PORTAFOLIO</label><select id="galleryActive"><option value="true" ${g?.active!==false?'selected':''}>Sí</option><option value="false" ${g?.active===false?'selected':''}>No</option></select></div>
  <div class="field"><label>MOSTRAR EN CARRUSEL</label><select id="galleryFeatured"><option value="true" ${g?.featured!==false?'selected':''}>Sí</option><option value="false" ${g?.featured===false?'selected':''}>No, solo portafolio</option></select></div>
@@ -416,8 +475,8 @@ function previewGalleryImage(input){
 function previewGalleryFocus(){
  const x=Number($('galleryFocusX')?.value||50),y=Number($('galleryFocusY')?.value||50);
  if($('focusXLabel'))$('focusXLabel').textContent=x+'%';
- if($('focusYLabel'))$('focusYLabel').textContent=y+'%';
- for(const id of ['galleryFocusPreview','galleryNewFocusPreview']){const im=$(id);if(im)im.style.objectPosition=`${x}% ${y}%`}
+ if($('focusYLabel'))$('focusYLabel').textContent=y+'%';const z=Number($('galleryZoom')?.value||1);if($('focusZoomLabel'))$('focusZoomLabel').textContent=z.toFixed(2)+'x';
+ for(const id of ['galleryFocusPreview','galleryNewFocusPreview']){const im=$(id);if(im){im.style.objectPosition=`${x}% ${y}%`;im.style.transform=`scale(${z})`;im.style.transformOrigin='center'}}
 }
 function gallerySplit(id){return ($(id)?.value||'').split(',').map(x=>x.trim()).filter(Boolean)}
 async function saveGalleryItem(i){
@@ -439,6 +498,7 @@ async function saveGalleryItem(i){
   },
   focusX:Number($('galleryFocusX')?.value||50),
   focusY:Number($('galleryFocusY')?.value||50),
+  zoom:Number($('galleryZoom')?.value||1),
   active:$('galleryActive').value==='true',
   featured:$('galleryFeatured').value==='true',
   created:old?.created||Date.now()
@@ -479,7 +539,7 @@ function productForm(id){
 }
 function renderProductExistingImages(){
  const box=$('pexistingimgs');if(!box)return;const a=window.mnProductImagesEdit||[];
- box.innerHTML=a.length?`<small style="display:block;color:var(--muted);margin-bottom:7px">IMÁGENES ACTUALES · ${a.length}/10</small><div style="display:flex;gap:9px;flex-wrap:wrap">${a.map((src,i)=>`<div style="width:112px"><div style="position:relative;width:112px;height:90px;border:1px solid var(--line);border-radius:10px;overflow:hidden"><img src="${src}" style="width:100%;height:100%;object-fit:cover">${i===0?'<span style="position:absolute;left:5px;top:5px;background:#c5a05a;color:#2b0710;padding:2px 5px;border-radius:5px;font-size:9px;font-weight:900">PORTADA</span>':''}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:4px"><button type="button" class="btn alt sm" onclick="productImageCover(${i})">${i===0?'✓':'Portada'}</button><button type="button" class="btn danger sm" onclick="productImageRemove(${i})">Quitar</button></div></div>`).join('')}</div>`:'<small style="color:var(--muted)">Sin imágenes guardadas actualmente.</small>';
+ box.innerHTML=a.length?`<small style="display:block;color:var(--muted);margin-bottom:7px">IMÁGENES ACTUALES · ${a.length}/10</small><div style="display:flex;gap:9px;flex-wrap:wrap">${a.map((src,i)=>`<div style="width:112px"><div style="position:relative;width:112px;height:90px;border:1px solid var(--line);border-radius:10px;overflow:hidden"><img src="${src}" style="width:100%;height:100%;object-fit:cover">${i===0?'<span style="position:absolute;left:5px;top:5px;background:#c5a05a;color:#2b0710;padding:2px 5px;border-radius:5px;font-size:9px;font-weight:900">PORTADA</span>':''}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:4px"><button type="button" class="btn alt sm" onclick="productImageCover(${i})">${i===0?'✓':'Portada'}</button><button type="button" class="btn alt sm" onclick="mnOpenImageEditorUrl('${src}')">Ajustar</button><button type="button" class="btn alt sm" onclick="mnOpenImageViewer('${src}',true)">Ver</button><button type="button" class="btn danger sm" onclick="productImageRemove(${i})">Quitar</button></div></div>`).join('')}</div>`:'<small style="color:var(--muted)">Sin imágenes guardadas actualmente.</small>';
 }
 function productImageCover(i){const a=window.mnProductImagesEdit||[];if(!a[i])return;const [x]=a.splice(i,1);a.unshift(x);renderProductExistingImages()}
 function productImageRemove(i){(window.mnProductImagesEdit||[]).splice(i,1);renderProductExistingImages()}
@@ -994,7 +1054,10 @@ async function mnUploadImage(file,folder='general'){
  const path=`${folder}/${Date.now()}-${Math.random().toString(36).slice(2,8)}-${base}.${ext}`;
  const {error}=await mnCloud.storage.from(MN_IMAGE_BUCKET).upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type||undefined});
  if(error)throw error;
- return mnCloud.storage.from(MN_IMAGE_BUCKET).getPublicUrl(path).data.publicUrl;
+ const url=mnCloud.storage.from(MN_IMAGE_BUCKET).getPublicUrl(path).data.publicUrl;
+ const pending=window.mnPendingImageSettings?.[mnFileKey(file)];
+ if(pending){imageSettings[url]=pending;delete window.mnPendingImageSettings[mnFileKey(file)];save('imageSettings',imageSettings)}
+ return url;
 }
 
 function mnFromDb(p){return {id:p.id,name:p.name||'',description:p.description||'',keywords:p.keywords||'',price:Number(p.price||0),salePrice:p.promo_price==null?null:Number(p.promo_price),category:Array.isArray(p.categories)?(p.categories[0]||''):((p.categories&&p.categories.category)||''),images:Array.isArray(p.images)?p.images:[],forms:Array.isArray(p.forms)?p.forms:[],lengths:Array.isArray(p.lengths)?p.lengths:[],stock:(p.stock&&typeof p.stock==='object')?p.stock:{},madeToOrder:!!p.made_to_order,status:p.status||'Disponible',created:p.created_at?new Date(p.created_at).getTime():Date.now()};}
@@ -1093,7 +1156,7 @@ mnBoot();
 </script>
 <script>
 // V14.1: sincronización completa de datos operativos con Supabase.
-const mnStateKeys={faqs:true,config:true,categories:true,sizes:true,forms:true,lengths:true,extras:true,galleryItems:true,gallerySettings:true,discountCampaigns:true,productMeta:true,storeOps:true,seasonThemes:true,activeSeasonId:true,photoRewards:false,activityLog:false,sales:false};
+const mnStateKeys={faqs:true,config:true,categories:true,sizes:true,forms:true,lengths:true,extras:true,galleryItems:true,gallerySettings:true,discountCampaigns:true,productMeta:true,storeOps:true,seasonThemes:true,activeSeasonId:true,photoRewards:false,activityLog:false,imageSettings:true,sales:false};
 function mnPayload(x){return JSON.parse(JSON.stringify(x));}
 async function mnUpsertCloud(table,row,conflict){const {error}=await mnCloud.from(table).upsert(row,{onConflict:conflict});if(error)throw error;}
 async function mnSyncCollection(k){
@@ -1106,14 +1169,14 @@ async function mnSyncCollection(k){
   }else if(k==='discounts'){
    for(const d of discounts) await mnUpsertCloud('mn_discounts_cloud',{code:String(d.code||'').toUpperCase(),payload:mnPayload(d),updated_at:new Date().toISOString()},'code');
   }else if(k in mnStateKeys){
-   const value=({faqs,config,categories,sizes,forms,lengths,extras,galleryItems,gallerySettings,discountCampaigns,productMeta,storeOps,seasonThemes,activeSeasonId,photoRewards,activityLog,sales})[k];
+   const value=({faqs,config,categories,sizes,forms,lengths,extras,galleryItems,gallerySettings,discountCampaigns,productMeta,storeOps,seasonThemes,activeSeasonId,photoRewards,activityLog,imageSettings,sales})[k];
    await mnUpsertCloud('mn_store_state',{key:k,payload:mnPayload(value),public_read:!!mnStateKeys[k],updated_at:new Date().toISOString()},'key');
   }
   document.getElementById('mnCloudBadge').textContent='Nube: guardado ✓';
  }catch(e){console.error('Cloud sync '+k,e);document.getElementById('mnCloudBadge').textContent='Nube: error';}
 }
 const mnSetItemV141=localStorage.setItem.bind(localStorage);
-localStorage.setItem=function(k,v){mnSetItemV141(k,v);const short=k.startsWith('mn_')?k.slice(3):k;if(['orders','requests','discounts','faqs','config','categories','sizes','forms','lengths','extras','galleryItems','gallerySettings','discountCampaigns','productMeta','storeOps','seasonThemes','activeSeasonId','photoRewards','activityLog','sales'].includes(short)&&window.mnCloudReady)queueMicrotask(()=>mnSyncCollection(short));};
+localStorage.setItem=function(k,v){mnSetItemV141(k,v);const short=k.startsWith('mn_')?k.slice(3):k;if(['orders','requests','discounts','faqs','config','categories','sizes','forms','lengths','extras','galleryItems','gallerySettings','discountCampaigns','productMeta','storeOps','seasonThemes','activeSeasonId','photoRewards','activityLog','imageSettings','sales'].includes(short)&&window.mnCloudReady)queueMicrotask(()=>mnSyncCollection(short));};
 async function mnLoadFullCloud(){
  // V14.5: cada módulo se carga de forma independiente.
  // Un fallo en solicitudes/descuentos/configuración ya no impide mostrar pedidos válidos.
@@ -1189,6 +1252,7 @@ async function mnLoadFullCloud(){
      if(x.key==='activeSeasonId')activeSeasonId=String(x.payload||'');
      if(x.key==='photoRewards')photoRewards=Array.isArray(x.payload)?x.payload:[];
      if(x.key==='activityLog')activityLog=Array.isArray(x.payload)?x.payload:[];
+     if(x.key==='imageSettings')imageSettings=(x.payload&&typeof x.payload==='object')?x.payload:{};
      if(x.key==='sales')sales=x.payload;
      mnOriginalSetItem('mn_'+x.key,JSON.stringify(x.payload));
    }
@@ -1219,4 +1283,25 @@ window.addEventListener('pageshow',()=>{if(window.mnCloudReady)mnRefreshAdminClo
 const mnOpenAdminV14=mnOpenAdmin;
 mnOpenAdmin=async function(){await mnOpenAdminV14();window.mnCloudReady=false;try{await mnLoadFullCloud();}catch(e){console.error(e);console.error('Carga operativa de nube',e);document.getElementById('mnCloudBadge').textContent='Nube: error';}window.mnCloudReady=true;};
 </script>
+
+<div id="mnImageViewer" class="mn-img-viewer">
+  <div class="mn-img-panel">
+    <div class="row"><div><div class="eyebrow">VISTA DE IMAGEN</div><h2 class="script">Ver imagen</h2></div><button class="btn alt sm" onclick="mnCloseImageViewer()">Cerrar ×</button></div>
+    <div id="mnImageViewerStage" class="mn-img-stage"><img id="mnImageViewerImg" alt=""></div>
+    <div class="mn-img-tools"><button class="btn alt sm" onclick="mnViewerZoom(-.2)">− Zoom</button><button class="btn alt sm" onclick="mnViewerZoom(.2)">+ Zoom</button><button class="btn alt sm" onclick="mnViewerReset()">Centrar</button><button id="mnViewerAdjustBtn" class="btn sm" onclick="mnViewerAdjust()">Ajustar encuadre</button></div>
+  </div>
+</div>
+<div id="mnImageEditor" class="mn-img-editor">
+  <div class="mn-img-panel">
+    <div class="row"><div><div class="eyebrow">AJUSTAR IMAGEN</div><h2 class="script">Encuadre</h2></div><button class="btn alt sm" onclick="mnCloseImageEditor()">Cerrar ×</button></div>
+    <div class="mn-img-preview-box"><img id="mnImageEditorImg" alt=""></div>
+    <div class="mn-img-controls">
+      <div class="field"><label>HORIZONTAL · <span id="mnEditXLabel">50%</span></label><input id="mnEditX" type="range" min="0" max="100" value="50" oninput="mnEditorPreview()"></div>
+      <div class="field"><label>VERTICAL · <span id="mnEditYLabel">50%</span></label><input id="mnEditY" type="range" min="0" max="100" value="50" oninput="mnEditorPreview()"></div>
+      <div class="field"><label>ZOOM · <span id="mnEditZoomLabel">1.00x</span></label><input id="mnEditZoom" type="range" min="1" max="2.5" step=".05" value="1" oninput="mnEditorPreview()"></div>
+    </div>
+    <div class="mn-img-tools"><button class="btn alt" onclick="mnEditorCenter()">Centrar</button><button class="btn alt" onclick="mnEditorReset()">Restablecer</button><button class="btn" onclick="mnSaveImageAdjust()">Guardar ajuste</button></div>
+    <small style="color:var(--muted);display:block;margin-top:8px">El archivo original no se destruye. Esto cambia cómo se encuadra en tarjetas y miniaturas.</small>
+  </div>
+</div>
 </body></html>
