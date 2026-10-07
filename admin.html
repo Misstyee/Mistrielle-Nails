@@ -252,6 +252,26 @@ document.addEventListener('change',e=>{
  imgs.forEach(f=>{const url=URL.createObjectURL(f),b=document.createElement('button');b.type='button';b.title='Ver grande / zoom';b.innerHTML=`<img src="${url}" alt="">`;b.onclick=()=>mnSafeOpen(url);wrap.appendChild(b)});
  input.insertAdjacentElement('afterend',wrap);
 },true);
+
+function lowStockHTML(){
+ const rows=[];
+ for(const p of products.filter(p=>!p.madeToOrder&&p.status!=='Oculto')){
+  for(const s of sizes){
+   const n=Number(p.stock?.[s]||0);
+   if(n<=1)rows.push({p,s,n});
+  }
+ }
+ return rows.length
+  ?rows.slice(0,30).map(x=>`<div class="mn-stock-alert"><b>${esc(x.p.name)}</b> · ${esc(x.s)} · ${x.n===0?'AGOTADA':'1 unidad'}</div>`).join('')
+  :'<div class="notice">No hay tallas en 0 o 1 unidad.</div>';
+}
+function mnBars(rows,key='ordered'){
+ const safe=Array.isArray(rows)?rows:[];
+ const max=Math.max(1,...safe.map(x=>Number(x?.[key]||0)));
+ return safe.length
+  ?safe.map(x=>`<div class="mn-chart-row"><small>${esc(x.name||x.id||'')}</small><div class="mn-chart-track"><div class="mn-chart-fill" style="width:${Math.max(4,Number(x?.[key]||0)/max*100)}%"></div></div><b>${Number(x?.[key]||0)}</b></div>`).join('')
+  :'<div class="empty">Sin datos todavía.</div>';
+}
 function nextProductId(){
  const used=(products||[]).map(p=>Number(String(p.id||'').match(/^MN-(\d+)$/)?.[1]||0));
  idCounter=Math.max(Number(idCounter||0),...used)+1;
