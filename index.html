@@ -278,6 +278,10 @@ tr:hover td{background:#2d0711}
    var(--hero-image-mobile,var(--hero-image-tablet,var(--hero-image-desktop,var(--hero-image,none)))) center/cover no-repeat!important;
  }
 }
+
+@media(max-width:620px){
+ #modalContent .box > .row > .btn[onclick="toggleCartExtras()"]{width:100%;margin-top:8px}
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -671,9 +675,20 @@ function addExtraToCart(id){
  if(same)same.qty++;else cart.push({key:Date.now(),id:x.id,name:x.name,image:x.image||'',price:Number(x.price||0),qty:1,isExtra:true,form:'',length:'',size:''});
  save('cart',cart);drawCart();render();
 }
+function toggleCartExtras(){
+ window.mnCartExtrasOpen=!window.mnCartExtrasOpen;drawCart()
+}
 function extrasCartHTML(){
  const xs=availableExtras();if(!xs.length)return '';
- return `<div class="box" style="margin-top:14px"><div class="eyebrow">COMPLEMENTA TU PEDIDO</div><h3 style="margin:5px 0 10px">¿Quieres agregar algo extra?</h3><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">${xs.map(x=>`<div style="border:1px solid var(--line);border-radius:12px;padding:10px">${x.image?`<img src="${x.image}" alt="" style="width:100%;height:110px;object-fit:cover;border-radius:9px;margin-bottom:8px">`:''}<b>${esc(x.name)}</b>${x.description?`<div style="font-size:12px;color:var(--muted);margin:4px 0">${esc(x.description)}</div>`:''}<div style="margin:7px 0"><b>${money(x.price)}</b> · <small>${Number(x.stock||0)} disponibles</small></div><button class="btn sm" onclick="addExtraToCart('${x.id}')">+ Agregar</button></div>`).join('')}</div><small style="display:block;margin-top:9px;color:var(--muted)">Tu set ya incluye su kit de aplicación. Estos son complementos opcionales adicionales.</small></div>`;
+ if(typeof window.mnCartExtrasOpen==='undefined')window.mnCartExtrasOpen=window.innerWidth>620;
+ const open=!!window.mnCartExtrasOpen;
+ return `<div class="box" style="margin-top:14px">
+  <div class="row" style="align-items:center;gap:10px">
+   <div><div class="eyebrow">COMPLEMENTA TU PEDIDO</div><h3 style="margin:5px 0">Complementos extra</h3><small style="color:var(--muted)">Opcionales. Tu set ya incluye su kit de aplicación.</small></div>
+   <button type="button" class="btn alt sm" onclick="toggleCartExtras()">${open?'Ocultar complementos':'Ver complementos'} · ${xs.length}</button>
+  </div>
+  ${open?`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:12px">${xs.map(x=>`<div style="border:1px solid var(--line);border-radius:12px;padding:10px">${x.image?`<img src="${x.image}" alt="" style="width:100%;height:110px;object-fit:cover;border-radius:9px;margin-bottom:8px">`:''}<b>${esc(x.name)}</b>${x.description?`<div style="font-size:12px;color:var(--muted);margin:4px 0">${esc(x.description)}</div>`:''}<div style="margin:7px 0"><b>${money(x.price)}</b> · <small>${Number(x.stock||0)} disponibles</small></div><button class="btn sm" onclick="addExtraToCart('${x.id}')">+ Agregar</button></div>`).join('')}</div>`:''}
+ </div>`;
 }
 function cartRecommendations(){const ids=new Set(cart.filter(x=>!x.isExtra).map(x=>x.id)),cats=new Set(cart.filter(x=>!x.isExtra).map(x=>products.find(p=>p.id===x.id)?.category).filter(Boolean));return products.filter(p=>p.status==='Disponible'&&!ids.has(p.id)).sort((a,b)=>(cats.has(b.category)?1:0)-(cats.has(a.category)?1:0)).slice(0,3)}
 function recommendationsHTML(){const a=cartRecommendations();if(!a.length)return '';return `<div class="box" style="margin-top:14px"><div class="eyebrow">TAMBIÉN PODRÍA GUSTARTE</div><div class="mn-rec-grid">${a.map(p=>`<div class="mn-rec-card" onclick="closeModal();openProduct('${p.id}')">${p.images?.[0]?`<img src="${p.images[0]}" alt="">`:''}<b>${esc(p.name)}</b><br><small>${priceHTML(p)}</small></div>`).join('')}</div></div>`}
