@@ -251,6 +251,12 @@ tr:hover td{background:#2d0711}
 .mn-public-viewer{position:fixed;inset:0;z-index:3000;background:rgba(8,0,3,.96);display:none;place-items:center;padding:14px}.mn-public-viewer.open{display:grid}
 .mn-public-shell{width:min(96vw,1100px)}.mn-public-stage{position:relative;height:min(82vh,820px);overflow:hidden;border:1px solid var(--line);border-radius:16px;background:#0d0105;touch-action:none}
 .mn-public-stage img{position:absolute;left:50%;top:50%;max-width:94%;max-height:94%;user-select:none;-webkit-user-drag:none;transform-origin:center center}.mn-public-controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+
+.mn-portfolio-card .mn-gallery-image-wrap{height:260px}
+.mn-gallery-card .mn-gallery-image-wrap{height:260px}
+.mn-gallery-image-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s ease}
+#portfolioFullGrid .mn-portfolio-card{display:block;min-height:330px}
+#portfolioFullGrid .mn-portfolio-card .pbody{padding:12px}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -329,7 +335,14 @@ function galleryAllTerms(g){
 function galleryTagText(g){return galleryAllTerms(g).slice(0,3).join(' · ')}
 function galleryObjectPosition(g){return `${Number(g.focusX??50)}% ${Number(g.focusY??50)}%`} function galleryZoom(g){return Number(g.zoom??1)}
 function galleryCardHTML(g,cls='mn-portfolio-card'){
- return `<article class="${cls}" onclick="openGalleryItem('${g.id}')"><div style="overflow:hidden;height:100%"><img src="${g.image}" alt="${esc(g.title||'Diseño Mistrielle')}" style="object-position:${galleryObjectPosition(g)};transform:scale(${galleryZoom(g)});transform-origin:center center"></div></div>${cls==='mn-gallery-card'?`<div class="meta"><b>${esc(g.title||'Diseño Mistrielle')}</b>${galleryTagText(g)?`<br><small>${esc(galleryTagText(g))}</small>`:''}</div>`:`<div class="pbody"><b>${esc(g.title||'Diseño Mistrielle')}</b>${galleryTagText(g)?`<br><small>${esc(galleryTagText(g))}</small>`:''}</div>`}</article>`;
+ return `<article class="${cls}" onclick="openGalleryItem('${g.id}')">
+  <div class="mn-gallery-image-wrap" style="overflow:hidden">
+   <img src="${g.image}" alt="${esc(g.title||'Diseño Mistrielle')}" style="object-position:${galleryObjectPosition(g)};transform:scale(${galleryZoom(g)});transform-origin:center center">
+  </div>
+  ${cls==='mn-gallery-card'
+    ?`<div class="meta"><b>${esc(g.title||'Diseño Mistrielle')}</b>${galleryTagText(g)?`<br><small>${esc(galleryTagText(g))}</small>`:''}</div>`
+    :`<div class="pbody"><b>${esc(g.title||'Diseño Mistrielle')}</b>${galleryTagText(g)?`<br><small>${esc(galleryTagText(g))}</small>`:''}<br><small style="opacity:.8">Toca para ver completa</small></div>`}
+ </article>`;
 }
 function portfolioPreviewLimit(){const w=window.innerWidth;return w<600?4:(w<1000?6:8)}
 function renderPortfolioPreview(){
@@ -347,13 +360,9 @@ function renderFullPortfolio(){
  const groups=galleryGroups();
  filters.innerHTML=groups.map(gr=>`<details ${mnGalleryFilterGroup===gr.key?'open':''}><summary>${esc(gr.label)}${mnGalleryFilterGroup===gr.key&&mnGalleryFilter?` · ${esc(mnGalleryFilter)}`:''}</summary><div class="mn-filter-chips"><button class="btn ${mnGalleryFilterGroup===gr.key&&!mnGalleryFilter?'':'alt'} sm" onclick="setGalleryFilter('${gr.key}','')">Todos</button>${gr.values.map(v=>`<button class="btn ${mnGalleryFilterGroup===gr.key&&mnGalleryFilter===v?'':'alt'} sm" onclick="setGalleryFilter('${gr.key}','${encodeURIComponent(v)}')">${esc(v)}</button>`).join('')}</div></details>`).join('');
  let a=visibleGallery();
- if(mnGalleryFilterGroup&&mnGalleryFilter){
-  a=a.filter(g=>(g.groups?.[mnGalleryFilterGroup]||[]).includes(mnGalleryFilter));
- }
- if(query){
-  a=a.filter(g=>[g.title,...galleryAllTerms(g)].join(' ').toLowerCase().includes(query));
- }
- grid.innerHTML=a.length?a.map(g=>galleryCardHTML(g)).join(''):'<div class="empty" style="grid-column:1/-1">No encontré diseños con esos filtros.</div>';
+ if(mnGalleryFilterGroup&&mnGalleryFilter)a=a.filter(g=>(g.groups?.[mnGalleryFilterGroup]||[]).includes(mnGalleryFilter));
+ if(query)a=a.filter(g=>[g.title,...galleryAllTerms(g)].join(' ').toLowerCase().includes(query));
+ grid.innerHTML=a.length?a.map(g=>galleryCardHTML(g,'mn-portfolio-card')).join(''):'<div class="empty" style="grid-column:1/-1">No encontré diseños con esos filtros.</div>';
 }
 function renderGallery(){
  const title=$('galleryPublicTitle'),sub=$('galleryPublicSubtitle'),car=$('galleryCarousel'),reward=$('galleryRewardBox');
@@ -388,8 +397,20 @@ function openFullPortfolio(){
 function closeFullPortfolio(){const v=$('portfolioFullView');if(v)v.classList.remove('open');document.body.style.overflow='';}
 function openGalleryItem(id){const all=visibleGallery(),idx=all.findIndex(x=>x.id===id);if(idx<0)return;showGalleryLightbox(idx)}
 function showGalleryLightbox(idx){
- const all=visibleGallery();if(!all.length)return;idx=(idx+all.length)%all.length;const g=all[idx];
- $('modalContent').innerHTML=`<div style="text-align:center"><div class="eyebrow">MISTRIELLE PORTFOLIO</div><h2 class="script">${esc(g.title||'Diseño Mistrielle')}</h2><div style="height:min(68vh,720px);display:grid;place-items:center;background:#120207;border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:zoom-in" onclick="openPublicViewer('${g.image}')"><img src="${g.image}" alt="" style="max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain"></div><small style="display:block;color:var(--muted);margin-top:6px">Toca la imagen para verla completa, hacer zoom y moverla.</small><div style="color:var(--muted);margin:10px 0 12px">${esc(galleryTagText(g))}</div><div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap"><button class="btn alt" onclick="showGalleryLightbox(${idx-1})">← Anterior</button><button class="btn alt" onclick="showGalleryLightbox(${idx+1})">Siguiente →</button><button class="btn alt" onclick="openPublicViewer('${g.image}')">Ver completa / Zoom</button><button class="btn gold" onclick="requestInspired('${g.id}')">Quiero algo inspirado en este diseño</button></div></div>`;
+ const all=visibleGallery();if(!all.length)return;idx=(idx+all.length)%all.length;const g=all[idx],groups=g.groups||{};
+ const details=[
+  ...(groups.colors?.length?[`Colores: ${groups.colors.join(', ')}`]:[]),
+  ...(groups.designs?.length?[`Diseño: ${groups.designs.join(', ')}`]:[]),
+  ...(groups.effects?.length?[`Efectos: ${groups.effects.join(', ')}`]:[]),
+  ...(groups.shapes?.length?[`Formas: ${groups.shapes.join(', ')}`]:[]),
+  ...(groups.lengths?.length?[`Largos: ${groups.lengths.join(', ')}`]:[]),
+  ...(groups.occasions?.length?[`Ocasiones: ${groups.occasions.join(', ')}`]:[])
+ ];
+ $('modalContent').innerHTML=`<div style="text-align:center"><div class="eyebrow">MISTRIELLE PORTFOLIO</div><h2 class="script">${esc(g.title||'Diseño Mistrielle')}</h2>
+ <div style="height:min(68vh,720px);display:grid;place-items:center;background:#120207;border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:zoom-in" onclick="openPublicViewer('${g.image}')"><img src="${g.image}" alt="" style="max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain"></div>
+ <small style="display:block;color:var(--muted);margin-top:6px">Toca la imagen para verla completa, hacer zoom y moverla.</small>
+ ${details.length?`<div class="notice" style="text-align:left;margin:12px 0">${details.map(x=>`<div>${esc(x)}</div>`).join('')}</div>`:''}
+ <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap"><button class="btn alt" onclick="showGalleryLightbox(${idx-1})">← Anterior</button><button class="btn alt" onclick="showGalleryLightbox(${idx+1})">Siguiente →</button><button class="btn alt" onclick="openPublicViewer('${g.image}')">Ver completa / Zoom</button><button class="btn gold" onclick="requestInspired('${g.id}')">Quiero algo inspirado en este diseño</button></div></div>`;
  openModal();
 }
 function requestInspired(id){const g=visibleGallery().find(x=>x.id===id);window.mnGalleryInspiration=g||null;closeModal();openCustom();setTimeout(()=>{const rd=$('rd');if(rd&&g)rd.value=`Me gustaría un diseño inspirado en "${g.title||'este diseño del portafolio'}".`;},0)}
