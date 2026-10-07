@@ -228,6 +228,14 @@ tr:hover td{background:#2d0711}
  .custom-luxe{padding:48px 18px!important}.custom-luxe h2{font-size:42px!important}
  .custom-process{grid-template-columns:1fr!important;max-width:420px!important}.custom-process div{padding:13px 8px!important}
 }
+
+.mn-gift-section{padding:18px 18px 4px}
+.mn-gift-inner{max-width:1120px;margin:auto;border:1px solid rgba(236,208,155,.5);border-radius:18px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:18px;background:radial-gradient(circle at 88% 20%,rgba(236,208,155,.12),transparent 28%),linear-gradient(135deg,#500a1e,#25040d);box-shadow:0 18px 45px rgba(0,0,0,.28)}
+.mn-gift-inner h2{font:italic 34px Georgia;color:#f2b7aa;margin:3px 0 6px}.mn-gift-inner p{margin:0;color:#dcb4b0;max-width:700px}
+.mn-gift-button{white-space:nowrap;animation:mnGiftPulse 1.9s ease-in-out infinite;box-shadow:0 0 0 0 rgba(236,208,155,.26)!important}
+@keyframes mnGiftPulse{0%,100%{transform:translateY(0) scale(1);box-shadow:0 0 0 0 rgba(236,208,155,.15)!important}50%{transform:translateY(-3px) scale(1.035);box-shadow:0 0 0 9px rgba(236,208,155,0)!important}}
+.mn-code-reveal{font:800 28px Georgia;letter-spacing:.12em;color:var(--gold2);padding:15px;border:1px dashed var(--gold);border-radius:12px;background:#21040c;word-break:break-all}
+@media(max-width:650px){.mn-gift-inner{display:grid;text-align:center;padding:18px}.mn-gift-inner h2{font-size:29px}.mn-gift-button{width:100%}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -237,6 +245,7 @@ window.MN_SUPABASE_KEY='sb_publishable_5bOuzwywcvqzPEcGrQZEvw_2uEUUp2a';
 </head><body>
 <div class="top">PRESS-ON NAILS · HECHAS PARA TI</div><header><div class="head"><button class="icon" onclick="document.getElementById('catalogo').scrollIntoView()">⌕</button><div class="brand" id="brandLogo"><b>Mistrielle Nails</b><small>PRESS ON NAILS</small></div><div><button class="icon" onclick="openFavorites()">♡<span id="favBadge" class="badge">0</span></button><button class="icon" onclick="openCart()">🛍<span id="cartBadge" class="badge">0</span></button></div></div><nav><a href="#inicio">Inicio</a><a href="#catalogo">Catálogo</a><a href="#personalizadas">Personalizadas</a><a href="#portafolio">Portafolio</a><a href="#faq">Preguntas frecuentes</a><a href="#contacto">Contacto</a><a href="javascript:tracking()">Mis pedidos / solicitudes</a></nav></header>
 <section id="inicio" class="hero"><div class="hero-inner"><div class="eyebrow">MISTRIELLE NAILS · PERSONAL LUXURY</div><h1>Un pequeño lujo hecho para tus manos.</h1><p id="heroSubtitle">Uñas Press-On Personalizadas y a la Medida. Tu mejor opción.</p><div class="hero-actions"><button id="heroButton" class="btn gold" onclick="document.getElementById('catalogo').scrollIntoView()">Catálogo de diseños</button><button class="btn hero-custom-btn" onclick="document.getElementById('personalizadas').scrollIntoView({behavior:'smooth'})">Quiero un set personalizado</button></div><button class="hero-scroll-cue" onclick="document.getElementById('personalizadas').scrollIntoView({behavior:'smooth'})"><span>La mayoría de nuestros diseños nacen de una idea tuya</span><b>↓ PERSONALIZA TU SET ↓</b></button></div></section>
+<section id="discountGiftSection" class="mn-gift-section" style="display:none"><div class="mn-gift-inner"><div><div class="eyebrow">REGALO MISTRIELLE</div><h2 id="giftTitle">Reclama tu código de descuento</h2><p id="giftMessage"></p></div><button id="giftButton" class="btn gold mn-gift-button" onclick="openActiveGift()">RECLAMAR MI CÓDIGO</button></div></section>
 <section id="mistrielleEdit" style="padding:32px 18px 8px"><div style="max-width:1180px;margin:auto"><div class="section-title" style="margin-bottom:16px"><div class="eyebrow">PORTFOLIO PREVIEW</div><h2 id="galleryPublicTitle">The Mistrielle Edit</h2><p id="galleryPublicSubtitle">Una selección de diseños creados por Mistrielle.</p></div><div class="mn-carousel-shell"><button class="mn-carousel-arrow left" type="button" onclick="moveGalleryCarousel(-1)" aria-label="Anterior">‹</button><div id="galleryCarousel" class="mn-gallery-carousel"></div><button class="mn-carousel-arrow right" type="button" onclick="moveGalleryCarousel(1)" aria-label="Siguiente">›</button></div><div style="text-align:center;margin-top:14px"><button class="btn alt" onclick="openFullPortfolio()">Ver portafolio completo</button></div></div></section>
 <main><section id="catalogo"><div class="section-title"><h2>Encuentra tu próximo set</h2><p>Busca también por color, temporada, estilo o cualquier palabra de la descripción.</p></div><div class="filters"><input id="search" oninput="render()" placeholder="Buscar: rosa, verano, flores, cat eye..."><select id="catFilter" onchange="render()"></select><select id="sort" onchange="render()"><option value="new">Más recientes</option><option value="asc">Precio menor</option><option value="desc">Precio mayor</option></select></div><div id="grid" class="grid"></div></section>
 <section id="personalizadas" class="personalizadas-feature" style="padding-top:46px"><div class="box custom-luxe" id="customLuxe" style="text-align:center"><div class="personalized-pulse">TU IDEA · TU SET · HECHO PARA TI</div><div class="eyebrow" style="color:var(--gold2)">EL CORAZÓN DE MISTRIELLE</div><h2 id="customTitle" class="script">Set Personalizado</h2><p id="customText">Tu idea. Tus medidas. Tu set. Creamos un diseño siguiendo tus reglas.</p><div class="custom-process"><div><b>01</b><span>Envíanos tu idea</span></div><div><b>02</b><span>Recibe tu cotización</span></div><div><b>03</b><span>Creamos y enviamos tu set</span></div></div><div class="personalized-cta-wrap"><button class="btn gold personalized-main-btn" onclick="openCustom()">QUIERO MI SET PERSONALIZADO</button><button class="btn alt" onclick="tracking()">Ver mi solicitud</button></div><div class="personalized-hint">¿Viste un diseño en el portafolio? También puedes pedir algo inspirado en él.</div></div></section>
@@ -260,7 +269,7 @@ const DEFAULT={categories:['Sencillas','Francesas','Cat Eye','Chrome','Decoradas
 {q:'¿Cómo funcionan los envíos?',a:'Manejamos envío local y entrega en UPN según disponibilidad.'}
 ]};
 const load=(k,d)=>{try{return JSON.parse(localStorage.getItem('mn_'+k))??d}catch(e){return d}}, save=(k,v)=>localStorage.setItem('mn_'+k,JSON.stringify(v));
-let products=load('products',[]),extras=load('extras',[]),galleryItems=load('galleryItems',[]),gallerySettings=load('gallerySettings',{speed:4,title:'The Mistrielle Edit',subtitle:'Una selección de diseños creados por Mistrielle.',rewardText:'¿Ya usaste tus Mistrielle? Envíanos una foto usando tus uñas y recibe un descuento para tu próxima compra.'}),orders=load('orders',[]),requests=load('requests',[]),discounts=load('discounts',[]),categories=load('categories',DEFAULT.categories),sizes=load('sizes',DEFAULT.sizes),forms=load('forms',DEFAULT.forms),lengths=load('lengths',DEFAULT.lengths),faqs=load('faqs',DEFAULT.faqs),config=load('config',{whatsapp:'',instagram:'',email:'',local:true,upn:true,national:false,welcome:'Un pequeño lujo hecho para tus manos.',heroSubtitle:'Uñas Press-On Personalizadas y a la Medida. Tu mejor opción.',heroButton:'Descubrir diseños',customTitle:'Hechas para ti',customText:'Tu idea. Tus medidas. Tu set. Creamos una manicura pensada especialmente para ti.',logo:'',heroImage:'',customImage:'',freeShippingEnabled:false,freeShippingMode:'amount',freeShippingAmount:600,freeShippingQty:3,shippingLabel:'Envío local',colorWine:'#3b0715',colorPink:'#f4cfd9',colorGold:'#c5a05a'});
+let products=load('products',[]),extras=load('extras',[]),galleryItems=load('galleryItems',[]),gallerySettings=load('gallerySettings',{speed:4,title:'The Mistrielle Edit',subtitle:'Una selección de diseños creados por Mistrielle.',rewardText:'¿Ya usaste tus Mistrielle? Envíanos una foto usando tus uñas y recibe un descuento para tu próxima compra.'}),discountCampaigns=load('discountCampaigns',[]),orders=load('orders',[]),requests=load('requests',[]),discounts=load('discounts',[]),categories=load('categories',DEFAULT.categories),sizes=load('sizes',DEFAULT.sizes),forms=load('forms',DEFAULT.forms),lengths=load('lengths',DEFAULT.lengths),faqs=load('faqs',DEFAULT.faqs),config=load('config',{whatsapp:'',instagram:'',email:'',local:true,upn:true,national:false,welcome:'Un pequeño lujo hecho para tus manos.',heroSubtitle:'Uñas Press-On Personalizadas y a la Medida. Tu mejor opción.',heroButton:'Descubrir diseños',customTitle:'Hechas para ti',customText:'Tu idea. Tus medidas. Tu set. Creamos una manicura pensada especialmente para ti.',logo:'',heroImage:'',customImage:'',freeShippingEnabled:false,freeShippingMode:'amount',freeShippingAmount:600,freeShippingQty:3,shippingLabel:'Envío local',colorWine:'#3b0715',colorPink:'#f4cfd9',colorGold:'#c5a05a'});
 let cart=load('cart',[]),favorites=load('favorites',[]),orderCounter=load('orderCounter',0),requestCounter=load('requestCounter',0),idCounter=load('idCounter',0);
 let appliedDiscount=null;
 const $=id=>document.getElementById(id), money=n=>'$'+Number(n||0).toFixed(0), priceHTML=p=>{let r=Number(p.price||0),s=Number(p.salePrice||0);if(s>0&&s<r){let pct=Math.round((1-s/r)*100);return `<span class="pricebox"><span class="oldprice">${money(r)}</span><span class="saleprice">${money(s)}</span><span class="discount">-${pct}%</span></span>`}return `<span class="saleprice">${money(r)}</span>`}, esc=s=>String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -370,6 +379,60 @@ function showGalleryLightbox(idx){
 }
 function requestInspired(id){const g=visibleGallery().find(x=>x.id===id);window.mnGalleryInspiration=g||null;closeModal();openCustom();setTimeout(()=>{const rd=$('rd');if(rd&&g)rd.value=`Me gustaría un diseño inspirado en "${g.title||'este diseño del portafolio'}".`;},0)}
 window.addEventListener('resize',()=>{clearTimeout(window.mnGalleryResizeTimer);window.mnGalleryResizeTimer=setTimeout(()=>{renderPortfolioPreview()},150)});
+function activeGiftCampaigns(){
+ const now=Date.now();
+ return (discountCampaigns||[]).filter(c=>{
+  if(!c||c.active===false)return false;
+  if(c.startsAt&&new Date(c.startsAt).getTime()>now)return false;
+  if(c.endsAt&&new Date(c.endsAt).getTime()<now)return false;
+  return true;
+ });
+}
+function renderGiftCampaign(){
+ const sec=$('discountGiftSection');if(!sec)return;
+ const c=activeGiftCampaigns()[0];
+ if(!c){sec.style.display='none';window.mnActiveGift=null;return}
+ window.mnActiveGift=c;sec.style.display='block';
+ $('giftTitle').textContent=c.title||'Reclama tu código de descuento';
+ $('giftMessage').textContent=c.message||'Tenemos un regalo para tu próxima compra.';
+ $('giftButton').textContent=c.buttonText||'RECLAMAR MI CÓDIGO';
+}
+function openActiveGift(){
+ const c=window.mnActiveGift||activeGiftCampaigns()[0];if(!c)return;
+ $('modalContent').innerHTML=`<div style="text-align:center"><div class="eyebrow">REGALO MISTRIELLE</div><h2 class="script">${esc(c.title||'Reclama tu código')}</h2><p style="color:var(--muted)">${esc(c.message||'')}</p><div class="notice">${c.type==='percent'?`<b>${Number(c.value||0)}% de descuento</b>`:`<b>${money(c.value)} de descuento</b>`}${Number(c.codeMaxUses||0)===1?'<br>Tu código podrá utilizarse una vez.':Number(c.codeMaxUses||0)>1?`<br>Tu código podrá utilizarse ${Number(c.codeMaxUses)} veces.`:'<br>Este código no tiene límite individual de usos.'}${c.expires?`<br>Válido hasta: ${esc(c.expires)}`:''}</div><br><button id="claimGiftBtn" class="btn gold mn-gift-button" onclick="claimGiftCode('${c.id}')">${esc(c.buttonText||'RECLAMAR MI CÓDIGO')}</button><div id="claimGiftResult" style="margin-top:14px"></div></div>`;
+ openModal();
+}
+function mnClaimKey(){
+ let k=localStorage.getItem('mn_discount_claimant');
+ if(!k){k='CLM-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);localStorage.setItem('mn_discount_claimant',k)}
+ return k;
+}
+async function claimGiftCode(id){
+ const btn=$('claimGiftBtn'),out=$('claimGiftResult');if(!btn||!out)return;
+ btn.disabled=true;btn.textContent='GENERANDO…';out.innerHTML='';
+ try{
+  const {data,error}=await mnCloud.rpc('mn_claim_discount_code',{campaign_id:id,claim_key:mnClaimKey()});
+  if(error)throw error;
+  if(!data?.code)throw new Error('No se pudo generar el código.');
+  const d={...(data.discount||{}),code:data.code};
+  discounts=load('discounts',discounts);
+  const pos=discounts.findIndex(x=>String(x.code||'').toUpperCase()===String(d.code).toUpperCase());
+  if(pos>=0)discounts[pos]=d;else discounts.unshift(d);
+  save('discounts',discounts);
+  out.innerHTML=`<div class="mn-code-reveal">${esc(data.code)}</div><p style="color:var(--muted)">${data.reused?'Este código ya había sido reclamado desde este navegador.':'Tu código fue creado y ya está listo para usar.'}</p><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn alt" onclick="copyGiftCode('${data.code}')">Copiar código</button><button class="btn gold" onclick="useGiftCode('${data.code}')">Usarlo ahora</button></div>`;
+  btn.style.display='none';
+ }catch(e){
+  out.innerHTML=`<div class="notice">${esc(e.message||String(e))}</div>`;
+  btn.disabled=false;btn.textContent='INTENTAR DE NUEVO';
+ }
+}
+async function copyGiftCode(code){try{await navigator.clipboard.writeText(code);alert('Código copiado: '+code)}catch(e){prompt('Copia tu código:',code)}}
+function useGiftCode(code){
+ discounts=load('discounts',discounts);const d=discounts.find(x=>String(x.code||'').toUpperCase()===String(code).toUpperCase());
+ if(d)appliedDiscount={...d};
+ closeModal();
+ if(cart.length)openCart();else{document.getElementById('catalogo').scrollIntoView({behavior:'smooth'});alert('Código guardado. Agrega tu set al carrito y aparecerá listo para aplicarse.')}
+}
 function render(){
  document.documentElement.style.setProperty('--wine',config.colorWine||'#3b0715');
  document.documentElement.style.setProperty('--pink',config.colorPink||'#f4cfd9');
@@ -391,7 +454,7 @@ function render(){
  $('grid').innerHTML=a.length?a.map(p=>{let fav=favorites.includes(p.id);return `<article class="card"><button class="fav" onclick="toggleFav('${p.id}',event)" title="Favorito">${fav?'♥':'♡'}</button><div onclick="openProduct('${p.id}')"><div class="photo mn-card-photo" style="position:relative" data-images="${encodeURIComponent(JSON.stringify(p.images||[]))}">${img(p.images?.[0])}${(p.images||[]).length>1?`<span style="position:absolute;right:7px;bottom:7px;background:rgba(0,0,0,.58);color:white;border-radius:999px;padding:3px 7px;font-size:10px">1/${p.images.length}</span>`:''}</div><div class="cardbody"><span class="id">${p.id}</span><div class="name">${esc(p.name)}</div><div class="row">${priceHTML(p)}<span class="tag">${esc(p.status||'Disponible')}</span></div></div></div></article>`}).join(''):`<div class="empty">Todavía no hay productos publicados.</div>`;
  startCardRotations();$('cartBadge').textContent=cart.reduce((s,x)=>s+x.qty,0);let visibleFavs=favorites.filter(id=>products.some(p=>p.id===id&&p.status!=='Oculto'));$('favBadge').textContent=visibleFavs.length;
  $('faqList').innerHTML=faqs.map(f=>`<details class="box"><summary><b>${esc(f.q)}</b></summary><div style="color:var(--muted);margin-top:10px;line-height:1.65;font-size:16px">${faqHTML(f.a)}</div>${faqMediaHTML(f)}</details>`).join('');
- let cc=[];if(config.whatsapp)cc.push(`<a class="contactcard" target="_blank" href="https://wa.me/${config.whatsapp.replace(/\D/g,'')}"><b>WhatsApp</b><br><small>${esc(config.whatsapp)}</small></a>`);if(config.instagram)cc.push(`<a class="contactcard" target="_blank" href="https://instagram.com/${config.instagram.replace('@','')}"><b>Instagram</b><br><small>${esc(config.instagram)}</small></a>`);if(config.email)cc.push(`<a class="contactcard" href="mailto:${esc(config.email)}"><b>Correo</b><br><small>${esc(config.email)}</small></a>`);$('contactCards').innerHTML=cc.length?cc.join(''):'<div class="notice" style="grid-column:1/-1">Los datos de contacto se configuran desde Administración.</div>';renderGallery();
+ let cc=[];if(config.whatsapp)cc.push(`<a class="contactcard" target="_blank" href="https://wa.me/${config.whatsapp.replace(/\D/g,'')}"><b>WhatsApp</b><br><small>${esc(config.whatsapp)}</small></a>`);if(config.instagram)cc.push(`<a class="contactcard" target="_blank" href="https://instagram.com/${config.instagram.replace('@','')}"><b>Instagram</b><br><small>${esc(config.instagram)}</small></a>`);if(config.email)cc.push(`<a class="contactcard" href="mailto:${esc(config.email)}"><b>Correo</b><br><small>${esc(config.email)}</small></a>`);$('contactCards').innerHTML=cc.length?cc.join(''):'<div class="notice" style="grid-column:1/-1">Los datos de contacto se configuran desde Administración.</div>';renderGiftCampaign();renderGallery();
 }
 function toggleFav(id,e){e.stopPropagation();favorites=favorites.includes(id)?favorites.filter(x=>x!==id):[...favorites,id];save('favorites',favorites);render()}
 function openFavorites(){products=load('products',products);favorites=load('favorites',favorites);let a=products.filter(p=>favorites.includes(p.id)&&p.status!=='Oculto');$('modalContent').innerHTML=`<h2 class="script">Mis favoritos</h2>${a.length?a.map(p=>`<div class="cartitem">${p.images?.[0]?`<img class="thumb" src="${p.images[0]}" alt="">`:`<div class="thumb"></div>`}<div><b>${esc(p.name)}</b><br><small>${p.id} · ${esc(p.category||'')}</small><br>${priceHTML(p)}${p.description?`<p style="margin:6px 0;color:var(--muted);font-size:11px">${esc(p.description)}</p>`:''}</div><div><button class="btn sm" onclick="closeModal();openProduct('${p.id}')">Ver producto</button><br><button class="btn alt sm" style="margin-top:6px" onclick="toggleFav('${p.id}',event);openFavorites()">Quitar</button></div></div>`).join(''):'<div class="empty">No tienes favoritos visibles ahora. Si alguno fue ocultado temporalmente por Mistrielle, seguirá guardado y reaparecerá aquí cuando vuelva a estar disponible.</div>'}`;openModal()}
@@ -553,7 +616,7 @@ window.addEventListener('load',async()=>{const g=document.getElementById('grid')
 // V14.1: pedidos, solicitudes, seguimiento y configuración en Supabase.
 async function mnLoadPublicState(){
  try{const {data,error}=await mnCloud.from('mn_store_state').select('key,payload').eq('public_read',true);if(error)throw error;
-  for(const x of data||[]){if(x.key==='faqs')faqs=x.payload;if(x.key==='config')config=x.payload;if(x.key==='categories')categories=x.payload;if(x.key==='sizes')sizes=x.payload;if(x.key==='forms')forms=x.payload;if(x.key==='lengths')lengths=x.payload;if(x.key==='extras')extras=Array.isArray(x.payload)?x.payload:[];if(x.key==='galleryItems')galleryItems=Array.isArray(x.payload)?x.payload:[];if(x.key==='gallerySettings')gallerySettings=(x.payload&&typeof x.payload==='object')?x.payload:gallerySettings;localStorage.setItem('mn_'+x.key,JSON.stringify(x.payload));}render();
+  for(const x of data||[]){if(x.key==='faqs')faqs=x.payload;if(x.key==='config')config=x.payload;if(x.key==='categories')categories=x.payload;if(x.key==='sizes')sizes=x.payload;if(x.key==='forms')forms=x.payload;if(x.key==='lengths')lengths=x.payload;if(x.key==='extras')extras=Array.isArray(x.payload)?x.payload:[];if(x.key==='galleryItems')galleryItems=Array.isArray(x.payload)?x.payload:[];if(x.key==='gallerySettings')gallerySettings=(x.payload&&typeof x.payload==='object')?x.payload:gallerySettings;if(x.key==='discountCampaigns')discountCampaigns=Array.isArray(x.payload)?x.payload:[];localStorage.setItem('mn_'+x.key,JSON.stringify(x.payload));}render();
  }catch(e){console.error('Estado público:',e)}
 }
 const mnLocalPlaceOrder=placeOrder;
@@ -593,6 +656,38 @@ findTracking=async function(){let n=$('tn').value.trim().toUpperCase(),w=$('tw')
 async function mnRefreshPublicCloud(){
  await Promise.allSettled([mnLoadCloudProducts(),mnLoadPublicState()]);
 }
+async function mnRemoteValidateDiscount(code,subtotal){
+ const clean=String(code||'').trim().toUpperCase();
+ if(!clean)return null;
+ const {data,error}=await mnCloud.rpc('mn_validate_discount_v2',{discount_code:clean,subtotal:Number(subtotal||0)});
+ if(error)throw error;
+ if(!data?.valid)return null;
+ const d={...(data.discount||{}),code:data.code||clean};
+ discounts=load('discounts',discounts);
+ const p=discounts.findIndex(x=>String(x.code||'').toUpperCase()===String(d.code).toUpperCase());
+ if(p>=0)discounts[p]=d;else discounts.unshift(d);
+ save('discounts',discounts);
+ return d;
+}
+applyDiscountCode=async function(){
+ const code=$('coupon')?.value||'';
+ try{
+  const d=await mnRemoteValidateDiscount(code,cartSubtotal());
+  if(!d){appliedDiscount=null;alert('Ese código no es válido, está vencido o ya alcanzó su límite de usos.');return drawCart()}
+  appliedDiscount={...d};drawCart();
+ }catch(e){alert('No pudimos validar el código: '+(e.message||e))}
+};
+const mnCheckoutLocal=checkout;
+checkout=async function(){
+ if(appliedDiscount){
+  try{
+   const d=await mnRemoteValidateDiscount(appliedDiscount.code,cartSubtotal());
+   if(!d){appliedDiscount=null;alert('El código ya no está disponible. Se retiró del pedido.');return drawCart()}
+   appliedDiscount={...d};
+  }catch(e){return alert('No pudimos validar el código antes de continuar: '+(e.message||e))}
+ }
+ return mnCheckoutLocal();
+};
 window.addEventListener('load',mnLoadPublicState);
 window.addEventListener('pageshow',()=>mnRefreshPublicCloud());
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')mnRefreshPublicCloud()});
