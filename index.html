@@ -283,6 +283,7 @@ tr:hover td{background:#2d0711}
 <script>
 window.MN_SUPABASE_URL='https://sjevqvcpkdpaeuxjxhlq.supabase.co';
 window.MN_SUPABASE_KEY='sb_publishable_5bOuzwywcvqzPEcGrQZEvw_2uEUUp2a';
+window.mnAdminPreviewRequested=new URLSearchParams(location.search).get('adminPreview')==='1';window.mnAdminPreview=false;
 </script>
 </head><body>
 <div id="maintenanceGate" class="mn-maintenance" style="display:none"><div class="mn-maint-card"><div class="eyebrow">MISTRIELLE NAILS</div><h1 id="maintenanceTitle">Estamos preparando algo bonito</h1><p id="maintenanceMessage"></p></div></div><div id="announcementBar" class="mn-announcement" style="display:none"><span id="announcementText"></span><button id="announcementButton" class="btn alt sm" style="display:none"></button><button id="announcementClose" class="mn-banner-close" type="button" onclick="dismissAnnouncement()" aria-label="Ocultar anuncio" title="Ocultar anuncio">×</button></div><div class="top">PRESS-ON NAILS · HECHAS PARA TI</div><header><div class="head"><button class="icon" onclick="document.getElementById('catalogo').scrollIntoView()">⌕</button><div class="brand" id="brandLogo"><b>Mistrielle Nails</b><small>PRESS ON NAILS</small></div><div><button class="icon" onclick="openFavorites()">♡<span id="favBadge" class="badge">0</span></button><button class="icon" onclick="openCart()">🛍<span id="cartBadge" class="badge">0</span></button></div></div><nav><a href="#inicio">Inicio</a><a href="#catalogo">Catálogo</a><a href="#personalizadas">Personalizadas</a><a href="#portafolio">Portafolio</a><a href="#faq">Preguntas frecuentes</a><a href="#contacto">Contacto</a><a href="javascript:tracking()">Mis pedidos / solicitudes</a></nav></header>
@@ -494,11 +495,22 @@ function useGiftCode(code){
 }
 function metaFor(id){return productMeta[id]||{labels:[],autoLabels:[],prepTime:''}}
 function productIsPublicNow(p){
- if(!p||p.status==='Oculto')return false;
+ if(!p)return false;
+ if(window.mnAdminPreview)return true;
+ if(p.status==='Oculto')return false;
  const m=metaFor(p.id),now=Date.now(),start=m.publishStart?new Date(m.publishStart).getTime():0,end=m.publishEnd?new Date(m.publishEnd).getTime():0;
  if(start&&now<start)return false;
  if(end&&now>=end)return false;
  return true;
+}
+function productImageSetting(p,src){
+ const m=metaFor(p?.id||''),st=m.imageSettings?.[src]||{};
+ return {x:Number(st.x??50),y:Number(st.y??50),z:Number(st.z??1)}
+}
+function productImageHTML(p,src){
+ if(!src)return '<span class="placeholder">Mistrielle</span>';
+ const st=productImageSetting(p,src);
+ return `<img src="${src}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:${st.x}% ${st.y}%;transform:scale(${st.z});transform-origin:center">`
 }
 
 function productLabels(p){const m=metaFor(p.id),s=activeSeason(),live=(s?.featuredCategory&&p.category===s.featuredCategory)?['Selección de temporada']:[];return [...new Set([...live,...(m.autoLabels||[]),...(m.labels||[])])]}
@@ -542,10 +554,22 @@ async function applyOperationalState(){
   bar.style.display=enabled&&!dismissed?'flex':'none';$('announcementText').textContent=d.text||'';
   const b=$('announcementButton');if(d.button&&d.target){b.style.display='inline-block';b.textContent=d.button;b.onclick=()=>bannerGo(d.target)}else b.style.display='none';
  }
+ let previewOk=false;
+ if(window.mnAdminPreviewRequested){try{const {data}=await mnCloud.auth.getSession();previewOk=!!data?.session}catch(e){previewOk=false}}
+ const wasPreview=window.mnAdminPreview;window.mnAdminPreview=previewOk;
+ let pb=$('mnPrivatePreviewBar');
+ if(previewOk&&!pb){
+  pb=document.createElement('div');pb.id='mnPrivatePreviewBar';
+  pb.textContent='VISTA PREVIA PRIVADA · PUEDES VER PRODUCTOS OCULTOS Y PROGRAMADOS';
+  pb.style.cssText='position:fixed;left:12px;right:12px;bottom:12px;z-index:5000;padding:10px 14px;text-align:center;background:#ecd09b;color:#2b0710;border:1px solid #7d5b27;border-radius:999px;font:700 11px Arial;letter-spacing:.08em;box-shadow:0 10px 30px rgba(0,0,0,.35)';
+  document.body.appendChild(pb)
+ }
+ if(pb)pb.style.display=previewOk?'block':'none';
  const gate=$('maintenanceGate');if(gate&&storeOps.storeOpen===false){
-  let adminPreview=false;try{const {data}=await mnCloud.auth.getSession();adminPreview=!!data?.session}catch(e){}
-  if(adminPreview)gate.style.display='none';else{gate.style.display='grid';$('maintenanceTitle').textContent=storeOps.maintenanceTitle||'Estamos preparando algo bonito';$('maintenanceMessage').textContent=storeOps.maintenanceMessage||'La tienda está temporalmente en mantenimiento.'}
+  if(previewOk)gate.style.display='none';
+  else{gate.style.display='grid';$('maintenanceTitle').textContent=storeOps.maintenanceTitle||'Estamos preparando algo bonito';$('maintenanceMessage').textContent=storeOps.maintenanceMessage||'La tienda está temporalmente en mantenimiento.'}
  }else if(gate)gate.style.display='none';
+ if(previewOk&&!wasPreview&&!window.mnPreviewRerendered){window.mnPreviewRerendered=true;setTimeout(()=>render(),0)}
 }
 function render(){
  applyOperationalState();
@@ -566,7 +590,7 @@ function render(){
  let q=$('search').value.toLowerCase().trim(), cat=$('catFilter').value, sort=$('sort').value;
  let a=products.filter(p=>productIsPublicNow(p)&&(!cat||p.category===cat)&&(!q||[p.name,p.id,p.description,p.keywords,p.category].join(' ').toLowerCase().includes(q)));
  if(sort==='asc')a.sort((x,y)=>(x.salePrice||x.price)-(y.salePrice||y.price)); if(sort==='desc')a.sort((x,y)=>(y.salePrice||y.price)-(x.salePrice||x.price)); if(sort==='new')a.sort((x,y)=>y.created-x.created); if(season?.featuredCategory&&!cat&&!q)a.sort((x,y)=>(y.category===season.featuredCategory?1:0)-(x.category===season.featuredCategory?1:0));
- $('grid').innerHTML=a.length?a.map(p=>{let fav=favorites.includes(p.id);return `<article class="card"><button class="fav" onclick="toggleFav('${p.id}',event)" title="Favorito">${fav?'♥':'♡'}</button><div onclick="openProduct('${p.id}')"><div class="photo mn-card-photo" style="position:relative" data-images="${encodeURIComponent(JSON.stringify(p.images||[]))}">${img(p.images?.[0])}${(p.images||[]).length>1?`<span style="position:absolute;right:7px;bottom:7px;background:rgba(0,0,0,.58);color:white;border-radius:999px;padding:3px 7px;font-size:10px">1/${p.images.length}</span>`:''}</div><div class="cardbody">${productLabels(p).length?`<div class="mn-product-labels">${productLabels(p).slice(0,2).map(x=>`<span class="mn-product-label">${esc(x)}</span>`).join('')}</div>`:''}<span class="id">${p.id}</span><div class="name">${esc(p.name)}</div><div class="row">${priceHTML(p)}<span class="tag">${esc(p.status||'Disponible')}</span></div></div></div></article>`}).join(''):`<div class="empty">Todavía no hay productos publicados.</div>`;
+ $('grid').innerHTML=a.length?a.map(p=>{let fav=favorites.includes(p.id);return `<article class="card"><button class="fav" onclick="toggleFav('${p.id}',event)" title="Favorito">${fav?'♥':'♡'}</button><div onclick="openProduct('${p.id}')"><div class="photo mn-card-photo" style="position:relative" data-images="${encodeURIComponent(JSON.stringify(p.images||[]))}">${productImageHTML(p,p.images?.[0])}${(p.images||[]).length>1?`<span style="position:absolute;right:7px;bottom:7px;background:rgba(0,0,0,.58);color:white;border-radius:999px;padding:3px 7px;font-size:10px">1/${p.images.length}</span>`:''}</div><div class="cardbody">${productLabels(p).length?`<div class="mn-product-labels">${productLabels(p).slice(0,2).map(x=>`<span class="mn-product-label">${esc(x)}</span>`).join('')}</div>`:''}<span class="id">${p.id}</span>${window.mnAdminPreview?`<div class="mn-product-labels"><span class="mn-product-label">VISTA PREVIA</span></div>`:''}<div class="name">${esc(p.name)}</div><div class="row">${priceHTML(p)}<span class="tag">${esc(p.status||'Disponible')}</span></div></div></div></article>`}).join(''):`<div class="empty">Todavía no hay productos publicados.</div>`;
  startCardRotations();$('cartBadge').textContent=cart.reduce((s,x)=>s+x.qty,0);let visibleFavs=favorites.filter(id=>products.some(p=>p.id===id&&p.status!=='Oculto'));$('favBadge').textContent=visibleFavs.length;
  $('faqList').innerHTML=faqs.map(f=>`<details class="box"><summary><b>${esc(f.q)}</b></summary><div style="color:var(--muted);margin-top:10px;line-height:1.65;font-size:16px">${faqHTML(f.a)}</div>${faqMediaHTML(f)}</details>`).join('');
  let cc=[];if(config.whatsapp)cc.push(`<a class="contactcard" target="_blank" href="https://wa.me/${config.whatsapp.replace(/\D/g,'')}"><b>WhatsApp</b><br><small>${esc(config.whatsapp)}</small></a>`);if(config.instagram)cc.push(`<a class="contactcard" target="_blank" href="https://instagram.com/${config.instagram.replace('@','')}"><b>Instagram</b><br><small>${esc(config.instagram)}</small></a>`);if(config.email)cc.push(`<a class="contactcard" href="mailto:${esc(config.email)}"><b>Correo</b><br><small>${esc(config.email)}</small></a>`);$('contactCards').innerHTML=cc.length?cc.join(''):'<div class="notice" style="grid-column:1/-1">Los datos de contacto se configuran desde Administración.</div>';renderGiftCampaign();renderGallery();
@@ -590,16 +614,16 @@ document.addEventListener('pointerdown',e=>{const st=$('mnPublicStage');if(!st||
 document.addEventListener('pointermove',e=>{if(!window.mnPublicViewerState.drag)return;window.mnPublicViewerState.x=e.clientX-window.mnPublicViewerState.sx;window.mnPublicViewerState.y=e.clientY-window.mnPublicViewerState.sy;publicViewerApply()});
 document.addEventListener('pointerup',()=>window.mnPublicViewerState.drag=false);
 document.addEventListener('wheel',e=>{const st=$('mnPublicStage');if(!st||!$('mnPublicViewer')?.classList.contains('open')||!st.contains(e.target))return;e.preventDefault();publicViewerZoom(e.deltaY>0?-.15:.15)},{passive:false});
-function setProductImage(encoded){
- const src=decodeURIComponent(encoded),box=$('productMainPhoto');if(!box)return;
- box.onclick=()=>openPublicViewer(src);box.innerHTML=`<img src="${src}" alt="" style="width:100%;height:100%;object-fit:cover">`;
+function setProductImage(encoded,id){
+ const src=decodeURIComponent(encoded),box=$('productMainPhoto'),p=products.find(x=>x.id===id);if(!box||!p)return;
+ box.onclick=()=>openPublicViewer(src);box.innerHTML=productImageHTML(p,src);
 }
 function approvedReviewsFor(id){const key=String(id||'').trim().toUpperCase();return (reviews||[]).filter(r=>String(r.product_id||'').trim().toUpperCase()===key&&(!r.status||r.status==='approved'))}
 function reviewSummary(id){const a=approvedReviewsFor(id);if(!a.length)return '<span style="color:var(--muted)">Sin reseñas todavía</span>';const avg=a.reduce((s,x)=>s+Number(x.rating||0),0)/a.length;return `<span class="mn-review-stars">${'★'.repeat(Math.round(avg))}${'☆'.repeat(5-Math.round(avg))}</span> <small>${avg.toFixed(1)} · ${a.length} reseña(s)</small>`}
 async function openProduct(id){
  try{const {data,error}=await mnCloud.rpc('mn_public_reviews');if(!error&&Array.isArray(data))reviews=data}catch(e){console.error('Actualizar reseñas del producto:',e)}
  let p=products.find(x=>x.id===id);if(!p||!productIsPublicNow(p))return alert('Este producto no está disponible en la tienda en este momento.');let st=p.stock||{},meta=metaFor(id),rv=approvedReviewsFor(id);
- $('modalContent').innerHTML=`<div class="eyebrow">${p.id} · ${esc(p.category)}</div><h2 class="script" style="font-size:32px;color:var(--wine)">${esc(p.name)}</h2>${productLabels(p).length?`<div class="mn-product-labels">${productLabels(p).map(x=>`<span class="mn-product-label">${esc(x)}</span>`).join('')}</div>`:''}<div style="margin-bottom:8px">${reviewSummary(id)}</div><div class="photo" style="max-height:330px;cursor:zoom-in" id="productMainPhoto" ${p.images?.[0]?`onclick="openPublicViewer('${p.images[0]}')"`:''}>${img(p.images?.[0])}</div>${(p.images||[]).length>1?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0">${p.images.map((src,i)=>`<button type="button" onclick="setProductImage('${encodeURIComponent(src)}')" style="padding:0;border:1px solid var(--line);background:none;border-radius:10px;overflow:hidden;cursor:pointer;width:64px;height:64px"><img src="${src}" alt="Vista ${i+1}" style="width:100%;height:100%;object-fit:cover"></button>`).join('')}</div>`:''}<p>${esc(p.description||'')}</p>${p.keywords?`<small style="color:var(--muted)">Estilo: ${esc(p.keywords)}</small>`:''}<div class="mn-prep"><b>Preparación estimada:</b> ${esc(meta.prepTime||storeOps.defaultPrep||'3–5 días hábiles')}</div><div style="margin:12px 0">${priceHTML(p)}</div><div class="fields"><div class="field"><label>FORMA *</label><select id="pf">${(p.forms||forms).map(x=>`<option>${esc(x)}</option>`)}</select></div><div class="field"><label>LARGO *</label><select id="pl">${(p.lengths||lengths).map(x=>`<option>${esc(x)}</option>`)}</select></div><div class="field full"><label>TALLA *</label><select id="ps" onchange="measureToggle()">${(p.sizes||sizes).map(x=>{let qty=Number(st[x]||0),disabled=!p.madeToOrder&&qty<=0;return `<option value="${esc(x)}" ${disabled?'disabled':''}>${esc(x)}${p.madeToOrder?'':` (${qty} disponibles)`}</option>`}).join('')}<option>Personalizada</option></select></div><div id="measures" class="full"></div></div><br><button class="btn" onclick="addCart('${id}')">Agregar al carrito</button><div class="mn-reviews"><div class="row"><h3 class="script">Reseñas</h3><button class="btn alt sm" onclick="reviewForm('${id}')">Escribir reseña</button></div>${rv.length?rv.slice(0,8).map(r=>`<div class="mn-review"><div class="mn-review-stars">${'★'.repeat(Number(r.rating||0))}${'☆'.repeat(5-Number(r.rating||0))}</div><b>${esc(r.name||'Clienta')}</b><p>${esc(r.comment||'')}</p>${r.image_data?`<img class="mn-review-photo" src="${r.image_data}" alt="Foto de la reseña" style="cursor:zoom-in" onclick="openPublicViewer(this.src)">`:''}</div>`).join(''):'<div class="notice">Todavía no hay reseñas publicadas.</div>'}</div>`;
+ $('modalContent').innerHTML=`<div class="eyebrow">${p.id} · ${esc(p.category)}</div><h2 class="script" style="font-size:32px;color:var(--wine)">${esc(p.name)}</h2>${productLabels(p).length?`<div class="mn-product-labels">${productLabels(p).map(x=>`<span class="mn-product-label">${esc(x)}</span>`).join('')}</div>`:''}<div style="margin-bottom:8px">${reviewSummary(id)}</div><div class="photo" style="max-height:330px;cursor:zoom-in" id="productMainPhoto" ${p.images?.[0]?`onclick="openPublicViewer('${p.images[0]}')"`:''}>${productImageHTML(p,p.images?.[0])}</div>${(p.images||[]).length>1?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0">${p.images.map((src,i)=>`<button type="button" onclick="setProductImage('${encodeURIComponent(src)}','${p.id}')" style="padding:0;border:1px solid var(--line);background:none;border-radius:10px;overflow:hidden;cursor:pointer;width:64px;height:64px"><img src="${src}" alt="Vista ${i+1}" style="width:100%;height:100%;object-fit:cover"></button>`).join('')}</div>`:''}<p>${esc(p.description||'')}</p>${p.keywords?`<small style="color:var(--muted)">Estilo: ${esc(p.keywords)}</small>`:''}<div class="mn-prep"><b>Preparación estimada:</b> ${esc(meta.prepTime||storeOps.defaultPrep||'3–5 días hábiles')}</div><div style="margin:12px 0">${priceHTML(p)}</div><div class="fields"><div class="field"><label>FORMA *</label><select id="pf">${(p.forms||forms).map(x=>`<option>${esc(x)}</option>`)}</select></div><div class="field"><label>LARGO *</label><select id="pl">${(p.lengths||lengths).map(x=>`<option>${esc(x)}</option>`)}</select></div><div class="field full"><label>TALLA *</label><select id="ps" onchange="measureToggle()">${(p.sizes||sizes).map(x=>{let qty=Number(st[x]||0),disabled=!p.madeToOrder&&qty<=0;return `<option value="${esc(x)}" ${disabled?'disabled':''}>${esc(x)}${p.madeToOrder?'':` (${qty} disponibles)`}</option>`}).join('')}<option>Personalizada</option></select></div><div id="measures" class="full"></div></div><br><button class="btn" onclick="addCart('${id}')">Agregar al carrito</button><div class="mn-reviews"><div class="row"><h3 class="script">Reseñas</h3><button class="btn alt sm" onclick="reviewForm('${id}')">Escribir reseña</button></div>${rv.length?rv.slice(0,8).map(r=>`<div class="mn-review"><div class="mn-review-stars">${'★'.repeat(Number(r.rating||0))}${'☆'.repeat(5-Number(r.rating||0))}</div><b>${esc(r.name||'Clienta')}</b><p>${esc(r.comment||'')}</p>${r.image_data?`<img class="mn-review-photo" src="${r.image_data}" alt="Foto de la reseña" style="cursor:zoom-in" onclick="openPublicViewer(this.src)">`:''}</div>`).join(''):'<div class="notice">Todavía no hay reseñas publicadas.</div>'}</div>`;
  openModal();
 }
 function reviewForm(id){
