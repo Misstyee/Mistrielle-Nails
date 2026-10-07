@@ -257,6 +257,27 @@ tr:hover td{background:#2d0711}
 .mn-gallery-image-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s ease}
 #portfolioFullGrid .mn-portfolio-card{display:block;min-height:330px}
 #portfolioFullGrid .mn-portfolio-card .pbody{padding:12px}
+
+/* HERO RESPONSIVE DE TEMPORADA */
+.hero{
+ background:
+  linear-gradient(90deg,rgba(18,1,6,var(--hero-overlay,.42)) 0%,rgba(64,5,20,calc(var(--hero-overlay,.42) + .08)) 50%,rgba(19,1,6,var(--hero-overlay,.42)) 100%),
+  var(--hero-image-desktop,var(--hero-image,none)) center/cover no-repeat!important;
+}
+@media (max-width:1024px){
+ .hero{
+  background:
+   linear-gradient(90deg,rgba(18,1,6,var(--hero-overlay,.42)),rgba(64,5,20,calc(var(--hero-overlay,.42) + .08))),
+   var(--hero-image-tablet,var(--hero-image-desktop,var(--hero-image,none))) center/cover no-repeat!important;
+ }
+}
+@media (max-width:620px){
+ .hero{
+  background:
+   linear-gradient(90deg,rgba(18,1,6,var(--hero-overlay,.42)),rgba(64,5,20,calc(var(--hero-overlay,.42) + .08))),
+   var(--hero-image-mobile,var(--hero-image-tablet,var(--hero-image-desktop,var(--hero-image,none)))) center/cover no-repeat!important;
+ }
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -473,14 +494,16 @@ function useGiftCode(code){
 }
 function metaFor(id){return productMeta[id]||{labels:[],autoLabels:[],prepTime:''}}
 function productLabels(p){const m=metaFor(p.id),s=activeSeason(),live=(s?.featuredCategory&&p.category===s.featuredCategory)?['Selección de temporada']:[];return [...new Set([...live,...(m.autoLabels||[]),...(m.labels||[])])]}
-function activeSeason(){return seasonThemes.find(x=>x.id===activeSeasonId)||null}
+function activeSeason(){const s=seasonThemes.find(x=>x.id===activeSeasonId)||null;if(!s)return null;const now=Date.now(),start=s.startsAt?new Date(s.startsAt).getTime():0,end=s.endsAt?new Date(s.endsAt).getTime():0;if(start&&now<start)return null;if(end&&now>end)return null;return s}
 function currentBannerData(){
  const s=activeSeason();
- if(s?.bannerEnabled&&s.bannerText)return {text:s.bannerText,button:s.bannerButtonText||'',target:s.bannerTarget||'',source:'season:'+s.id};
- return {text:storeOps.bannerText||'',button:storeOps.bannerButtonText||'',target:storeOps.bannerTarget||'',source:'store'};
+ if(s?.bannerEnabled&&s.bannerText)return {text:s.bannerText,button:s.bannerButtonText||'',target:s.bannerTarget||'',source:'season:'+s.id,enabled:true};
+ const now=Date.now(),start=storeOps.bannerStartsAt?new Date(storeOps.bannerStartsAt).getTime():0,end=storeOps.bannerEndsAt?new Date(storeOps.bannerEndsAt).getTime():0;
+ const inWindow=(!start||now>=start)&&(!end||now<=end);
+ return {text:storeOps.bannerText||'',button:storeOps.bannerButtonText||'',target:storeOps.bannerTarget||'',source:'store',enabled:storeOps.bannerEnabled&&inWindow};
 }
 function announcementKey(d){let raw=[d.source,d.text,d.button,d.target].join('|'),h=0;for(let i=0;i<raw.length;i++)h=((h<<5)-h)+raw.charCodeAt(i)|0;return 'mn_banner_hidden_'+Math.abs(h)}
-function dismissAnnouncement(){const d=currentBannerData();localStorage.setItem(announcementKey(d),'1');const bar=$('announcementBar');if(bar)bar.style.display='none'}
+function dismissAnnouncement(){const d=currentBannerData();sessionStorage.setItem(announcementKey(d),'1');const bar=$('announcementBar');if(bar)bar.style.display='none'}
 function bannerGo(target){
  if(target==='campana'){
   const active=window.mnActiveGift||activeGiftCampaigns()[0];
@@ -494,13 +517,20 @@ async function applyOperationalState(){
  document.documentElement.style.setProperty('--wine',season?.colorWine||config.colorWine||'#3b0715');
  document.documentElement.style.setProperty('--pink',season?.colorPink||config.colorPink||'#f4cfd9');
  document.documentElement.style.setProperty('--gold',season?.colorGold||config.colorGold||'#c5a05a');
- const hero=document.querySelector('.hero');if(hero){const hi=season?.heroImage||config.heroImage;if(hi)hero.style.setProperty('--hero-image',`url("${hi}")`)}
+ const hero=document.querySelector('.hero');
+ if(hero){
+  const desktop=season?.heroImage||config.heroImage||'',tablet=season?.heroImageTablet||desktop,mobile=season?.heroImageMobile||tablet||desktop;
+  hero.style.setProperty('--hero-image-desktop',desktop?`url("${desktop}")`:'none');
+  hero.style.setProperty('--hero-image-tablet',tablet?`url("${tablet}")`:'none');
+  hero.style.setProperty('--hero-image-mobile',mobile?`url("${mobile}")`:'none');
+  hero.style.setProperty('--hero-overlay',String(Number(season?.heroOverlay??0.42)));
+ }
  let badge=$('mnSeasonBadge');if(!badge&&hero){badge=document.createElement('div');badge.id='mnSeasonBadge';badge.className='mn-season-badge';hero.appendChild(badge)}
  if(badge){badge.textContent=season?.badge||'';badge.style.display=season?.badge?'block':'none'}
  const d=currentBannerData(),bar=$('announcementBar');
  if(bar){
-  const enabled=(season?.bannerEnabled&&season?.bannerText)||(storeOps.bannerEnabled&&storeOps.bannerText&&!season?.bannerEnabled);
-  const dismissed=localStorage.getItem(announcementKey(d))==='1';
+  const enabled=(season?.bannerEnabled&&season?.bannerText)||(!season?.bannerEnabled&&d.enabled&&d.text);
+  const dismissed=sessionStorage.getItem(announcementKey(d))==='1';
   bar.style.display=enabled&&!dismissed?'flex':'none';$('announcementText').textContent=d.text||'';
   const b=$('announcementButton');if(d.button&&d.target){b.style.display='inline-block';b.textContent=d.button;b.onclick=()=>bannerGo(d.target)}else b.style.display='none';
  }
