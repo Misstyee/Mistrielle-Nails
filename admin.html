@@ -1034,21 +1034,39 @@ function mnStartSessionClock(){
  if(mnSessionTimer)clearInterval(mnSessionTimer);
  mnSessionTimer=setInterval(()=>{if(!mnSessionStillValid())mnExpireSession()},60000);
 }
+function mnWithTimeout(promise,ms=9000,label='operación'){
+ return Promise.race([
+  Promise.resolve(promise),
+  new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+' tardó demasiado')),ms))
+ ]);
+}
 async function mnOpenAdmin(){
- await mnCheckAdmin();
+ await mnWithTimeout(mnCheckAdmin(),8000,'Verificación de administradora');
  document.getElementById('mnAuthGate').style.display='none';
  window.mnCloudReady=false;
- document.getElementById('mnCloudBadge').textContent='Nube: cargando…';
- await mnLoadCloudProducts();
- window.mnCloudReady=true;
- try{await mnLoadFullCloud()}catch(e){console.error('Carga completa Admin:',e)}
+
+ // Mostrar el panel con la copia local INMEDIATAMENTE.
  try{renderAdmin()}catch(e){
-  console.error('Render Admin:',e);
+  console.error('Render local Admin:',e);
   document.getElementById('mnCloudBadge').textContent='Admin: error visual';
-  alert('El panel cargó, pero hubo un error visual: '+(e.message||e));
+  alert('El panel abrió, pero hubo un error visual: '+(e.message||e));
  }
- document.getElementById('mnCloudBadge').textContent='Nube: conectada ✓';
+
+ document.getElementById('mnCloudBadge').textContent='Nube: sincronizando…';
  mnStartSessionClock();
+
+ // Sincronizar la nube sin dejar el panel inutilizable.
+ try{
+  await mnWithTimeout(mnLoadCloudProducts(),9000,'Carga de productos');
+  window.mnCloudReady=true;
+  await mnWithTimeout(mnLoadFullCloud(),12000,'Carga completa');
+  document.getElementById('mnCloudBadge').textContent='Nube: conectada ✓';
+ }catch(e){
+  console.error('Sincronización Admin:',e);
+  window.mnCloudReady=true;
+  document.getElementById('mnCloudBadge').textContent='Nube: conexión lenta · usando datos guardados';
+  try{renderAdmin()}catch(_){}
+ }
 }
 async function mnExpireSession(){
  if(mnSessionTimer){clearInterval(mnSessionTimer);mnSessionTimer=null}
@@ -1069,18 +1087,26 @@ async function mnLogout(){
  location.reload();
 }
 async function mnBoot(){
- const {data}=await mnCloud.auth.getSession();
- if(!data.session)return;
- // Las sesiones creadas antes de esta actualización no tienen reloj de 12 horas:
- // se cierran una vez para empezar el control desde un inicio de sesión real.
+ let session=null;
+ try{
+  const r=await mnWithTimeout(mnCloud.auth.getSession(),8000,'Lectura de sesión');
+  session=r?.data?.session||null;
+ }catch(e){console.error('Sesión:',e)}
+ if(!session)return;
+
  if(!localStorage.getItem(MN_ADMIN_SESSION_KEY)){
   localStorage.setItem(MN_ADMIN_SESSION_KEY,String(Date.now()));
  }
  if(!mnSessionStillValid()){await mnExpireSession();return}
- try{await mnOpenAdmin()}catch(e){
-  localStorage.removeItem(MN_ADMIN_SESSION_KEY);
-  await mnCloud.auth.signOut();
-  document.getElementById('mnAuthError').textContent=e.message;
+
+ try{
+  await mnOpenAdmin();
+ }catch(e){
+  console.error('Abrir Admin:',e);
+  // Si falla la verificación real de permisos, mostramos el error.
+  // Ya no cerramos la sesión automáticamente por una simple lentitud de red.
+  document.getElementById('mnAuthError').textContent=e.message||'No se pudo abrir Administración.';
+  document.getElementById('mnCloudBadge').textContent='Nube: error de acceso';
  }
 }
 document.getElementById('mnLoginBtn').onclick=async()=>{
@@ -1217,11 +1243,19 @@ async function mnLoadFullCloud(){
 }
 let mnAdminRefreshing=false;
 async function mnRefreshAdminCloud(btn){
- if(mnAdminRefreshing)return; mnAdminRefreshing=true;
- const old=btn?.textContent;if(btn){btn.disabled=true;btn.textContent='Actualizando…';}
- try{await mnLoadFullCloud();}
- catch(e){console.error('Actualización de pedidos',e);document.getElementById('mnCloudBadge').textContent='Nube: error';}
- finally{mnAdminRefreshing=false;if(btn){btn.disabled=false;btn.textContent=old||'↻ Actualizar nube';}}
+ if(mnAdminRefreshing)return;mnAdminRefreshing=true;
+ const old=btn?.textContent;if(btn){btn.disabled=true;btn.textContent='Actualizando…'}
+ try{
+  document.getElementById('mnCloudBadge').textContent='Nube: actualizando…';
+  await mnWithTimeout(mnLoadFullCloud(),12000,'Actualización de nube');
+ }catch(e){
+  console.error('Actualización de pedidos',e);
+  document.getElementById('mnCloudBadge').textContent='Nube: conexión lenta';
+ }finally{
+  mnAdminRefreshing=false;
+  if(btn){btn.disabled=false;btn.textContent=old||'↻ Actualizar nube'}
+  try{renderAdmin()}catch(_){}
+ }
 }
 window.addEventListener('focus',()=>{if(window.mnCloudReady)mnRefreshAdminCloud();});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&window.mnCloudReady)mnRefreshAdminCloud();});
