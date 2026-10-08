@@ -479,7 +479,7 @@ function renderAdmin(){
    const used=discounts.filter(d=>d.sourceCampaignId===c.id&&Number(d.used||0)>0).length;
    const now=Date.now(),started=!c.startsAt||new Date(c.startsAt).getTime()<=now,notEnded=!c.endsAt||new Date(c.endsAt).getTime()>=now;
    const live=c.active!==false&&started&&notEnded;
-   return `<div class="cartitem"><div style="width:60px;height:60px;border-radius:10px;background:linear-gradient(135deg,#7f1730,#2b0710);display:grid;place-items:center;color:var(--gold2);font-weight:900">${c.type==='percent'?Number(c.value||0)+'%':'$'+Number(c.value||0)}</div><div><b>${esc(c.name||'Campaña')}</b><br><small>${esc(c.title||'Reclama tu código de descuento')}</small><br><small>${live?'ACTIVA AHORA':c.active!==false?'PROGRAMADA / FUERA DE HORARIO':'DESACTIVADA'} · Generados ${gen}${Number(c.maxCodes||0)>0?`/${Number(c.maxCodes)}`:' / ∞'} · Usados ${used}</small></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn ${c.active!==false?'danger':'alt'} sm" onclick="toggleCampaign(${i})">${c.active!==false?'Desactivar':'Activar'}</button><button class="btn alt sm" onclick="campaignForm(${i})">Editar</button><button class="btn danger sm" onclick="deleteCampaign(${i})">Eliminar campaña</button></div></div>`;
+   return `<div class="cartitem"><div style="width:60px;height:60px;border-radius:10px;background:linear-gradient(135deg,#7f1730,#2b0710);display:grid;place-items:center;color:var(--gold2);font-weight:900">${c.type==='percent'?Number(c.value||0)+'%':'$'+Number(c.value||0)}</div><div><b>${esc(c.name||'Campaña')}</b><br><small>${esc(c.title||'Reclama tu código de descuento')}</small><br><small>${live?'ACTIVA AHORA':c.active!==false?'PROGRAMADA / FUERA DE HORARIO':'DESACTIVADA'} · Generados ${gen}${Number(c.maxCodes||0)>0?`/${Number(c.maxCodes)}`:' / ∞'} · Usados ${used}</small></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button type="button" class="btn ${c.active!==false?'danger':'alt'} sm" onclick="toggleCampaign(event,${i})">${c.active!==false?'Desactivar':'Activar'}</button><button type="button" class="btn alt sm" onclick="previewCampaignAdmin(${i})">Vista previa</button><button type="button" class="btn alt sm" onclick="campaignForm(${i})">Editar</button><button class="btn danger sm" onclick="deleteCampaign(${i})">Eliminar campaña</button></div></div>`;
  }).join(''):'<div class="empty">No hay campañas todavía. Crea una para mostrar “Reclama tu código” en la tienda.</div>'}
  <hr style="border-color:var(--line);margin:28px 0">
  <div class="row"><div><div class="eyebrow">PROMOCIONES</div><h2 class="script">Códigos de descuento</h2><p style="color:var(--muted)">Los códigos automáticos también aparecen aquí. Puedes ocultarlos sin perder el historial.</p></div><div style="display:flex;gap:7px;flex-wrap:wrap"><button class="btn sm" onclick="discountForm()">+ Nuevo código</button><button class="btn alt sm" onclick="mnRefreshAdminCloud(this)">↻ Actualizar nube</button></div></div>
@@ -604,7 +604,7 @@ function galleryGroup(g,key){
 function galleryPreviewCurrent(g){
  if(!g?.image)return '<div style="margin-top:8px;color:var(--muted);font-size:12px">Sin imagen guardada actualmente.</div>';
  const x=Number(g.focusX??50),y=Number(g.focusY??50);
- return `<div style="margin-top:12px"><small style="color:var(--muted)">IMAGEN ACTUAL · VISTA DEL CARRUSEL</small><div style="margin-top:6px;width:min(100%,340px);aspect-ratio:1/1;border-radius:14px;border:1px solid var(--line);overflow:hidden;background:#16030a"><img id="galleryFocusPreview" src="${g.image}" alt="" style="${mnFramePreviewStyle({x,y,z:Number(g.zoom??1)})}"></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button type="button" class="btn alt sm" onclick="openGalleryFrameEditor('current')">Ajustar encuadre</button><button type="button" class="btn alt sm" onclick="mnSafeOpen('${g.image}')">Ver completa</button></div><small style="display:block;margin-top:6px;color:var(--muted)">La imagen completa seguirá viéndose al abrirla. Estos controles solo cambian el encuadre de las miniaturas y el carrusel.</small></div>`;
+ return `<div style="margin-top:12px"><small style="color:var(--muted)">IMAGEN ACTUAL · VISTA DEL CARRUSEL</small><div style="margin-top:6px;width:min(100%,340px);aspect-ratio:1/1;border-radius:14px;border:1px solid var(--line);overflow:hidden;background:#16030a"><img id="galleryFocusPreview" src="${g.image}" alt="" style="${mnFramePreviewStyle({x,y,z:Number(g.zoom??1)})}"></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button type="button" class="btn alt sm" onclick="openGalleryFrameEditor('current')">Vista en tienda / Ajustar</button><button type="button" class="btn alt sm" onclick="mnSafeOpen('${g.image}')">Ver completa</button></div><small style="display:block;margin-top:6px;color:var(--muted)">La imagen completa seguirá viéndose al abrirla. Estos controles solo cambian el encuadre de las miniaturas y el carrusel.</small></div>`;
 }
 function galleryForm(i){
  let g=i===undefined?null:galleryItems[i],gx=Number(g?.focusX??50),gy=Number(g?.focusY??50);
@@ -634,7 +634,7 @@ function previewGalleryImage(input){
  const box=$('galleryNewPreview'),file=input?.files?.[0];if(!box)return;box.innerHTML='';
  if(!file)return;
  const url=URL.createObjectURL(file),x=Number($('galleryFocusX')?.value||50),y=Number($('galleryFocusY')?.value||50);
- box.innerHTML=`<small style="color:var(--muted)">VISTA PREVIA · CARRUSEL</small><div style="margin-top:6px;width:min(100%,340px);aspect-ratio:1/1;border-radius:14px;border:1px solid var(--line);overflow:hidden;background:#16030a"><img id="galleryNewFocusPreview" src="${url}" alt="" style="${mnFramePreviewStyle({x,y,z:Number($('galleryZoom')?.value||1)})}"></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button type="button" class="btn alt sm" onclick="openGalleryFrameEditor('new')">Ajustar encuadre</button><button type="button" class="btn alt sm" onclick="mnSafeOpen('${url}')">Ver completa</button></div>`;
+ box.innerHTML=`<small style="color:var(--muted)">VISTA PREVIA · CARRUSEL</small><div style="margin-top:6px;width:min(100%,340px);aspect-ratio:1/1;border-radius:14px;border:1px solid var(--line);overflow:hidden;background:#16030a"><img id="galleryNewFocusPreview" src="${url}" alt="" style="${mnFramePreviewStyle({x,y,z:Number($('galleryZoom')?.value||1)})}"></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button type="button" class="btn alt sm" onclick="openGalleryFrameEditor('new')">Vista en tienda / Ajustar</button><button type="button" class="btn alt sm" onclick="mnSafeOpen('${url}')">Ver completa</button></div>`;
 }
 function previewGalleryFocus(){
  const x=Number($('galleryFocusX')?.value||50),y=Number($('galleryFocusY')?.value||50);
@@ -727,7 +727,7 @@ function mnFramePreviewStyle(st){st=mnFrameNormalize(st);return `width:100%;heig
 function mnEnsureFrameModal(){
  if($('mnFrameEditor'))return;
  const wrap=document.createElement('div');
- wrap.innerHTML=`<div id="mnFrameEditor" class="mn-frame-editor"><div class="mn-frame-card"><div class="row" style="align-items:flex-start;gap:12px"><div><div class="eyebrow">EDITOR DE IMAGEN</div><h3 id="mnFrameTitle" class="script" style="margin:4px 0 0">Ajustar imagen</h3><small style="color:var(--muted)">Puedes moverla con tu dedo o mouse, además de usar los botones.</small></div><button type="button" class="btn alt sm" onclick="mnCloseFrameEditor()">Cerrar</button></div><div class="mn-frame-stage" id="mnFrameStage"><img id="mnFrameImg" alt=""></div><div class="mn-frame-toolbar"><button type="button" class="btn alt sm" onclick="mnFrameNudge(-5,0,0)">←</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,-5,0)">↑</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,5,0)">↓</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(5,0,0)">→</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,0,-.1)">− Zoom</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,0,.1)">+ Zoom</button><button type="button" class="btn alt sm" onclick="mnFrameCenter()">Centrar</button><button type="button" class="btn gold sm" onclick="mnSaveFrameEditor()">Guardar encuadre</button></div><div class="mn-frame-sliders"><label>Horizontal · <span id="mnFrameXLabel">50%</span><input id="mnFrameX" type="range" min="0" max="100" value="50" oninput="mnFrameSliderSync()"></label><label>Vertical · <span id="mnFrameYLabel">50%</span><input id="mnFrameY" type="range" min="0" max="100" value="50" oninput="mnFrameSliderSync()"></label><label>Zoom · <span id="mnFrameZLabel">1.00x</span><input id="mnFrameZ" type="range" min="1" max="3" step=".05" value="1" oninput="mnFrameSliderSync()"></label></div></div></div>`;
+ wrap.innerHTML=`<div id="mnFrameEditor" class="mn-frame-editor"><div class="mn-frame-card"><div class="row" style="align-items:flex-start;gap:12px"><div><div class="eyebrow">EDITOR DE IMAGEN</div><h3 id="mnFrameTitle" class="script" style="margin:4px 0 0">Ajustar imagen</h3><small style="color:var(--muted)">Puedes moverla con tu dedo o mouse, además de usar los botones.</small></div><button type="button" class="btn alt sm" onclick="mnCloseFrameEditor()">Cerrar</button></div><div class="mn-frame-stage" id="mnFrameStage"><img id="mnFrameImg" alt=""></div><div class="mn-frame-store-wrap"><div class="eyebrow">VISTA EN TIENDA</div><div id="mnFrameStorePreview"></div><small style="display:block;color:var(--muted);margin-top:6px">Esta vista cambia en vivo mientras mueves o acercas la imagen.</small></div><div class="mn-frame-toolbar"><button type="button" class="btn alt sm" onclick="mnFrameNudge(-5,0,0)">←</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,-5,0)">↑</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,5,0)">↓</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(5,0,0)">→</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,0,-.1)">− Zoom</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,0,.1)">+ Zoom</button><button type="button" class="btn alt sm" onclick="mnFrameCenter()">Centrar</button><button type="button" class="btn gold sm" onclick="mnSaveFrameEditor()">Guardar encuadre</button></div><div class="mn-frame-sliders"><label>Horizontal · <span id="mnFrameXLabel">50%</span><input id="mnFrameX" type="range" min="0" max="100" value="50" oninput="mnFrameSliderSync()"></label><label>Vertical · <span id="mnFrameYLabel">50%</span><input id="mnFrameY" type="range" min="0" max="100" value="50" oninput="mnFrameSliderSync()"></label><label>Zoom · <span id="mnFrameZLabel">1.00x</span><input id="mnFrameZ" type="range" min="1" max="3" step=".05" value="1" oninput="mnFrameSliderSync()"></label></div></div></div>`;
  document.body.appendChild(wrap.firstChild);
  const stage=$('mnFrameStage');
  stage.addEventListener('pointerdown',mnFramePointerStart);
@@ -739,13 +739,34 @@ function mnEnsureFrameModal(){
 function mnOpenFrameEditor(opts){
  mnEnsureFrameModal();
  const st=mnFrameNormalize(opts||{});
- window.mnFrameEditorState={title:opts?.title||'Ajustar imagen',src:opts?.src||'',x:st.x,y:st.y,z:st.z,onSave:typeof opts?.onSave==='function'?opts.onSave:()=>{},drag:false,lastX:0,lastY:0};
+ window.mnFrameEditorState={title:opts?.title||'Ajustar imagen',src:opts?.src||'',x:st.x,y:st.y,z:st.z,onSave:typeof opts?.onSave==='function'?opts.onSave:()=>{},drag:false,lastX:0,lastY:0,kind:opts?.kind||'image',context:opts?.context||{}};
  $('mnFrameTitle').textContent=window.mnFrameEditorState.title;
  $('mnFrameImg').src=window.mnFrameEditorState.src||'';
  $('mnFrameEditor').classList.add('open');
  mnFrameSyncInputs();
 }
 function mnCloseFrameEditor(){$('mnFrameEditor')?.classList.remove('open')}
+function mnFrameStorePreviewHTML(s){
+ const st=mnFrameNormalize(s),src=s.src||'',kind=s.kind||'image',ctx=s.context||{};
+ const image=`<img src="${src}" alt="" style="${mnFramePreviewStyle(st)}">`;
+ if(kind==='product'){
+  const name=($('pn')?.value||ctx.name||'Producto Mistrielle'),id=ctx.id||'MN-000',status=$('pst')?.value||ctx.status||'Disponible';
+  const price=Number($('pp')?.value||ctx.price||0),sale=Number($('psale')?.value||ctx.salePrice||0);
+  const priceHTML=sale>0&&sale<price?`<span class="mn-prev-old">$${price.toFixed(0)}</span> <b>$${sale.toFixed(0)}</b>`:`<b>$${price.toFixed(0)}</b>`;
+  return `<div class="mn-store-product-preview"><div class="mn-store-product-photo">${image}<span class="mn-prev-heart">♡</span></div><div class="mn-store-product-body"><span class="mn-prev-id">${esc(id)}</span><div class="mn-store-product-name">${esc(name)}</div><div class="row">${priceHTML}<span class="mn-prev-tag">${esc(status)}</span></div></div></div>`;
+ }
+ if(kind==='gallery'){
+  return `<div class="mn-store-gallery-preview"><div class="mn-store-gallery-photo">${image}</div><div class="mn-store-gallery-body"><b>${esc(ctx.title||$('galleryItemTitle')?.value||'Diseño Mistrielle')}</b><br><small>${ctx.client?'Foto real de clienta':'Portafolio Mistrielle'}</small></div></div>`;
+ }
+ if(kind==='extra'){
+  return `<div class="mn-store-extra-preview"><div class="mn-store-extra-photo">${image}</div><b>${esc($('xname')?.value||ctx.name||'Complemento')}</b><div style="margin-top:5px"><b>$${Number($('xprice')?.value||ctx.price||0).toFixed(0)}</b></div></div>`;
+ }
+ return `<div class="mn-store-generic-preview">${image}</div>`;
+}
+function mnRenderStoreImagePreview(){
+ const s=window.mnFrameEditorState,box=$('mnFrameStorePreview');if(!s||!box)return;
+ box.innerHTML=mnFrameStorePreviewHTML(s);
+}
 function mnFrameSyncInputs(){
  const s=window.mnFrameEditorState;if(!s)return;
  if($('mnFrameX'))$('mnFrameX').value=s.x;
@@ -755,6 +776,7 @@ function mnFrameSyncInputs(){
  if($('mnFrameYLabel'))$('mnFrameYLabel').textContent=Math.round(s.y)+'%';
  if($('mnFrameZLabel'))$('mnFrameZLabel').textContent=Number(s.z).toFixed(2)+'x';
  const im=$('mnFrameImg');if(im)im.style.cssText=mnFramePreviewStyle(s);
+ mnRenderStoreImagePreview();
 }
 function mnFrameSliderSync(){
  const s=window.mnFrameEditorState;if(!s)return;
@@ -786,34 +808,34 @@ function openProductFrameEditor(i){
  const src=(window.mnProductImagesEdit||[])[i];if(!src)return;
  const all=window.mnProductImageSettingsEdit||(window.mnProductImageSettingsEdit={});
  const st=all[src]||(all[src]={x:50,y:50,z:1});
- mnOpenFrameEditor({title:`Ajustar foto del producto ${i+1}`,src,x:st.x,y:st.y,z:st.z,onSave:(next)=>{all[src]=next;renderProductExistingImages()}})
+ mnOpenFrameEditor({title:`Ajustar foto del producto ${i+1}`,src,x:st.x,y:st.y,z:st.z,kind:'product',context:{id:($('modalContent')?.querySelector('.eyebrow')?.textContent||'').match(/MN-\d+/)?.[0]||'',name:$('pn')?.value||'',price:Number($('pp')?.value||0),salePrice:Number($('psale')?.value||0),status:$('pst')?.value||'Disponible'},onSave:(next)=>{all[src]=next;renderProductExistingImages()}})
 }
 function openPendingProductFrameEditor(i){
  const urls=window.mnProductNewPreviewUrls||[],src=urls[i];if(!src)return;
  const frames=window.mnNewProductFramesEdit||(window.mnNewProductFramesEdit=[]);
  const st=frames[i]||{x:50,y:50,z:1};
- mnOpenFrameEditor({title:`Ajustar nueva foto ${i+1}`,src,x:st.x,y:st.y,z:st.z,onSave:(next)=>{frames[i]=next;renderPendingProductPreviews()}})
+ mnOpenFrameEditor({title:`Ajustar nueva foto ${i+1}`,src,x:st.x,y:st.y,z:st.z,kind:'product',context:{name:$('pn')?.value||'',price:Number($('pp')?.value||0),salePrice:Number($('psale')?.value||0),status:$('pst')?.value||'Disponible'},onSave:(next)=>{frames[i]=next;renderPendingProductPreviews()}})
 }
 function renderPendingProductPreviews(){
  const box=$('pnewimgs');if(!box)return;
  const urls=window.mnProductNewPreviewUrls||[],frames=window.mnNewProductFramesEdit||[];
- box.innerHTML=urls.length?`<small style="display:block;color:var(--muted);margin-bottom:7px">NUEVAS IMÁGENES · ${urls.length}</small><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px">${urls.map((src,i)=>{const st=mnFrameNormalize(frames[i]||{});return `<div style="border:1px solid var(--line);border-radius:12px;padding:8px"><div style="position:relative;width:100%;height:150px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#16030a"><img src="${src}" style="${mnFramePreviewStyle(st)}"></div><small style="display:block;color:var(--muted);margin:7px 0">Encuadre · ${Math.round(st.x)}% / ${Math.round(st.y)}% · ${Number(st.z).toFixed(2)}x</small><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px"><button type="button" class="btn alt sm" onclick="openPendingProductFrameEditor(${i})">Ajustar</button><button type="button" class="btn alt sm" onclick="mnSafeOpen('${src}')">Ver</button></div></div>`}).join('')}</div>`:'';
+ box.innerHTML=urls.length?`<small style="display:block;color:var(--muted);margin-bottom:7px">NUEVAS IMÁGENES · ${urls.length}</small><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px">${urls.map((src,i)=>{const st=mnFrameNormalize(frames[i]||{});return `<div style="border:1px solid var(--line);border-radius:12px;padding:8px"><div style="position:relative;width:100%;height:150px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#16030a"><img src="${src}" style="${mnFramePreviewStyle(st)}"></div><small style="display:block;color:var(--muted);margin:7px 0">Encuadre · ${Math.round(st.x)}% / ${Math.round(st.y)}% · ${Number(st.z).toFixed(2)}x</small><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px"><button type="button" class="btn alt sm" onclick="openPendingProductFrameEditor(${i})">Vista en tienda / Ajustar</button><button type="button" class="btn alt sm" onclick="mnSafeOpen('${src}')">Ver</button></div></div>`}).join('')}</div>`:'';
 }
 function openGalleryFrameEditor(kind='current'){
  const src=kind==='new'?($('galleryNewFocusPreview')?.src||''):($('galleryFocusPreview')?.src||'');
  if(!src)return;
- mnOpenFrameEditor({title:'Ajustar imagen del portafolio',src,x:Number($('galleryFocusX')?.value||50),y:Number($('galleryFocusY')?.value||50),z:Number($('galleryZoom')?.value||1),onSave:(next)=>{if($('galleryFocusX'))$('galleryFocusX').value=next.x;if($('galleryFocusY'))$('galleryFocusY').value=next.y;if($('galleryZoom'))$('galleryZoom').value=next.z;previewGalleryFocus()}})
+ mnOpenFrameEditor({title:'Ajustar imagen del portafolio',src,x:Number($('galleryFocusX')?.value||50),y:Number($('galleryFocusY')?.value||50),z:Number($('galleryZoom')?.value||1),kind:'gallery',context:{title:$('galleryItemTitle')?.value||'Diseño Mistrielle',client:$('gallerySourceType')?.value==='client'},onSave:(next)=>{if($('galleryFocusX'))$('galleryFocusX').value=next.x;if($('galleryFocusY'))$('galleryFocusY').value=next.y;if($('galleryZoom'))$('galleryZoom').value=next.z;previewGalleryFocus()}})
 }
 function openExtraFrameEditor(){
  const src=window.mnExtraPreviewSrc||'';if(!src)return;
  const st=window.mnExtraFrameEdit||{x:50,y:50,z:1};
- mnOpenFrameEditor({title:'Ajustar imagen del complemento',src,x:st.x,y:st.y,z:st.z,onSave:(next)=>{window.mnExtraFrameEdit=next;renderExtraPreview()}})
+ mnOpenFrameEditor({title:'Ajustar imagen del complemento',src,x:st.x,y:st.y,z:st.z,kind:'extra',context:{name:$('xname')?.value||'',price:Number($('xprice')?.value||0)},onSave:(next)=>{window.mnExtraFrameEdit=next;renderExtraPreview()}})
 }
 function renderExtraPreview(){
  const box=$('xpreview');if(!box)return;
  const src=window.mnExtraPreviewSrc||'';if(!src){box.innerHTML='<small style="color:var(--muted)">Sin imagen seleccionada.</small>';return}
  const st=mnFrameNormalize(window.mnExtraFrameEdit||{});
- box.innerHTML=`<small style="display:block;color:var(--muted);margin-bottom:6px">VISTA PREVIA DEL EXTRA</small><div style="width:130px;height:105px;border-radius:10px;border:1px solid var(--line);overflow:hidden;background:#16030a"><img src="${src}" style="${mnFramePreviewStyle(st)}"></div><small style="display:block;color:var(--muted);margin-top:6px">Encuadre · ${Math.round(st.x)}% / ${Math.round(st.y)}% · ${Number(st.z).toFixed(2)}x</small><button type="button" class="btn alt sm" style="margin-top:8px" onclick="openExtraFrameEditor()">Ajustar imagen</button>`
+ box.innerHTML=`<small style="display:block;color:var(--muted);margin-bottom:6px">VISTA PREVIA DEL EXTRA</small><div style="width:130px;height:105px;border-radius:10px;border:1px solid var(--line);overflow:hidden;background:#16030a"><img src="${src}" style="${mnFramePreviewStyle(st)}"></div><small style="display:block;color:var(--muted);margin-top:6px">Encuadre · ${Math.round(st.x)}% / ${Math.round(st.y)}% · ${Number(st.z).toFixed(2)}x</small><button type="button" class="btn alt sm" style="margin-top:8px" onclick="openExtraFrameEditor()">Vista en tienda / Ajustar</button>`
 }
 function previewExtraImage(input){
  const file=input?.files?.[0];if(file){window.mnExtraPreviewSrc=URL.createObjectURL(file)}
@@ -839,7 +861,7 @@ function renderProductExistingImages(){
     <button type="button" class="btn alt sm" onclick="productImageAdjust(${i},0,0,-.1)">− Zoom</button>
     <button type="button" class="btn alt sm" onclick="productImageAdjust(${i},0,0,.1)">+ Zoom</button>
     <button type="button" class="btn alt sm" onclick="productImageCenter(${i})">Centrar</button>
-    <button type="button" class="btn alt sm" onclick="openProductFrameEditor(${i})">Ajustar</button>
+    <button type="button" class="btn alt sm" onclick="openProductFrameEditor(${i})">Vista en tienda / Ajustar</button>
    </div>
    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:5px">
     <button type="button" class="btn alt sm" onclick="mnSafeOpen('${src}')">Ver</button>
@@ -1127,7 +1149,19 @@ function saveCampaign(i){
  if(i<0)discountCampaigns.unshift(c);else discountCampaigns[i]=c;
  save('discountCampaigns',discountCampaigns);closeModal();renderAdmin();
 }
-function toggleCampaign(i){discountCampaigns[i].active=discountCampaigns[i].active===false?true:false;save('discountCampaigns',discountCampaigns);renderAdmin()}
+function previewCampaignAdmin(i){
+ const c=discountCampaigns[i];if(!c)return;
+ $('modalContent').innerHTML=`<div style="text-align:center"><div class="eyebrow">VISTA EN TIENDA · CAMPAÑA</div><h2 class="script">${esc(c.title||'Reclama tu código de descuento')}</h2><p style="color:var(--muted)">${esc(c.message||'Tenemos un regalo para tu próxima compra.')}</p><div class="notice">${c.type==='percent'?`<b>${Number(c.value||0)}% de descuento</b>`:`<b>${money(c.value)} de descuento</b>`}<br><small>${c.active===false?'DESACTIVADA':((c.startsAt&&new Date(c.startsAt)>new Date())||(c.endsAt&&new Date(c.endsAt)<new Date())?'ACTIVA, PERO FUERA DE HORARIO':'ACTIVA AHORA')}</small></div><br><button type="button" class="btn gold">${esc(c.buttonText||'RECLAMAR MI CÓDIGO')}</button><p style="margin-top:14px;color:var(--muted);font-size:12px">La vista previa privada mostrará esta campaña aunque esté programada para otra hora, siempre que esté activada.</p></div>`;openModal()
+}
+async function toggleCampaign(e,i){
+ if(e){e.preventDefault();e.stopPropagation()}
+ const c=discountCampaigns[i];if(!c)return;
+ c.active=c.active===false?true:false;
+ save('discountCampaigns',discountCampaigns);
+ if(window.mnCloudReady){try{await mnSyncCollection('discountCampaigns')}catch(_){}}
+ renderAdmin();
+}
+
 function deleteCampaign(i){const c=discountCampaigns[i];if(!c)return;if(!confirm(`¿Eliminar la campaña "${c.name}"? Los códigos ya reclamados NO se borrarán.`))return;discountCampaigns.splice(i,1);save('discountCampaigns',discountCampaigns);renderAdmin()}
 function toggleDiscountHidden(i){discounts[i].hidden=!discounts[i].hidden;save('discounts',discounts);renderAdmin()}
 function toggleDiscountActive(i){discounts[i].active=!discounts[i].active;save('discounts',discounts);renderAdmin()}
@@ -1451,6 +1485,15 @@ try{renderAdmin()}catch(e){console.error('Render inicial Admin:',e)}
 </script>
 <style>
 .mn-frame-editor{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(8,2,5,.72);padding:20px;z-index:100050}.mn-frame-editor.open{display:flex}.mn-frame-card{width:min(760px,100%);max-height:min(92vh,100%);overflow:auto;background:#fff7f7;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 30px 90px #0007}.mn-frame-stage{margin-top:14px;width:min(100%,520px);aspect-ratio:1/1;border:1px solid var(--line);border-radius:16px;background:#16030a;overflow:hidden;touch-action:none}.mn-frame-stage img{width:100%;height:100%;object-fit:cover}.mn-frame-toolbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}.mn-frame-sliders{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}.mn-frame-sliders label{display:block;font-size:12px;color:var(--muted)}.mn-frame-sliders input{width:100%}@media(max-width:700px){.mn-frame-toolbar,.mn-frame-sliders{grid-template-columns:repeat(2,minmax(0,1fr))}.mn-frame-card{padding:14px}}
+
+.mn-frame-store-wrap{margin-top:14px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#26050d}
+#mnFrameStorePreview{margin-top:9px;display:grid;place-items:center}
+.mn-store-product-preview{width:min(292px,100%);background:linear-gradient(180deg,#360914,#20040b);border:1px solid rgba(200,162,103,.45);border-radius:5px;overflow:hidden;color:#f9e7e8;text-align:left}
+.mn-store-product-photo{aspect-ratio:1/1;overflow:hidden;position:relative;background:#180309}.mn-store-product-photo img,.mn-store-gallery-photo img,.mn-store-extra-photo img,.mn-store-generic-preview img{width:100%;height:100%;object-fit:cover}
+.mn-prev-heart{position:absolute;right:9px;top:9px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#3b0715;border:1px solid rgba(200,162,103,.5);color:#f6dce3;font-size:18px}
+.mn-store-product-body{padding:14px;background:linear-gradient(180deg,#3b0a16,#23050d)}.mn-prev-id{font-size:9px;letter-spacing:.12em;color:#ba929a}.mn-store-product-name{font:italic 21px Georgia;margin:5px 0;color:#f2b7aa}.mn-store-product-body b{font:italic 22px Georgia;color:#f0c990}.mn-prev-old{text-decoration:line-through;color:#a88b94;font-size:12px}.mn-prev-tag{font-size:9px;padding:4px 7px;border-radius:99px;background:#5b1830;color:#f7d9df}
+.mn-store-gallery-preview{width:min(330px,100%);background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;color:#3b0715;text-align:left}.mn-store-gallery-photo{height:260px;overflow:hidden;background:#180309}.mn-store-gallery-body{padding:11px}
+.mn-store-extra-preview{width:min(240px,100%);background:#fff7f7;border:1px solid var(--line);border-radius:12px;padding:10px;color:#3b0715;text-align:left}.mn-store-extra-photo{height:110px;overflow:hidden;border-radius:9px;margin-bottom:8px;background:#180309}.mn-store-generic-preview{width:min(420px,100%);height:240px;overflow:hidden;border-radius:12px;background:#180309}
 </style>
 <style>
 #mnAuthGate{position:fixed;inset:0;z-index:99999;background:#17050b;display:flex;align-items:center;justify-content:center;padding:24px;font-family:inherit}.mn-login{width:min(430px,100%);background:#fff7f7;border:1px solid #c5a05a;padding:28px;border-radius:18px;box-shadow:0 25px 80px #0008;color:#3b0715}.mn-login h2{margin:0 0 8px;font-size:30px}.mn-login p{color:#735c64}.mn-login input{width:100%;box-sizing:border-box;margin:7px 0 12px;padding:12px;border:1px solid #d8c7cb;border-radius:10px}.mn-login button{width:100%;padding:12px;border:0;border-radius:10px;background:#3b0715;color:white;font-weight:700;cursor:pointer}#mnAuthError{color:#a11635;min-height:20px;font-size:13px;margin-top:10px}.mn-cloud-badge{position:fixed;right:12px;bottom:12px;z-index:9998;background:#17050b;color:#f4cfd9;border:1px solid #c5a05a;padding:7px 10px;border-radius:999px;font-size:11px}
