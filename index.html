@@ -381,8 +381,8 @@ function setCatalogCardImage(el,index){
  if(!imgs.length)return;
  index=(index+imgs.length)%imgs.length;
  el.dataset.idx=String(index);
- const pid=el.dataset.productId||'',p=products.find(x=>x.id===pid),src=imgs[index],im=el.querySelector('img');
- if(im&&p){im.src=src;im.style.cssText=productImageStyle(productImageSetting(p,src))}
+ const pid=el.dataset.productId||'',p=products.find(x=>x.id===pid),src=imgs[index],im=el.querySelector('.mn-product-framed-bg');
+ if(im&&p){im.dataset.src=src;im.style.cssText=productImageStyle(productImageSetting(p,src),src)}
  const badge=el.querySelector('.mn-card-count');if(badge)badge.textContent=`${index+1}/${imgs.length}`;
 }
 function startCardRotations(){
@@ -607,15 +607,15 @@ function productImageSetting(p,src){
  const m=metaFor(p?.id||''),st=m.imageSettings?.[src]||{};
  return {x:Number(st.x??50),y:Number(st.y??50),z:Number(st.z??1)}
 }
-function productImageStyle(st){
+function productImageStyle(st,src=''){
  st={x:Math.max(0,Math.min(100,Number(st?.x??50))),y:Math.max(0,Math.min(100,Number(st?.y??50))),z:Math.max(1,Math.min(3,Number(st?.z??1)))};
- const grow=(st.z-1)*100,left=-(st.z-1)*st.x,top=-(st.z-1)*st.y;
- return `position:absolute;max-width:none;width:${100+grow}%;height:${100+grow}%;left:${left}%;top:${top}%;object-fit:cover;transform:none;transform-origin:center center`
+ const safe=String(src||'').replace(/"/g,'%22');
+ return `display:block;width:100%;height:100%;background-image:url("${safe}");background-repeat:no-repeat;background-size:${st.z*100}% ${st.z*100}%;background-position:${st.x}% ${st.y}%;background-color:#16030a`
 }
 function productImageHTML(p,src){
  if(!src)return '<span class="placeholder">Mistrielle</span>';
  const st=productImageSetting(p,src);
- return `<img src="${src}" alt="" style="${productImageStyle(st)}">`
+ return `<span class="mn-product-framed-bg" data-src="${src}" style="${productImageStyle(st,src)}"></span>`
 }
 
 function productLabels(p){const m=metaFor(p.id),s=activeSeason(),live=(s?.featuredCategory&&p.category===s.featuredCategory)?['Selección de temporada']:[];return [...new Set([...live,...(m.autoLabels||[]),...(m.labels||[])])]}
