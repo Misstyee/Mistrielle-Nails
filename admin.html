@@ -604,7 +604,7 @@ function galleryGroup(g,key){
 function galleryPreviewCurrent(g){
  if(!g?.image)return '<div style="margin-top:8px;color:var(--muted);font-size:12px">Sin imagen guardada actualmente.</div>';
  const x=Number(g.focusX??50),y=Number(g.focusY??50);
- return `<div style="margin-top:12px"><small style="color:var(--muted)">IMAGEN ACTUAL · VISTA DEL CARRUSEL</small><div style="margin-top:6px;width:min(100%,340px);position:relative;aspect-ratio:1/1;border-radius:14px;border:1px solid var(--line);overflow:hidden;background:#16030a"><span id="galleryFocusPreview" data-src="${g.image}" style="${mnFramePreviewStyle({x,y,z:Number(g.zoom??1)},g.image)}"></span></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button type="button" class="btn alt sm" onclick="openGalleryFrameEditor('current')">Vista en tienda / Ajustar</button><button type="button" class="btn alt sm" onclick="mnSafeOpen('${g.image}')">Ver completa</button></div><small style="display:block;margin-top:6px;color:var(--muted)">La imagen completa seguirá viéndose al abrirla. Estos controles solo cambian el encuadre de las miniaturas y el carrusel.</small></div>`;
+ return `<div style="margin-top:12px"><small style="color:var(--muted)">IMAGEN ACTUAL · VISTA DEL CARRUSEL</small><div style="margin-top:6px;width:min(100%,340px);position:relative;aspect-ratio:1/1;border-radius:14px;border:1px solid var(--line);overflow:hidden;background:#16030a"><img id="galleryFocusPreview" src="${g.image}" alt="" style="${mnFramePreviewStyle({x,y,z:Number(g.zoom??1)})}"></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button type="button" class="btn alt sm" onclick="openGalleryFrameEditor('current')">Vista en tienda / Ajustar</button><button type="button" class="btn alt sm" onclick="mnSafeOpen('${g.image}')">Ver completa</button></div><small style="display:block;margin-top:6px;color:var(--muted)">La imagen completa seguirá viéndose al abrirla. Estos controles solo cambian el encuadre de las miniaturas y el carrusel.</small></div>`;
 }
 function galleryForm(i){
  let g=i===undefined?null:galleryItems[i],gx=Number(g?.focusX??50),gy=Number(g?.focusY??50);
@@ -635,13 +635,13 @@ function previewGalleryImage(input){
  const box=$('galleryNewPreview'),file=input?.files?.[0];if(!box)return;box.innerHTML='';
  if(!file)return;
  const url=URL.createObjectURL(file),x=Number($('galleryFocusX')?.value||50),y=Number($('galleryFocusY')?.value||50);
- box.innerHTML=`<small style="color:var(--muted)">VISTA PREVIA · CARRUSEL</small><div style="margin-top:6px;width:min(100%,340px);position:relative;aspect-ratio:1/1;border-radius:14px;border:1px solid var(--line);overflow:hidden;background:#16030a"><span id="galleryNewFocusPreview" data-src="${url}" style="${mnFramePreviewStyle({x,y,z:Number($('galleryZoom')?.value||1)},url)}"></span></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button type="button" class="btn alt sm" onclick="openGalleryFrameEditor('new')">Vista en tienda / Ajustar</button><button type="button" class="btn alt sm" onclick="mnSafeOpen('${url}')">Ver completa</button></div>`;
+ box.innerHTML=`<small style="color:var(--muted)">VISTA PREVIA · CARRUSEL</small><div style="margin-top:6px;width:min(100%,340px);position:relative;aspect-ratio:1/1;border-radius:14px;border:1px solid var(--line);overflow:hidden;background:#16030a"><img id="galleryNewFocusPreview" src="${url}" alt="" style="${mnFramePreviewStyle({x,y,z:Number($('galleryZoom')?.value||1)})}"></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button type="button" class="btn alt sm" onclick="openGalleryFrameEditor('new')">Vista en tienda / Ajustar</button><button type="button" class="btn alt sm" onclick="mnSafeOpen('${url}')">Ver completa</button></div>`;
 }
 function previewGalleryFocus(){
  const x=Number($('galleryFocusX')?.value||50),y=Number($('galleryFocusY')?.value||50);
  if($('focusXLabel'))$('focusXLabel').textContent=x+'%';
  if($('focusYLabel'))$('focusYLabel').textContent=y+'%';const z=Number($('galleryZoom')?.value||1);if($('focusZoomLabel'))$('focusZoomLabel').textContent=z.toFixed(2)+'x';
- for(const id of ['galleryFocusPreview','galleryNewFocusPreview']){const im=$(id);if(im){const src=im.dataset.src||'';im.style.cssText=mnFramePreviewStyle({x,y,z},src)}}
+ for(const id of ['galleryFocusPreview','galleryNewFocusPreview']){const im=$(id);if(im)im.style.cssText=mnFramePreviewStyle({x,y,z})}
 }
 function gallerySplit(id){return ($(id)?.value||'').split(',').map(x=>x.trim()).filter(Boolean)}
 async function saveGalleryItem(i){
@@ -726,15 +726,18 @@ function productForm(id){
 }
 
 function mnFrameNormalize(st){return {x:Math.max(0,Math.min(100,Number(st?.x??50))),y:Math.max(0,Math.min(100,Number(st?.y??50))),z:Math.max(1,Math.min(3,Number(st?.z??1)))}}
-function mnFramePreviewStyle(st,src=''){
+function mnFramePreviewStyle(st){
  st=mnFrameNormalize(st);
- const safe=String(src||'').replace(/"/g,'%22');
- return `display:block;width:100%;height:100%;background-image:url("${safe}");background-repeat:no-repeat;background-size:${st.z*100}% ${st.z*100}%;background-position:${st.x}% ${st.y}%;background-color:#16030a`
+ const tx=(50-st.x)*(st.z-1),ty=(50-st.y)*(st.z-1);
+ return `position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:translate(${tx}%,${ty}%) scale(${st.z});transform-origin:center center;pointer-events:none;user-select:none`
+}
+function mnFrameImageHTML(src,st,id=''){
+ return `<img ${id?`id="${id}"`:''} src="${src||''}" alt="" style="${mnFramePreviewStyle(st)}">`
 }
 function mnEnsureFrameModal(){
  if($('mnFrameEditor'))return;
  const wrap=document.createElement('div');
- wrap.innerHTML=`<div id="mnFrameEditor" class="mn-frame-editor"><div class="mn-frame-card"><div class="row" style="align-items:flex-start;gap:12px"><div><div class="eyebrow">EDITOR DE IMAGEN</div><h3 id="mnFrameTitle" class="script" style="margin:4px 0 0">Ajustar imagen</h3><small style="color:var(--muted)">Puedes moverla con tu dedo o mouse, además de usar los botones. En productos ya existentes, “Guardar encuadre” lo aplica inmediatamente a la tienda.</small></div><button type="button" class="btn alt sm" onclick="mnCloseFrameEditor()">Cerrar</button></div><div class="mn-frame-stage" id="mnFrameStage"><div id="mnFrameImg" style="width:100%;height:100%"></div></div><div class="mn-frame-store-wrap"><div class="eyebrow">VISTA EN TIENDA</div><div id="mnFrameStorePreview"></div><small style="display:block;color:var(--muted);margin-top:6px">Esta vista cambia en vivo mientras mueves o acercas la imagen.</small></div><div class="mn-frame-toolbar"><button type="button" class="btn alt sm" onclick="mnFrameNudge(-5,0,0)">←</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,-5,0)">↑</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,5,0)">↓</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(5,0,0)">→</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,0,-.1)">− Zoom</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,0,.1)">+ Zoom</button><button type="button" class="btn alt sm" onclick="mnFrameCenter()">Centrar</button><button type="button" class="btn gold sm" onclick="mnSaveFrameEditor()">Guardar encuadre</button></div><div class="mn-frame-sliders"><label>Horizontal · <span id="mnFrameXLabel">50%</span><input id="mnFrameX" type="range" min="0" max="100" value="50" oninput="mnFrameSliderSync()"></label><label>Vertical · <span id="mnFrameYLabel">50%</span><input id="mnFrameY" type="range" min="0" max="100" value="50" oninput="mnFrameSliderSync()"></label><label>Zoom · <span id="mnFrameZLabel">1.00x</span><input id="mnFrameZ" type="range" min="1" max="3" step=".05" value="1" oninput="mnFrameSliderSync()"></label></div></div></div>`;
+ wrap.innerHTML=`<div id="mnFrameEditor" class="mn-frame-editor"><div class="mn-frame-card"><div class="row" style="align-items:flex-start;gap:12px"><div><div class="eyebrow">EDITOR DE IMAGEN</div><h3 id="mnFrameTitle" class="script" style="margin:4px 0 0">Ajustar imagen</h3><small style="color:var(--muted)">Puedes moverla con tu dedo o mouse, además de usar los botones. En productos ya existentes, “Guardar encuadre” lo aplica inmediatamente a la tienda.</small></div><button type="button" class="btn alt sm" onclick="mnCloseFrameEditor()">Cerrar</button></div><div class="mn-frame-stage" id="mnFrameStage"><img id="mnFrameImg" alt=""></div><div class="mn-frame-store-wrap"><div class="eyebrow">VISTA EN TIENDA</div><div id="mnFrameStorePreview"></div><small style="display:block;color:var(--muted);margin-top:6px">Esta vista cambia en vivo mientras mueves o acercas la imagen.</small></div><div class="mn-frame-toolbar"><button type="button" class="btn alt sm" onclick="mnFrameNudge(-5,0,0)">←</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,-5,0)">↑</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,5,0)">↓</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(5,0,0)">→</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,0,-.1)">− Zoom</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,0,.1)">+ Zoom</button><button type="button" class="btn alt sm" onclick="mnFrameCenter()">Centrar</button><button type="button" class="btn gold sm" onclick="mnSaveFrameEditor()">Guardar encuadre</button></div><div class="mn-frame-sliders"><label>Horizontal · <span id="mnFrameXLabel">50%</span><input id="mnFrameX" type="range" min="0" max="100" value="50" oninput="mnFrameSliderSync()"></label><label>Vertical · <span id="mnFrameYLabel">50%</span><input id="mnFrameY" type="range" min="0" max="100" value="50" oninput="mnFrameSliderSync()"></label><label>Zoom · <span id="mnFrameZLabel">1.00x</span><input id="mnFrameZ" type="range" min="1" max="3" step=".05" value="1" oninput="mnFrameSliderSync()"></label></div></div></div>`;
  document.body.appendChild(wrap.firstChild);
  const stage=$('mnFrameStage');
  stage.addEventListener('pointerdown',mnFramePointerStart);
@@ -750,14 +753,14 @@ function mnOpenFrameEditor(opts){
  const st=mnFrameNormalize(opts||{});
  window.mnFrameEditorState={title:opts?.title||'Ajustar imagen',src:opts?.src||'',x:st.x,y:st.y,z:st.z,onSave:typeof opts?.onSave==='function'?opts.onSave:()=>{},drag:false,lastX:0,lastY:0,kind:opts?.kind||'image',context:opts?.context||{}};
  $('mnFrameTitle').textContent=window.mnFrameEditorState.title;
- $('mnFrameImg').dataset.src=window.mnFrameEditorState.src||'';
+ $('mnFrameImg').src=window.mnFrameEditorState.src||'';
  $('mnFrameEditor').classList.add('open');
  mnFrameSyncInputs();
 }
 function mnCloseFrameEditor(){$('mnFrameEditor')?.classList.remove('open')}
 function mnFrameStorePreviewHTML(s){
  const st=mnFrameNormalize(s),src=s.src||'',kind=s.kind||'image',ctx=s.context||{};
- const image=`<span class="mn-preview-framed-image" style="${mnFramePreviewStyle(st,src)}"></span>`;
+ const image=mnFrameImageHTML(src,st);
  if(kind==='product'){
   const name=($('pn')?.value||ctx.name||'Producto Mistrielle'),id=ctx.id||'MN-000',status=$('pst')?.value||ctx.status||'Disponible';
   const price=Number($('pp')?.value||ctx.price||0),sale=Number($('psale')?.value||ctx.salePrice||0);
@@ -784,16 +787,19 @@ function mnFrameSyncInputs(){
  if($('mnFrameXLabel'))$('mnFrameXLabel').textContent=Math.round(s.x)+'%';
  if($('mnFrameYLabel'))$('mnFrameYLabel').textContent=Math.round(s.y)+'%';
  if($('mnFrameZLabel'))$('mnFrameZLabel').textContent=Number(s.z).toFixed(2)+'x';
- const im=$('mnFrameImg');if(im)im.style.cssText=mnFramePreviewStyle(s,s.src);
+ const im=$('mnFrameImg');if(im)im.style.cssText=mnFramePreviewStyle(s);
  mnRenderStoreImagePreview();
 }
 function mnFrameSliderSync(){
  const s=window.mnFrameEditorState;if(!s)return;
- s.x=Number($('mnFrameX')?.value||50);s.y=Number($('mnFrameY')?.value||50);s.z=Number($('mnFrameZ')?.value||1);
+ const x=Number($('mnFrameX')?.value||50),y=Number($('mnFrameY')?.value||50),z=Number($('mnFrameZ')?.value||1);
+ s.x=x;s.y=y;s.z=z;
+ if(s.z<=1.001&&(Math.abs(x-50)>1||Math.abs(y-50)>1))s.z=1.10;
  mnFrameSyncInputs();
 }
 function mnFrameNudge(dx,dy,dz){
  const s=window.mnFrameEditorState;if(!s)return;
+ if((dx||dy)&&Number(s.z)<=1.001)s.z=1.10;
  s.x=Math.max(0,Math.min(100,Number(s.x)+dx));
  s.y=Math.max(0,Math.min(100,Number(s.y)+dy));
  s.z=Math.max(1,Math.min(3,Number(s.z)+dz));
@@ -810,7 +816,8 @@ function mnFramePointerMove(e){
  const s=window.mnFrameEditorState,stage=$('mnFrameStage');if(!s?.drag||!stage)return;
  const rect=stage.getBoundingClientRect(),dx=e.clientX-s.lastX,dy=e.clientY-s.lastY;
  s.lastX=e.clientX;s.lastY=e.clientY;
- const sensitivity=100/Math.max(Math.min(rect.width,rect.height),1);
+ if(Number(s.z)<=1.001&&(Math.abs(dx)>1||Math.abs(dy)>1))s.z=1.10;
+ const sensitivity=115/Math.max(Math.min(rect.width,rect.height),1);
  s.x=Math.max(0,Math.min(100,Number(s.x)-dx*sensitivity));
  s.y=Math.max(0,Math.min(100,Number(s.y)-dy*sensitivity));
  mnFrameSyncInputs();e.preventDefault();
@@ -859,10 +866,10 @@ function openPendingProductFrameEditor(i){
 function renderPendingProductPreviews(){
  const box=$('pnewimgs');if(!box)return;
  const urls=window.mnProductNewPreviewUrls||[],frames=window.mnNewProductFramesEdit||[];
- box.innerHTML=urls.length?`<small style="display:block;color:var(--muted);margin-bottom:7px">NUEVAS IMÁGENES · ${urls.length}</small><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px">${urls.map((src,i)=>{const st=mnFrameNormalize(frames[i]||{});return `<div style="border:1px solid var(--line);border-radius:12px;padding:8px"><div style="position:relative;width:100%;height:150px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#16030a"><span style="${mnFramePreviewStyle(st,src)}"></span></div><small style="display:block;color:var(--muted);margin:7px 0">Encuadre · ${Math.round(st.x)}% / ${Math.round(st.y)}% · ${Number(st.z).toFixed(2)}x</small><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px"><button type="button" class="btn alt sm" onclick="openPendingProductFrameEditor(${i})">Vista en tienda / Ajustar</button><button type="button" class="btn alt sm" onclick="mnSafeOpen('${src}')">Ver</button></div></div>`}).join('')}</div>`:'';
+ box.innerHTML=urls.length?`<small style="display:block;color:var(--muted);margin-bottom:7px">NUEVAS IMÁGENES · ${urls.length}</small><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px">${urls.map((src,i)=>{const st=mnFrameNormalize(frames[i]||{});return `<div style="border:1px solid var(--line);border-radius:12px;padding:8px"><div style="position:relative;width:100%;height:150px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#16030a"><img src="${src}" alt="" style="${mnFramePreviewStyle(st)}"></div><small style="display:block;color:var(--muted);margin:7px 0">Encuadre · ${Math.round(st.x)}% / ${Math.round(st.y)}% · ${Number(st.z).toFixed(2)}x</small><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px"><button type="button" class="btn alt sm" onclick="openPendingProductFrameEditor(${i})">Vista en tienda / Ajustar</button><button type="button" class="btn alt sm" onclick="mnSafeOpen('${src}')">Ver</button></div></div>`}).join('')}</div>`:'';
 }
 function openGalleryFrameEditor(kind='current'){
- const src=kind==='new'?($('galleryNewFocusPreview')?.dataset?.src||''):($('galleryFocusPreview')?.dataset?.src||'');
+ const src=kind==='new'?($('galleryNewFocusPreview')?.src||''):($('galleryFocusPreview')?.src||'');
  if(!src)return;
  mnOpenFrameEditor({title:'Ajustar imagen del portafolio',src,x:Number($('galleryFocusX')?.value||50),y:Number($('galleryFocusY')?.value||50),z:Number($('galleryZoom')?.value||1),kind:'gallery',context:{title:$('galleryItemTitle')?.value||'Diseño Mistrielle',client:$('gallerySourceType')?.value==='client'},onSave:(next)=>{
  if($('galleryFocusX'))$('galleryFocusX').value=next.x;
@@ -893,7 +900,7 @@ function renderExtraPreview(){
  const box=$('xpreview');if(!box)return;
  const src=window.mnExtraPreviewSrc||'';if(!src){box.innerHTML='<small style="color:var(--muted)">Sin imagen seleccionada.</small>';return}
  const st=mnFrameNormalize(window.mnExtraFrameEdit||{});
- box.innerHTML=`<small style="display:block;color:var(--muted);margin-bottom:6px">VISTA PREVIA DEL EXTRA</small><div style="position:relative;width:130px;height:105px;border-radius:10px;border:1px solid var(--line);overflow:hidden;background:#16030a"><span style="${mnFramePreviewStyle(st,src)}"></span></div><small style="display:block;color:var(--muted);margin-top:6px">Encuadre · ${Math.round(st.x)}% / ${Math.round(st.y)}% · ${Number(st.z).toFixed(2)}x</small><button type="button" class="btn alt sm" style="margin-top:8px" onclick="openExtraFrameEditor()">Vista en tienda / Ajustar</button>`
+ box.innerHTML=`<small style="display:block;color:var(--muted);margin-bottom:6px">VISTA PREVIA DEL EXTRA</small><div style="position:relative;width:130px;height:105px;border-radius:10px;border:1px solid var(--line);overflow:hidden;background:#16030a"><img src="${src}" alt="" style="${mnFramePreviewStyle(st)}"></div><small style="display:block;color:var(--muted);margin-top:6px">Encuadre · ${Math.round(st.x)}% / ${Math.round(st.y)}% · ${Number(st.z).toFixed(2)}x</small><button type="button" class="btn alt sm" style="margin-top:8px" onclick="openExtraFrameEditor()">Vista en tienda / Ajustar</button>`
 }
 function previewExtraImage(input){
  const file=input?.files?.[0];if(file){window.mnExtraPreviewSrc=URL.createObjectURL(file)}
@@ -907,7 +914,7 @@ function renderProductExistingImages(){
   const st=settings[src]||{x:50,y:50,z:1};
   return `<div style="border:1px solid var(--line);border-radius:12px;padding:8px">
    <div style="position:relative;width:100%;height:150px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#16030a">
-    <span style="${mnFramePreviewStyle(st,src)}"></span>
+    <img src="${src}" alt="" style="${mnFramePreviewStyle(st)}">
     ${i===0?'<span style="position:absolute;left:5px;top:5px;background:#c5a05a;color:#2b0710;padding:2px 5px;border-radius:5px;font-size:9px;font-weight:900">PORTADA</span>':''}
    </div>
    <small style="display:block;color:var(--muted);margin:7px 0">Encuadre · ${Math.round(Number(st.x??50))}% / ${Math.round(Number(st.y??50))}% · ${Number(st.z??1).toFixed(2)}x</small>
@@ -1573,7 +1580,7 @@ document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelect
 try{renderAdmin()}catch(e){console.error('Render inicial Admin:',e)}
 </script>
 <style>
-.mn-frame-editor{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(8,2,5,.72);padding:20px;z-index:100050}.mn-frame-editor.open{display:flex}.mn-frame-card{width:min(760px,100%);max-height:min(92vh,100%);overflow:auto;background:#fff7f7;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 30px 90px #0007}.mn-frame-stage{position:relative;margin-top:14px;width:min(100%,520px);aspect-ratio:1/1;border:1px solid var(--line);border-radius:16px;background:#16030a;overflow:hidden;touch-action:none}.mn-frame-stage #mnFrameImg,.mn-preview-framed-image{display:block;width:100%;height:100%}.mn-frame-toolbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}.mn-frame-sliders{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}.mn-frame-sliders label{display:block;font-size:12px;color:var(--muted)}.mn-frame-sliders input{width:100%}@media(max-width:700px){.mn-frame-toolbar,.mn-frame-sliders{grid-template-columns:repeat(2,minmax(0,1fr))}.mn-frame-card{padding:14px}}
+.mn-frame-editor{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(8,2,5,.72);padding:20px;z-index:100050}.mn-frame-editor.open{display:flex}.mn-frame-card{width:min(760px,100%);max-height:min(92vh,100%);overflow:auto;background:#fff7f7;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 30px 90px #0007}.mn-frame-stage{position:relative;margin-top:14px;width:min(100%,520px);aspect-ratio:1/1;border:1px solid var(--line);border-radius:16px;background:#16030a;overflow:hidden;touch-action:none}.mn-frame-stage img{display:block;width:100%;height:100%;object-fit:cover;pointer-events:none;user-select:none}.mn-frame-toolbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}.mn-frame-sliders{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}.mn-frame-sliders label{display:block;font-size:12px;color:var(--muted)}.mn-frame-sliders input{width:100%}@media(max-width:700px){.mn-frame-toolbar,.mn-frame-sliders{grid-template-columns:repeat(2,minmax(0,1fr))}.mn-frame-card{padding:14px}}
 
 .mn-frame-store-wrap{margin-top:14px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#26050d}
 #mnFrameStorePreview{margin-top:9px;display:grid;place-items:center}
