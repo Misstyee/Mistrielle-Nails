@@ -324,25 +324,19 @@ const $=id=>document.getElementById(id), money=n=>'$'+Number(n||0).toFixed(0), p
 function nextProductId(){idCounter++;save('idCounter',idCounter);return 'MN-'+String(idCounter).padStart(3,'0')}
 function mnLockPageScroll(){
  if(document.body.dataset.mnScrollLocked==='1')return;
- const y=window.scrollY||document.documentElement.scrollTop||0;
  document.body.dataset.mnScrollLocked='1';
- document.body.dataset.mnScrollY=String(y);
- document.body.style.position='fixed';
- document.body.style.top=`-${y}px`;
- document.body.style.left='0';
- document.body.style.right='0';
- document.body.style.width='100%';
+ document.body.dataset.mnPrevOverflow=document.body.style.overflow||'';
+ document.documentElement.dataset.mnPrevOverflow=document.documentElement.style.overflow||'';
+ document.body.style.overflow='hidden';
+ document.documentElement.style.overflow='hidden';
 }
 function mnUnlockPageScroll(){
  if(document.body.dataset.mnScrollLocked!=='1')return;
- const y=Number(document.body.dataset.mnScrollY||0);
  document.body.dataset.mnScrollLocked='0';
- document.body.style.position='';
- document.body.style.top='';
- document.body.style.left='';
- document.body.style.right='';
- document.body.style.width='';
- window.scrollTo(0,y);
+ document.body.style.overflow=document.body.dataset.mnPrevOverflow||'';
+ document.documentElement.style.overflow=document.documentElement.dataset.mnPrevOverflow||'';
+ delete document.body.dataset.mnPrevOverflow;
+ delete document.documentElement.dataset.mnPrevOverflow;
 }
 function openModal(){
  const modal=$('modal');if(!modal)return;
@@ -429,15 +423,15 @@ function galleryTagText(g){return galleryAllTerms(g).slice(0,3).join(' · ')}
 function galleryObjectPosition(g){return `${Number(g.focusX??50)}% ${Number(g.focusY??50)}%`}
 function galleryZoom(g){return Number(g.zoom??1)}
 function galleryImageStyle(g){
- const x=Number(g.focusX??50),y=Number(g.focusY??50),z=Number(g.zoom??1),tx=(50-x)*(z-1),ty=(50-y)*(z-1);
- return `object-position:${x}% ${y}%;transform:translate(${tx}%,${ty}%) scale(${z});transform-origin:center center`
+ const x=Math.max(0,Math.min(100,Number(g.focusX??50))),y=Math.max(0,Math.min(100,Number(g.focusY??50))),z=Math.max(1,Math.min(3,Number(g.zoom??1)));
+ const grow=(z-1)*100,left=-(z-1)*x,top=-(z-1)*y;
+ return `position:absolute;max-width:none;width:${100+grow}%;height:${100+grow}%;left:${left}%;top:${top}%;object-fit:cover;transform:none`
 }
 function extraImageSetting(x){const st=x?.imageSettings||{};return {x:Number(st.x??50),y:Number(st.y??50),z:Number(st.z??1)}}
 function extraImageHTML(x,{width='100%',height='110px',radius='9px',className='',marginBottom='0'}={}){
  if(!x?.image)return '';
- const st=extraImageSetting(x);
- const tx=(50-st.x)*(st.z-1),ty=(50-st.y)*(st.z-1);
- return `<img ${className?`class="${className}"`:''} src="${x.image}" alt="" style="width:${width};height:${height};object-fit:cover;object-position:${st.x}% ${st.y}%;transform:translate(${tx}%,${ty}%) scale(${st.z});transform-origin:center center;border-radius:${radius};margin-bottom:${marginBottom}">`;
+ const st=extraImageSetting(x),z=Math.max(1,Math.min(3,Number(st.z??1))),grow=(z-1)*100,left=-(z-1)*Number(st.x??50),top=-(z-1)*Number(st.y??50);
+ return `<span style="position:relative;display:block;width:${width};height:${height};overflow:hidden;border-radius:${radius};margin-bottom:${marginBottom}"><img ${className?`class="${className}"`:''} src="${x.image}" alt="" style="position:absolute;max-width:none;width:${100+grow}%;height:${100+grow}%;left:${left}%;top:${top}%;object-fit:cover;transform:none"></span>`;
 }
 function cartThumbHTML(item){
  if(!item?.image)return '<div class="thumb"></div>';
@@ -448,7 +442,7 @@ function cartThumbHTML(item){
 function galleryCardHTML(g,cls='mn-portfolio-card'){
  const details=galleryAllTerms(g).slice(0,4);
  return `<article class="${cls}" onclick="openGalleryItem('${g.id}')">
-  <div class="mn-gallery-image-wrap" style="overflow:hidden">
+  <div class="mn-gallery-image-wrap" style="position:relative;overflow:hidden">
    <img src="${g.image}" alt="${esc(g.title||'Diseño Mistrielle')}" style="${galleryImageStyle(g)}">
   </div>
   ${cls==='mn-gallery-card'
@@ -614,9 +608,9 @@ function productImageSetting(p,src){
  return {x:Number(st.x??50),y:Number(st.y??50),z:Number(st.z??1)}
 }
 function productImageStyle(st){
- st={x:Number(st?.x??50),y:Number(st?.y??50),z:Number(st?.z??1)};
- const tx=(50-st.x)*(st.z-1),ty=(50-st.y)*(st.z-1);
- return `width:100%;height:100%;object-fit:cover;object-position:${st.x}% ${st.y}%;transform:translate(${tx}%,${ty}%) scale(${st.z});transform-origin:center center`
+ st={x:Math.max(0,Math.min(100,Number(st?.x??50))),y:Math.max(0,Math.min(100,Number(st?.y??50))),z:Math.max(1,Math.min(3,Number(st?.z??1)))};
+ const grow=(st.z-1)*100,left=-(st.z-1)*st.x,top=-(st.z-1)*st.y;
+ return `position:absolute;max-width:none;width:${100+grow}%;height:${100+grow}%;left:${left}%;top:${top}%;object-fit:cover;transform:none;transform-origin:center center`
 }
 function productImageHTML(p,src){
  if(!src)return '<span class="placeholder">Mistrielle</span>';
@@ -734,7 +728,7 @@ function reviewSummary(id){const a=approvedReviewsFor(id);if(!a.length)return '<
 async function openProduct(id){
  try{const {data,error}=await mnCloud.rpc('mn_public_reviews');if(!error&&Array.isArray(data))reviews=data}catch(e){console.error('Actualizar reseñas del producto:',e)}
  let p=products.find(x=>x.id===id);if(!p||!productIsPublicNow(p))return alert('Este producto no está disponible en la tienda en este momento.');let st=p.stock||{},meta=metaFor(id),rv=approvedReviewsFor(id);
- $('modalContent').innerHTML=`<div class="eyebrow">${p.id} · ${esc(p.category)}</div><h2 class="script" style="font-size:32px;color:var(--wine)">${esc(p.name)}</h2>${productLabels(p).length?`<div class="mn-product-labels">${productLabels(p).map(x=>`<span class="mn-product-label">${esc(x)}</span>`).join('')}</div>`:''}<div style="margin-bottom:8px">${reviewSummary(id)}</div><div class="photo" style="max-height:330px;cursor:zoom-in" id="productMainPhoto" ${p.images?.[0]?`onclick="openPublicViewer('${p.images[0]}')"`:''}>${productImageHTML(p,p.images?.[0])}</div>${(p.images||[]).length>1?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0">${p.images.map((src,i)=>`<button type="button" onclick="setProductImage('${encodeURIComponent(src)}','${p.id}')" style="padding:0;border:1px solid var(--line);background:none;border-radius:10px;overflow:hidden;cursor:pointer;width:64px;height:64px"><img src="${src}" alt="Vista ${i+1}" style="width:100%;height:100%;object-fit:cover;object-position:${productImageSetting(p,src).x}% ${productImageSetting(p,src).y}%;transform:scale(${productImageSetting(p,src).z});transform-origin:${productImageSetting(p,src).x}% ${productImageSetting(p,src).y}%"></button>`).join('')}</div>`:''}<p>${esc(p.description||'')}</p>${p.keywords?`<small style="color:var(--muted)">Estilo: ${esc(p.keywords)}</small>`:''}<div class="mn-prep"><b>Preparación estimada:</b> ${esc(meta.prepTime||storeOps.defaultPrep||'3–5 días hábiles')}</div><div style="margin:12px 0">${priceHTML(p)}</div><div class="fields"><div class="field"><label>FORMA *</label><select id="pf">${(p.forms||forms).map(x=>`<option>${esc(x)}</option>`)}</select></div><div class="field"><label>LARGO *</label><select id="pl">${(p.lengths||lengths).map(x=>`<option>${esc(x)}</option>`)}</select></div><div class="field full"><label>TALLA *</label><select id="ps" onchange="measureToggle()">${(p.sizes||sizes).map(x=>{let qty=Number(st[x]||0),disabled=!p.madeToOrder&&qty<=0;return `<option value="${esc(x)}" ${disabled?'disabled':''}>${esc(x)}${p.madeToOrder?'':` (${qty} disponibles)`}</option>`}).join('')}<option>Personalizada</option></select></div><div id="measures" class="full"></div></div><br><button class="btn" onclick="addCart('${id}')">Agregar al carrito</button><div class="mn-reviews"><div class="row"><h3 class="script">Reseñas</h3><button class="btn alt sm" onclick="reviewForm('${id}')">Escribir reseña</button></div>${rv.length?rv.slice(0,8).map(r=>`<div class="mn-review"><div class="mn-review-stars">${'★'.repeat(Number(r.rating||0))}${'☆'.repeat(5-Number(r.rating||0))}</div><b>${esc(r.name||'Clienta')}</b><p>${esc(r.comment||'')}</p>${r.image_data?`<img class="mn-review-photo" src="${r.image_data}" alt="Foto de la reseña" style="cursor:zoom-in" onclick="openPublicViewer(this.src)">`:''}</div>`).join(''):'<div class="notice">Todavía no hay reseñas publicadas.</div>'}</div>`;
+ $('modalContent').innerHTML=`<div class="eyebrow">${p.id} · ${esc(p.category)}</div><h2 class="script" style="font-size:32px;color:var(--wine)">${esc(p.name)}</h2>${productLabels(p).length?`<div class="mn-product-labels">${productLabels(p).map(x=>`<span class="mn-product-label">${esc(x)}</span>`).join('')}</div>`:''}<div style="margin-bottom:8px">${reviewSummary(id)}</div><div class="photo" style="position:relative;max-height:330px;cursor:zoom-in" id="productMainPhoto" ${p.images?.[0]?`onclick="openPublicViewer('${p.images[0]}')"`:''}>${productImageHTML(p,p.images?.[0])}</div>${(p.images||[]).length>1?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0">${p.images.map((src,i)=>`<button type="button" onclick="setProductImage('${encodeURIComponent(src)}','${p.id}')" style="padding:0;border:1px solid var(--line);background:none;border-radius:10px;overflow:hidden;cursor:pointer;width:64px;height:64px"><span style="position:relative;display:block;width:100%;height:100%;overflow:hidden">${productImageHTML(p,src)}</span></button>`).join('')}</div>`:''}<p>${esc(p.description||'')}</p>${p.keywords?`<small style="color:var(--muted)">Estilo: ${esc(p.keywords)}</small>`:''}<div class="mn-prep"><b>Preparación estimada:</b> ${esc(meta.prepTime||storeOps.defaultPrep||'3–5 días hábiles')}</div><div style="margin:12px 0">${priceHTML(p)}</div><div class="fields"><div class="field"><label>FORMA *</label><select id="pf">${(p.forms||forms).map(x=>`<option>${esc(x)}</option>`)}</select></div><div class="field"><label>LARGO *</label><select id="pl">${(p.lengths||lengths).map(x=>`<option>${esc(x)}</option>`)}</select></div><div class="field full"><label>TALLA *</label><select id="ps" onchange="measureToggle()">${(p.sizes||sizes).map(x=>{let qty=Number(st[x]||0),disabled=!p.madeToOrder&&qty<=0;return `<option value="${esc(x)}" ${disabled?'disabled':''}>${esc(x)}${p.madeToOrder?'':` (${qty} disponibles)`}</option>`}).join('')}<option>Personalizada</option></select></div><div id="measures" class="full"></div></div><br><button class="btn" onclick="addCart('${id}')">Agregar al carrito</button><div class="mn-reviews"><div class="row"><h3 class="script">Reseñas</h3><button class="btn alt sm" onclick="reviewForm('${id}')">Escribir reseña</button></div>${rv.length?rv.slice(0,8).map(r=>`<div class="mn-review"><div class="mn-review-stars">${'★'.repeat(Number(r.rating||0))}${'☆'.repeat(5-Number(r.rating||0))}</div><b>${esc(r.name||'Clienta')}</b><p>${esc(r.comment||'')}</p>${r.image_data?`<img class="mn-review-photo" src="${r.image_data}" alt="Foto de la reseña" style="cursor:zoom-in" onclick="openPublicViewer(this.src)">`:''}</div>`).join(''):'<div class="notice">Todavía no hay reseñas publicadas.</div>'}</div>`;
  openModal();
 }
 function reviewForm(id){
