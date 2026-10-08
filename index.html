@@ -424,8 +424,7 @@ function galleryObjectPosition(g){return `${Number(g.focusX??50)}% ${Number(g.fo
 function galleryZoom(g){return Number(g.zoom??1)}
 function galleryImageStyle(g){
  const x=Math.max(0,Math.min(100,Number(g.focusX??50))),y=Math.max(0,Math.min(100,Number(g.focusY??50))),z=Math.max(1,Math.min(3,Number(g.zoom??1)));
- const grow=(z-1)*100,left=-(z-1)*x,top=-(z-1)*y;
- return `position:absolute;max-width:none;width:${100+grow}%;height:${100+grow}%;left:${left}%;top:${top}%;object-fit:cover;transform:none`
+ return `position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(${z});transform-origin:${x}% ${y}%`
 }
 function extraImageSetting(x){const st=x?.imageSettings||{};return {x:Number(st.x??50),y:Number(st.y??50),z:Number(st.z??1)}}
 function extraImageHTML(x,{width='100%',height='110px',radius='9px',className='',marginBottom='0'}={}){
@@ -609,8 +608,7 @@ function productImageSetting(p,src){
 }
 function productImageStyle(st){
  st={x:Math.max(0,Math.min(100,Number(st?.x??50))),y:Math.max(0,Math.min(100,Number(st?.y??50))),z:Math.max(1,Math.min(3,Number(st?.z??1)))};
- const tx=(50-st.x)*(st.z-1),ty=(50-st.y)*(st.z-1);
- return `position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:translate(${tx}%,${ty}%) scale(${st.z});transform-origin:center center`
+ return `position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(${st.z});transform-origin:${st.x}% ${st.y}%`
 }
 function productImageHTML(p,src){
  if(!src)return '<span class="placeholder">Mistrielle</span>';
