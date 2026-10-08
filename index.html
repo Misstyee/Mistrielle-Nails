@@ -479,6 +479,7 @@ function activeGiftCampaigns(){
  const now=Date.now();
  return (discountCampaigns||[]).filter(c=>{
   if(!c||c.active===false)return false;
+  if(window.mnAdminPreview)return true;
   if(c.startsAt&&new Date(c.startsAt).getTime()>now)return false;
   if(c.endsAt&&new Date(c.endsAt).getTime()<now)return false;
   return true;
