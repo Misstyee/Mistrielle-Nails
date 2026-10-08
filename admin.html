@@ -608,6 +608,7 @@ function galleryPreviewCurrent(g){
 }
 function galleryForm(i){
  let g=i===undefined?null:galleryItems[i],gx=Number(g?.focusX??50),gy=Number(g?.focusY??50);
+ window.mnEditingGalleryIndex=i===undefined?-1:i;
  $('modalContent').innerHTML=`<div class="eyebrow">PORTAFOLIO MISTRIELLE</div><h2 class="script">${g?'Editar imagen':'Nueva imagen de exhibición'}</h2><div class="fields">
  <div class="field full"><label>IMAGEN *</label><label for="galleryImage" class="btn alt sm" style="display:inline-block;cursor:pointer">Elegir imagen</label><input id="galleryImage" type="file" accept="image/*" style="display:none" onchange="previewGalleryImage(this)"><div id="galleryNewPreview" style="margin-top:10px"></div>${galleryPreviewCurrent(g)}</div>
  <div class="field full"><label>TÍTULO (OPCIONAL)</label><input id="galleryItemTitle" value="${esc(g?.title||'')}" placeholder="Ej. Halloween 3D"></div><div class="field"><label>TIPO DE FOTO</label><select id="gallerySourceType"><option value="brand" ${(g?.sourceType||(!g?.sourceRewardId?'brand':'client'))==='brand'?'selected':''}>Foto / publicidad de Mistrielle</option><option value="client" ${(g?.sourceType||(!g?.sourceRewardId?'brand':'client'))==='client'?'selected':''}>Foto real de clienta</option></select><small style="color:var(--muted)">Las fotos de clientas se muestran en una sección separada para no romper la estética editorial del portafolio.</small></div>
@@ -677,6 +678,7 @@ function deleteGallery(i){const g=galleryItems[i];if(!g)return;if(!confirm(`¿El
 function saveGallerySettings(){gallerySettings={...gallerySettings,speed:Math.max(1,Math.min(30,Number($('gallerySpeed').value||4))),title:$('galleryTitle').value.trim()||'The Mistrielle Edit',subtitle:$('gallerySubtitle').value.trim(),clientTitle:$('galleryClientTitle')?.value.trim()||'Mistrielle en ti',clientSubtitle:$('galleryClientSubtitle')?.value.trim()||'Fotos reales de nuestras clientas usando sus sets Mistrielle.',rewardText:$('galleryReward').value.trim()};save('gallerySettings',gallerySettings);alert('Configuración de galería guardada.');renderAdmin()}
 function extraForm(i){
  let x=i===undefined?null:extras[i];
+ window.mnEditingExtraIndex=i===undefined?-1:i;
  window.mnExtraFrameEdit=mnFrameNormalize(x?.imageSettings||{});
  window.mnExtraPreviewSrc=x?.image||'';
  $('modalContent').innerHTML=`<div class="eyebrow">COMPLEMENTO DEL PEDIDO</div><h2 class="script">${x?'Editar':'Nuevo'} extra</h2><div class="fields"><div class="field full"><label>NOMBRE *</label><input id="xname" value="${esc(x?.name||'')}" placeholder="Ej. Pegamento extra 2 g"></div><div class="field full"><label>DESCRIPCIÓN</label><input id="xdesc" value="${esc(x?.description||'')}" placeholder="Ej. Pegamento adicional para futuras aplicaciones"></div><div class="field"><label>PRECIO *</label><input id="xprice" type="number" min="0" step=".01" value="${Number(x?.price||0)}"></div><div class="field"><label>STOCK *</label><input id="xstock" type="number" min="0" step="1" value="${Number(x?.stock||0)}"></div><div class="field"><label>ESTADO</label><select id="xactive"><option value="true" ${x?.active!==false?'selected':''}>Activo</option><option value="false" ${x?.active===false?'selected':''}>Oculto</option></select></div><div class="field full"><label>IMAGEN</label><input id="ximage" type="file" accept="image/*" onchange="previewExtraImage(this)"><div id="xpreview" style="margin-top:8px"></div><small style="display:block;color:var(--muted);margin-top:6px">Puedes moverla, centrarla y hacer zoom para decidir cómo se verá en la tienda.</small></div></div><br><button class="btn" onclick="saveExtra(${i===undefined?'-1':i})">Guardar extra</button>`;
@@ -717,6 +719,7 @@ function productDateQuick(id,mode){
 }
 function productForm(id){
  let p=id?products.find(x=>x.id===id):null,meta=productMetaFor(p?.id||'');
+ window.mnEditingProductId=p?.id||'';
  window.mnProductImagesEdit=[...(p?.images||[])];window.mnProductImageSettingsEdit=JSON.parse(JSON.stringify(meta.imageSettings||{}));
  $('modalContent').innerHTML=`<div class="eyebrow">${p?'EDITAR':'NUEVO'} PRODUCTO</div><h2 class="script">${p?esc(p.name):'Agregar producto'}</h2><div class="fields"><div class="field"><label>NOMBRE *</label><input id="pn" value="${esc(p?.name||'')}"></div><div class="field"><label>PRECIO *</label><input id="pp" type="number" value="${p?.price||''}"></div><div class="field"><label>PRECIO PROMOCIONAL</label><input id="psale" type="number" value="${p?.salePrice||''}"></div><div class="field"><label>CATEGORÍA</label><select id="pc">${categories.map(x=>`<option ${x===p?.category?'selected':''}>${x}</option>`)}</select></div><div class="field full"><label>DESCRIPCIÓN</label><textarea id="pd">${esc(p?.description||'')}</textarea></div><div class="field full"><label>PALABRAS DE BÚSQUEDA</label><input id="pkey" value="${esc(p?.keywords||'')}" placeholder="rosa, verano, flores..."></div><div class="field full"><label>ETIQUETAS VISIBLES</label><input id="plabels" value="${esc((meta.labels||[]).join(', '))}" placeholder="Nuevo, Edición especial, Personalizable"><small style="color:var(--muted)">Las etiquetas automáticas se gestionan desde Estadísticas.</small></div><div class="field"><label>TIEMPO DE PREPARACIÓN</label><input id="pprep" value="${esc(meta.prepTime||'')}" placeholder="${esc(storeOps.defaultPrep||'3–5 días hábiles')}"></div><div class="field"><label>PUBLICAR DESDE (OPCIONAL)</label><input id="ppublishStart" type="datetime-local" value="${esc(meta.publishStart||'')}"><div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px"><button type="button" class="btn alt sm" onclick="productDateQuick('ppublishStart','now')">Ahora</button><button type="button" class="btn alt sm" onclick="productDateQuick('ppublishStart','tomorrow')">Mañana</button><button type="button" class="btn alt sm" onclick="productDateQuick('ppublishStart','clear')">Limpiar</button></div><small style="color:var(--muted)">En teléfono puedes usar estos botones rápidos.</small></div><div class="field"><label>RETIRAR DESDE (OPCIONAL)</label><input id="ppublishEnd" type="datetime-local" value="${esc(meta.publishEnd||'')}"><div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px"><button type="button" class="btn alt sm" onclick="productDateQuick('ppublishEnd','day')">+1 día</button><button type="button" class="btn alt sm" onclick="productDateQuick('ppublishEnd','week')">+7 días</button><button type="button" class="btn alt sm" onclick="productDateQuick('ppublishEnd','clear')">Limpiar</button></div><small style="color:var(--muted)">También puedes tocar el campo de fecha normalmente.</small></div><div class="field"><label>ESTADO</label><select id="pst">${['Disponible','Agotado','Próximamente','Oculto'].map(x=>`<option ${x===p?.status?'selected':''}>${x}</option>`)}</select></div><div class="field"><label>MODALIDAD</label><select id="pmade" onchange="stockToggle()"><option value="stock" ${!p?.madeToOrder?'selected':''}>Stock disponible</option><option value="order" ${p?.madeToOrder?'selected':''}>Hecho bajo pedido</option></select></div><div class="field full" id="stockArea"><label>STOCK POR TALLA</label><div class="stockgrid">${sizes.map(s=>`<div><small>${s}</small><input class="stock" data-size="${s}" type="number" min="0" value="${p?.stock?.[s]??0}"></div>`).join('')}</div></div><div class="field full"><label>IMÁGENES (HASTA 10)</label><label for="pimgs" class="btn alt sm" style="display:inline-block;cursor:pointer">Añadir imágenes</label><input id="pimgs" type="file" accept="image/*" multiple style="display:none" onchange="previewProductFiles(this)"><small style="display:block;color:var(--muted);margin-top:6px">Puedes añadir nuevas sin borrar las anteriores. La primera es la portada.</small><div id="pnewimgs" class="previewimgs"></div><div id="pexistingimgs" style="margin-top:10px"></div></div><div class="field full"><label>FORMAS DISPONIBLES</label><div class="chips">${forms.map(x=>`<label class="chip"><input class="pf" type="checkbox" value="${x}" ${(p?.forms||forms).includes(x)?'checked':''}> ${x}</label>`)}</div></div><div class="field full"><label>LARGOS</label><div class="chips">${lengths.map(x=>`<label class="chip"><input class="pl" type="checkbox" value="${x}" ${(p?.lengths||lengths).includes(x)?'checked':''}> ${x}</label>`)}</div></div><div class="field full"><label>TALLAS</label><div class="chips">${sizes.map(x=>`<label class="chip"><input class="psz" type="checkbox" value="${x}" ${(p?.sizes||sizes).includes(x)?'checked':''}> ${x}</label>`)}</div></div></div><br><button class="btn" onclick="saveProduct('${p?.id||''}')">Guardar producto</button>`;
  renderProductExistingImages();stockToggle();openModal();
@@ -731,7 +734,7 @@ function mnFramePreviewStyle(st){
 function mnEnsureFrameModal(){
  if($('mnFrameEditor'))return;
  const wrap=document.createElement('div');
- wrap.innerHTML=`<div id="mnFrameEditor" class="mn-frame-editor"><div class="mn-frame-card"><div class="row" style="align-items:flex-start;gap:12px"><div><div class="eyebrow">EDITOR DE IMAGEN</div><h3 id="mnFrameTitle" class="script" style="margin:4px 0 0">Ajustar imagen</h3><small style="color:var(--muted)">Puedes moverla con tu dedo o mouse, además de usar los botones.</small></div><button type="button" class="btn alt sm" onclick="mnCloseFrameEditor()">Cerrar</button></div><div class="mn-frame-stage" id="mnFrameStage"><img id="mnFrameImg" alt=""></div><div class="mn-frame-store-wrap"><div class="eyebrow">VISTA EN TIENDA</div><div id="mnFrameStorePreview"></div><small style="display:block;color:var(--muted);margin-top:6px">Esta vista cambia en vivo mientras mueves o acercas la imagen.</small></div><div class="mn-frame-toolbar"><button type="button" class="btn alt sm" onclick="mnFrameNudge(-5,0,0)">←</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,-5,0)">↑</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,5,0)">↓</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(5,0,0)">→</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,0,-.1)">− Zoom</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,0,.1)">+ Zoom</button><button type="button" class="btn alt sm" onclick="mnFrameCenter()">Centrar</button><button type="button" class="btn gold sm" onclick="mnSaveFrameEditor()">Guardar encuadre</button></div><div class="mn-frame-sliders"><label>Horizontal · <span id="mnFrameXLabel">50%</span><input id="mnFrameX" type="range" min="0" max="100" value="50" oninput="mnFrameSliderSync()"></label><label>Vertical · <span id="mnFrameYLabel">50%</span><input id="mnFrameY" type="range" min="0" max="100" value="50" oninput="mnFrameSliderSync()"></label><label>Zoom · <span id="mnFrameZLabel">1.00x</span><input id="mnFrameZ" type="range" min="1" max="3" step=".05" value="1" oninput="mnFrameSliderSync()"></label></div></div></div>`;
+ wrap.innerHTML=`<div id="mnFrameEditor" class="mn-frame-editor"><div class="mn-frame-card"><div class="row" style="align-items:flex-start;gap:12px"><div><div class="eyebrow">EDITOR DE IMAGEN</div><h3 id="mnFrameTitle" class="script" style="margin:4px 0 0">Ajustar imagen</h3><small style="color:var(--muted)">Puedes moverla con tu dedo o mouse, además de usar los botones. En productos ya existentes, “Guardar encuadre” lo aplica inmediatamente a la tienda.</small></div><button type="button" class="btn alt sm" onclick="mnCloseFrameEditor()">Cerrar</button></div><div class="mn-frame-stage" id="mnFrameStage"><img id="mnFrameImg" alt=""></div><div class="mn-frame-store-wrap"><div class="eyebrow">VISTA EN TIENDA</div><div id="mnFrameStorePreview"></div><small style="display:block;color:var(--muted);margin-top:6px">Esta vista cambia en vivo mientras mueves o acercas la imagen.</small></div><div class="mn-frame-toolbar"><button type="button" class="btn alt sm" onclick="mnFrameNudge(-5,0,0)">←</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,-5,0)">↑</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,5,0)">↓</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(5,0,0)">→</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,0,-.1)">− Zoom</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,0,.1)">+ Zoom</button><button type="button" class="btn alt sm" onclick="mnFrameCenter()">Centrar</button><button type="button" class="btn gold sm" onclick="mnSaveFrameEditor()">Guardar encuadre</button></div><div class="mn-frame-sliders"><label>Horizontal · <span id="mnFrameXLabel">50%</span><input id="mnFrameX" type="range" min="0" max="100" value="50" oninput="mnFrameSliderSync()"></label><label>Vertical · <span id="mnFrameYLabel">50%</span><input id="mnFrameY" type="range" min="0" max="100" value="50" oninput="mnFrameSliderSync()"></label><label>Zoom · <span id="mnFrameZLabel">1.00x</span><input id="mnFrameZ" type="range" min="1" max="3" step=".05" value="1" oninput="mnFrameSliderSync()"></label></div></div></div>`;
  document.body.appendChild(wrap.firstChild);
  const stage=$('mnFrameStage');
  stage.addEventListener('pointerdown',mnFramePointerStart);
@@ -807,12 +810,26 @@ function mnFramePointerMove(e){
  mnFrameSyncInputs();
 }
 function mnFramePointerEnd(){if(window.mnFrameEditorState)window.mnFrameEditorState.drag=false}
-function mnSaveFrameEditor(){const s=window.mnFrameEditorState;if(!s)return;if(typeof s.onSave==='function')s.onSave(mnFrameNormalize(s));mnCloseFrameEditor()}
+function mnSaveFrameEditor(){
+ const s=window.mnFrameEditorState;if(!s)return;
+ if(typeof s.onSave==='function')s.onSave(mnFrameNormalize(s));
+ mnCloseFrameEditor();
+ const badge=$('mnCloudBadge');if(badge)badge.textContent='Nube: guardando encuadre…';
+ setTimeout(()=>{if(badge&&window.mnCloudReady)badge.textContent='Nube: conectada'},900);
+}
 function openProductFrameEditor(i){
  const src=(window.mnProductImagesEdit||[])[i];if(!src)return;
  const all=window.mnProductImageSettingsEdit||(window.mnProductImageSettingsEdit={});
  const st=all[src]||(all[src]={x:50,y:50,z:1});
- mnOpenFrameEditor({title:`Ajustar foto del producto ${i+1}`,src,x:st.x,y:st.y,z:st.z,kind:'product',context:{id:($('modalContent')?.querySelector('.eyebrow')?.textContent||'').match(/MN-\d+/)?.[0]||'',name:$('pn')?.value||'',price:Number($('pp')?.value||0),salePrice:Number($('psale')?.value||0),status:$('pst')?.value||'Disponible'},onSave:(next)=>{all[src]=next;renderProductExistingImages()}})
+ mnOpenFrameEditor({title:`Ajustar foto del producto ${i+1}`,src,x:st.x,y:st.y,z:st.z,kind:'product',context:{id:window.mnEditingProductId||'',name:$('pn')?.value||'',price:Number($('pp')?.value||0),salePrice:Number($('psale')?.value||0),status:$('pst')?.value||'Disponible'},onSave:(next)=>{
+  all[src]=next;
+  const pid=window.mnEditingProductId||'';
+  if(pid){
+   productMeta[pid]={...(productMeta[pid]||{}),imageSettings:{...((productMeta[pid]||{}).imageSettings||{}),[src]:next}};
+   save('productMeta',productMeta);
+  }
+  renderProductExistingImages();
+ }})
 }
 function openPendingProductFrameEditor(i){
  const urls=window.mnProductNewPreviewUrls||[],src=urls[i];if(!src)return;
@@ -828,12 +845,30 @@ function renderPendingProductPreviews(){
 function openGalleryFrameEditor(kind='current'){
  const src=kind==='new'?($('galleryNewFocusPreview')?.src||''):($('galleryFocusPreview')?.src||'');
  if(!src)return;
- mnOpenFrameEditor({title:'Ajustar imagen del portafolio',src,x:Number($('galleryFocusX')?.value||50),y:Number($('galleryFocusY')?.value||50),z:Number($('galleryZoom')?.value||1),kind:'gallery',context:{title:$('galleryItemTitle')?.value||'Diseño Mistrielle',client:$('gallerySourceType')?.value==='client'},onSave:(next)=>{if($('galleryFocusX'))$('galleryFocusX').value=next.x;if($('galleryFocusY'))$('galleryFocusY').value=next.y;if($('galleryZoom'))$('galleryZoom').value=next.z;previewGalleryFocus()}})
+ mnOpenFrameEditor({title:'Ajustar imagen del portafolio',src,x:Number($('galleryFocusX')?.value||50),y:Number($('galleryFocusY')?.value||50),z:Number($('galleryZoom')?.value||1),kind:'gallery',context:{title:$('galleryItemTitle')?.value||'Diseño Mistrielle',client:$('gallerySourceType')?.value==='client'},onSave:(next)=>{
+ if($('galleryFocusX'))$('galleryFocusX').value=next.x;
+ if($('galleryFocusY'))$('galleryFocusY').value=next.y;
+ if($('galleryZoom'))$('galleryZoom').value=next.z;
+ const gi=Number(window.mnEditingGalleryIndex??-1);
+ if(gi>=0&&galleryItems[gi]){
+  galleryItems[gi]={...galleryItems[gi],focusX:next.x,focusY:next.y,zoom:next.z};
+  save('galleryItems',galleryItems);
+ }
+ previewGalleryFocus()
+ }})
 }
 function openExtraFrameEditor(){
  const src=window.mnExtraPreviewSrc||'';if(!src)return;
  const st=window.mnExtraFrameEdit||{x:50,y:50,z:1};
- mnOpenFrameEditor({title:'Ajustar imagen del complemento',src,x:st.x,y:st.y,z:st.z,kind:'extra',context:{name:$('xname')?.value||'',price:Number($('xprice')?.value||0)},onSave:(next)=>{window.mnExtraFrameEdit=next;renderExtraPreview()}})
+ mnOpenFrameEditor({title:'Ajustar imagen del complemento',src,x:st.x,y:st.y,z:st.z,kind:'extra',context:{name:$('xname')?.value||'',price:Number($('xprice')?.value||0)},onSave:(next)=>{
+ window.mnExtraFrameEdit=next;
+ const xi=Number(window.mnEditingExtraIndex??-1);
+ if(xi>=0&&extras[xi]){
+  extras[xi]={...extras[xi],imageSettings:next};
+  save('extras',extras);
+ }
+ renderExtraPreview()
+ }})
 }
 function renderExtraPreview(){
  const box=$('xpreview');if(!box)return;
