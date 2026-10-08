@@ -558,7 +558,7 @@ function renderAdmin(){
  </div>`;
 
  const activeSeason=seasonThemes.find(x=>x.id===activeSeasonId);
- $('seasons').innerHTML=`<div class="box"><div class="row"><div><div class="eyebrow">SELLO DE TEMPORADA</div><h2 class="script">Temporadas</h2></div><button class="btn sm" onclick="seasonForm()">+ Nueva temporada</button></div>${activeSeason?`<div class="notice"><b>Activa:</b> ${esc(activeSeason.name)}</div>`:'<div class="notice">Se usa el diseño normal.</div>'}${seasonThemes.length?seasonThemes.map((s,i)=>`<div class="cartitem">${s.heroImage?`<img class="thumb" src="${s.heroImage}">`:'<div class="thumb"></div>'}<div><b>${esc(s.name)}</b><br><small>${esc(s.badge||'')}</small>${s.startsAt||s.endsAt?`<br><small>${s.startsAt?'Desde '+esc(s.startsAt.replace('T',' ')):''}${s.startsAt&&s.endsAt?' · ':''}${s.endsAt?'Hasta '+esc(s.endsAt.replace('T',' ')):''}</small>`:''}</div><div><button class="btn ${s.id===activeSeasonId?'danger':'alt'} sm" onclick="setSeason('${s.id===activeSeasonId?'':s.id}')">${s.id===activeSeasonId?'Desactivar':'Activar'}</button> <button class="btn alt sm" onclick="seasonForm(${i})">Editar</button> <button class="btn danger sm" onclick="deleteSeason(${i})">Eliminar</button></div></div>`).join(''):'<div class="empty">Aún no hay temas guardados.</div>'}</div>`;
+ $('seasons').innerHTML=`<div class="box"><div class="row"><div><div class="eyebrow">SELLO DE TEMPORADA</div><h2 class="script">Temporadas</h2></div><button class="btn sm" onclick="seasonForm()">+ Nueva temporada</button></div>${activeSeason?`<div class="notice"><b>Activa:</b> ${esc(activeSeason.name)}</div>`:'<div class="notice">Se usa el diseño normal.</div>'}${seasonThemes.length?seasonThemes.map((s,i)=>`<div class="cartitem">${s.heroImage?`<img class="thumb" src="${s.heroImage}">`:'<div class="thumb"></div>'}<div><b>${esc(s.name)}</b><br><small>${esc(s.badge||'')}</small>${s.startsAt||s.endsAt?`<br><small>${s.startsAt?'Desde '+esc(s.startsAt.replace('T',' ')):''}${s.startsAt&&s.endsAt?' · ':''}${s.endsAt?'Hasta '+esc(s.endsAt.replace('T',' ')):''}</small>`:''}</div><div><button type="button" class="btn ${s.id===activeSeasonId?'danger':'alt'} sm" onclick="setSeason(event,'${s.id===activeSeasonId?'':s.id}')">${s.id===activeSeasonId?'Desactivar':'Activar'}</button> <button type="button" class="btn alt sm" onclick="previewSeasonAdmin(${i})">Vista previa</button> <button type="button" class="btn alt sm" onclick="seasonForm(${i})">Editar</button> <button type="button" class="btn danger sm" onclick="deleteSeason(${i})">Eliminar</button></div></div>`).join(''):'<div class="empty">Aún no hay temas guardados.</div>'}</div>`;
 
  const rv=window.mnReviews||[];
  $('reviews').innerHTML=`<div class="box"><div class="row"><div><div class="eyebrow">OPINIONES</div><h2 class="script">Reseñas</h2><p style="color:var(--muted)">Llegan pendientes; tú decides qué se publica.</p></div><button class="btn alt sm" onclick="mnRefreshReviews()">↻ Actualizar</button></div>${rv.length?rv.map(r=>`<div class="cartitem"><div>${'★'.repeat(Number(r.rating||0))}${'☆'.repeat(5-Number(r.rating||0))}</div><div><b>${esc(r.name||'Clienta')}</b> · <small>${esc(r.product_name||r.product_id||'')}</small><p>${esc(r.comment||'')}</p>${r.image_data?`<img src="${r.image_data}" alt="Foto de reseña" style="display:block;width:min(220px,100%);max-height:220px;object-fit:contain;border:1px solid var(--line);border-radius:10px;margin:8px 0">`:''}<small>${esc(r.status||'pending')}</small></div><div><button class="btn sm" onclick="moderateReview(${r.id},'approved')">Publicar</button> <button class="btn alt sm" onclick="moderateReview(${r.id},'hidden')">Ocultar</button> <button class="btn danger sm" onclick="moderateReview(${r.id},'deleted')">Eliminar definitivamente</button></div></div>`).join(''):'<div class="empty">Pulsa Actualizar para cargar reseñas.</div>'}</div>`;
@@ -1454,6 +1454,37 @@ function seasonForm(i){
   <div class="field"><label>BOTÓN BANNER</label><input id="sbannerBtn" value="${esc(s?.bannerButtonText||'')}"></div>
   <div class="field"><label>DESTINO BANNER</label><select id="sbannerTarget"><option value="">Sin botón</option><option value="campana" ${s?.bannerTarget==='campana'?'selected':''}>Campaña</option><option value="personalizadas" ${s?.bannerTarget==='personalizadas'?'selected':''}>Personalizadas</option><option value="catalogo" ${s?.bannerTarget==='catalogo'?'selected':''}>Catálogo</option><option value="portafolio" ${s?.bannerTarget==='portafolio'?'selected':''}>Portafolio</option></select></div>
  </div><br><button class="btn" onclick="saveSeason(${i===undefined?'-1':i})">Guardar</button>`;openModal()
+}
+
+async function setSeason(e,id){
+ if(e){e.preventDefault();e.stopPropagation()}
+ activeSeasonId=String(id||'');
+ save('activeSeasonId',activeSeasonId);
+ if(window.mnCloudReady){try{await mnSyncCollection('activeSeasonId')}catch(err){console.error('Guardar temporada activa:',err)}}
+ renderAdmin();
+}
+function previewSeasonAdmin(i){
+ const s=seasonThemes[i];if(!s)return;
+ const desktop=s.heroImage||config.heroImage||'';
+ const overlay=Math.max(.15,Math.min(.80,Number(s.heroOverlay??.42)));
+ const visible=Math.round((1-overlay)*100);
+ $('modalContent').innerHTML=`<div class="eyebrow">VISTA EN TIENDA · TEMPORADA</div>
+ <h2 class="script">${esc(s.name||'Temporada')}</h2>
+ <div style="position:relative;min-height:360px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:${esc(s.colorWine||config.colorWine||'#3b0715')};display:grid;place-items:center;text-align:center;padding:28px">
+  ${desktop?`<img src="${desktop}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">`:''}
+  <div style="position:absolute;inset:0;background:rgba(30,3,10,${overlay})"></div>
+  <div style="position:relative;z-index:2;color:${esc(s.colorPink||config.colorPink||'#f4cfd9')}">
+   ${s.badge?`<div class="eyebrow" style="color:${esc(s.colorGold||config.colorGold||'#c5a05a')}">${esc(s.badge)}</div>`:''}
+   <h1 class="script" style="font-size:clamp(34px,6vw,62px);margin:10px 0">${esc(s.heroTitle||s.name||'Mistrielle Nails')}</h1>
+   <p>${esc(s.heroSubtitle||config.heroSubtitle||'')}</p>
+   ${s.heroButtonText?`<button type="button" class="btn gold">${esc(s.heroButtonText)}</button>`:''}
+  </div>
+ </div>
+ <div class="notice" style="margin-top:12px"><b>Visibilidad de imagen:</b> ${visible}%<br>
+ <b>Estado:</b> ${s.id===activeSeasonId?'ACTIVA':'NO ACTIVA'}<br>
+ <b>Programación:</b> ${s.startsAt?esc(s.startsAt.replace('T',' ')):'sin inicio'} → ${s.endsAt?esc(s.endsAt.replace('T',' ')):'sin fin'}</div>
+ <br><button type="button" class="btn ${s.id===activeSeasonId?'danger':'gold'}" onclick="setSeason(event,'${s.id===activeSeasonId?'':s.id}');closeModal()">${s.id===activeSeasonId?'Desactivar temporada':'Activar temporada'}</button>`;
+ openModal();
 }
 async function saveSeason(i){
  const name=$('sname').value.trim();if(!name)return alert('Escribe el nombre.');
