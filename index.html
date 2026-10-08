@@ -551,7 +551,7 @@ function productImageHTML(p,src){
 }
 
 function productLabels(p){const m=metaFor(p.id),s=activeSeason(),live=(s?.featuredCategory&&p.category===s.featuredCategory)?['Selección de temporada']:[];return [...new Set([...live,...(m.autoLabels||[]),...(m.labels||[])])]}
-function activeSeason(){const s=seasonThemes.find(x=>x.id===activeSeasonId)||null;if(!s)return null;const now=Date.now(),start=s.startsAt?new Date(s.startsAt).getTime():0,end=s.endsAt?new Date(s.endsAt).getTime():0;if(start&&now<start)return null;if(end&&now>end)return null;return s}
+function activeSeason(){const s=seasonThemes.find(x=>x.id===activeSeasonId)||null;if(!s)return null;if(window.mnAdminPreview)return s;const now=Date.now(),start=s.startsAt?new Date(s.startsAt).getTime():0,end=s.endsAt?new Date(s.endsAt).getTime():0;if(start&&now<start)return null;if(end&&now>end)return null;return s}
 function currentBannerData(){
  const s=activeSeason();
  if(s?.bannerEnabled&&s.bannerText)return {text:s.bannerText,button:s.bannerButtonText||'',target:s.bannerTarget||'',source:'season:'+s.id,enabled:true};
