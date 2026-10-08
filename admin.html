@@ -222,6 +222,90 @@ window.MN_SUPABASE_KEY='sb_publishable_5bOuzwywcvqzPEcGrQZEvw_2uEUUp2a';
 .mn-season-slide-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.mn-season-slide{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff9f6;color:#4b0718}.mn-season-slide-preview{position:relative;height:150px;overflow:hidden;border-radius:10px;background:#23040d}.mn-season-slide-preview img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.mn-season-device-actions{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}.mn-notice-admin-card{border:1px solid var(--line);border-radius:14px;padding:13px;margin:9px 0;background:#fff9f6;color:#4b0718}.mn-notice-admin-card.important{border-color:#c89c4d;background:#fff2d9}
 @media(max-width:700px){.mn-notif-card{grid-template-columns:8px 1fr}.mn-notif-actions{grid-column:2;justify-content:flex-start}.mn-avatar-pending-grid{grid-template-columns:1fr}.mn-season-slide-grid{grid-template-columns:1fr}}
 </style>
+
+<style id="mnCustomers31FixStyles">
+/* FIX: mnAdmImageStyle usa position:absolute; el avatar necesita ser su contexto. */
+.mn-customer-avatar{
+  position:relative!important;
+  isolation:isolate;
+  overflow:hidden!important;
+  flex:0 0 auto;
+}
+.mn-customer-avatar img{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:none!important;
+  object-fit:cover!important;
+}
+.mn-customer-card{overflow:hidden}
+.mn-card-pending-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  margin-top:6px;padding:5px 8px;border-radius:999px;
+  background:#fff0d2;border:1px solid #c9a360;color:#5a2208;
+  font-size:8px;font-weight:900;letter-spacing:.08em;text-transform:uppercase
+}
+.mn-pending-avatar-panel{
+  border:1px solid #d6ae64;border-radius:16px;background:#fff7e9;
+  margin:0 0 16px;color:#4b0718;overflow:hidden
+}
+.mn-pending-avatar-panel>summary{
+  cursor:pointer;list-style:none;padding:14px 16px;font-weight:900;
+  display:flex;align-items:center;justify-content:space-between;gap:12px
+}
+.mn-pending-avatar-panel>summary::-webkit-details-marker{display:none}
+.mn-pending-avatar-panel>summary:after{content:'▾';font-size:16px}
+.mn-pending-avatar-panel:not([open])>summary:after{content:'▸'}
+.mn-pending-avatar-list{padding:0 14px 14px;display:grid;gap:10px}
+.mn-pending-avatar-row{
+  display:grid;grid-template-columns:76px 1fr auto;gap:12px;align-items:center;
+  padding:10px;border:1px solid #eccb91;border-radius:13px;background:#fffdf9
+}
+.mn-pending-avatar-thumb{
+  position:relative;width:76px;height:76px;border-radius:50%;overflow:hidden;
+  background:#2a0610;border:1px solid #c9a360
+}
+.mn-pending-avatar-thumb img{
+  position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
+  max-width:none!important;object-fit:cover!important
+}
+.mn-pending-avatar-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+
+.mn-expediente-block{
+  margin:12px 0;border:1px solid var(--line);border-radius:14px;
+  background:#fffaf7;overflow:hidden;color:#4b0718
+}
+.mn-expediente-block>summary{
+  cursor:pointer;list-style:none;padding:13px 15px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  font-weight:900;color:#4b0718;background:#f8e9e5
+}
+.mn-expediente-block>summary::-webkit-details-marker{display:none}
+.mn-expediente-block>summary:after{content:'MOSTRAR ▾';font-size:8px;letter-spacing:.09em;color:#7b3f49}
+.mn-expediente-block[open]>summary:after{content:'OCULTAR ▴'}
+.mn-expediente-inner{padding:14px}
+.mn-expediente-list{display:grid;gap:8px}
+.mn-expediente-item{
+  padding:10px 11px;border:1px solid #ead0cc;border-radius:11px;background:#fff;
+  color:#4b0718;line-height:1.45
+}
+.mn-expediente-item small{color:#8e5c64}
+.mn-expediente-count{
+  display:inline-flex;min-width:24px;height:24px;padding:0 7px;border-radius:999px;
+  align-items:center;justify-content:center;background:#4b0718;color:#fff6ef;
+  font-size:10px;font-weight:900;margin-left:7px
+}
+.mn-profile-actions{
+  display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 4px;
+  padding:11px;border:1px solid var(--line);border-radius:13px;background:#fff
+}
+@media(max-width:700px){
+  .mn-pending-avatar-row{grid-template-columns:64px 1fr}
+  .mn-pending-avatar-thumb{width:64px;height:64px}
+  .mn-pending-avatar-actions{grid-column:1/-1;justify-content:flex-start}
+}
+</style>
 </head><body class="admin">
 <div class="adminhead"><div class="row"><div><div class="eyebrow">MISTRIELLE NAILS · PRIVATE ATELIER</div><h1>Panel de Administración</h1><small style="color:var(--muted)">Catálogo, pedidos, solicitudes, stock y contenido.</small></div><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button id="mnNotifTopBtn" class="btn alt sm" type="button" onclick="openAdminTab('notifications')">🔔 Notificaciones <span id="mnNotifTopCount"></span></button><a class="btn alt sm" href="https://misstyee.github.io/Mistrielle-Nails/?adminPreview=1" target="_blank">Vista previa privada</a><button class="btn danger sm" type="button" onclick="mnLogout()">Cerrar sesión</button></div></div></div>
 <div class="adminwrap"><div class="mn-admin-toolbar"><div class="mn-admin-toolbar-row"><input id="mnAdminSearch" class="mn-admin-search" placeholder="Buscar pedido, producto, solicitud, cupón, reseña..." oninput="mnAdminSearchNow(this.value)"><button class="btn alt sm" onclick="mnAdminSearchNow($('mnAdminSearch').value)">Buscar</button></div><div class="mn-admin-groups"><button class="mn-group-btn active" onclick="setAdminGroup('all',this)">Todo</button><button class="mn-group-btn" onclick="setAdminGroup('resumen',this)">Resumen</button><button class="mn-group-btn" onclick="setAdminGroup('ventas',this)">Ventas</button><button class="mn-group-btn" onclick="setAdminGroup('catalogo',this)">Catálogo</button><button class="mn-group-btn" onclick="setAdminGroup('clientas',this)">Clientas</button><button class="mn-group-btn" onclick="setAdminGroup('contenido',this)">Contenido</button><button class="mn-group-btn" onclick="setAdminGroup('tienda',this)">Tienda</button></div><div id="mnAdminSearchResults" class="mn-search-results" style="display:none"></div></div><div class="tabs"><button class="tab active" data-tab="home" data-group="resumen">INICIO</button><button class="tab" data-tab="activity" data-group="resumen">ACTIVIDAD</button><button class="tab" data-tab="notifications" data-group="resumen">NOTIFICACIONES</button><button class="tab" data-tab="products" data-group="catalogo">PRODUCTOS</button><button class="tab" data-tab="extras" data-group="catalogo">EXTRAS / ACCESORIOS</button><button class="tab" data-tab="gallery" data-group="contenido">GALERÍA / PORTAFOLIO</button><button class="tab" data-tab="orders" data-group="ventas">PEDIDOS</button><button class="tab" data-tab="requests" data-group="ventas">SOLICITUDES</button><button class="tab" data-tab="stats" data-group="ventas">ESTADÍSTICAS</button><button class="tab" data-tab="customers" data-group="clientas">CLIENTAS</button><button class="tab" data-tab="reviews" data-group="clientas">RESEÑAS</button><button class="tab" data-tab="rewards" data-group="clientas">RECOMPENSAS</button><button class="tab" data-tab="seasons" data-group="contenido">TEMPORADAS</button><button class="tab" data-tab="operations" data-group="tienda">OPERACIÓN</button><button class="tab" data-tab="sales" data-group="ventas">VENTAS / GANANCIAS</button><button class="tab" data-tab="discounts" data-group="ventas">DESCUENTOS / ENVÍO</button><button class="tab" data-tab="notices" data-group="contenido">AVISOS</button><button class="tab" data-tab="faq" data-group="contenido">PREGUNTAS FRECUENTES</button><button class="tab" data-tab="design" data-group="tienda">DISEÑO DE LA TIENDA</button><button class="tab" data-tab="options" data-group="catalogo">CATEGORÍAS / TALLAS / FORMAS</button><button class="tab" data-tab="config" data-group="tienda">CONFIGURACIÓN / CONTACTO</button></div>
@@ -1981,14 +2065,47 @@ function mnCustomerInitial(p){return esc((mnProfileDisplay(p).trim()[0]||'M').to
 function mnCustomerAvatarHTML(p){return p?.avatarUrl?`<div class="mn-customer-avatar"><img src="${esc(p.avatarUrl)}" alt="" style="${mnAdmImageStyle(p.avatarSettings)}"></div>`:`<div class="mn-customer-avatar">${mnCustomerInitial(p)}</div>`}
 function mnSetCustomerFilter(f){window.mnCustomerAdminFilter=f;mnRenderCustomersV2()}
 function mnCustomersAdminHTML(){return '<div id="mnCustomersV2Mount"></div>'}
+
+function mnPendingAvatarRequestsHTML(){
+ const pending=(window.mnCustomerProfiles||[]).filter(p=>p.avatarRequestStatus==='pending'&&p.pendingAvatar);
+ if(!pending.length)return '';
+ return `<details class="mn-pending-avatar-panel" open>
+   <summary><span>📸 CAMBIOS DE FOTO PENDIENTES</span><span>${pending.length}</span></summary>
+   <div class="mn-pending-avatar-list">
+    ${pending.map(p=>`<div class="mn-pending-avatar-row">
+      <div class="mn-pending-avatar-thumb"><img src="${esc(p.pendingAvatar)}" alt="" style="${mnAdmImageStyle(p.pendingAvatarSettings)}"></div>
+      <div>
+       <b>${esc(mnProfileDisplay(p))}</b><br>
+       <small>${esc(p.customerId)} · pidió actualizar su foto${p.avatarRequestedAt?` · ${esc(String(p.avatarRequestedAt).slice(0,10))}`:''}</small>
+      </div>
+      <div class="mn-pending-avatar-actions">
+       <button class="btn gold sm" onclick="mnModerateCustomerAvatarQuick('${esc(p.customerId)}','approved')">Aprobar</button>
+       <button class="btn danger sm" onclick="mnModerateCustomerAvatarQuick('${esc(p.customerId)}','rejected')">Rechazar</button>
+       <button class="btn alt sm" onclick="mnOpenCustomerProfile('${esc(p.customerId)}')">Ver perfil</button>
+      </div>
+    </div>`).join('')}
+   </div>
+  </details>`;
+}
+async function mnModerateCustomerAvatarQuick(id,decision){
+ const note=decision==='rejected'?(prompt('Motivo opcional para la clienta:','')||''):'';
+ try{
+  const {error}=await mnCloud.rpc('mn_admin_moderate_avatar',{target_customer_id:id,decision,admin_note:note});
+  if(error)throw error;
+  await mnRefreshCustomerProfiles();
+  mnRenderCustomersV2();
+  mnRenderNotifications();
+ }catch(e){alert('No se pudo actualizar la foto: '+e.message)}
+}
 function mnRenderCustomersV2(){
  const mount=$('mnCustomersV2Mount')||$('customers');if(!mount)return;
  const all=window.mnCustomerProfiles||[];const f=window.mnCustomerAdminFilter||'all';
  const q=String(window.mnCustomerSearch||'').trim().toLowerCase();
  let rows=all.filter(p=>f==='favorites'?p.favorite:f==='featured'?p.featured:f==='internal'?p.internal:true).filter(p=>!q||[p.customerId,p.name,p.alias,p.role,p.whatsapp,...mnProfileBadges(p)].join(' ').toLowerCase().includes(q));
- mount.innerHTML=`<div class="box"><div class="row"><div><div class="eyebrow">CLIENTAS 2.0</div><h2 class="script">Perfiles Mistrielle</h2><p style="color:var(--muted)">Alias, roles, insignias, cupones personales, historial y tablón público. El WhatsApp sigue siendo privado.</p></div><button class="btn alt sm" onclick="mnRefreshCustomerProfiles().then(()=>mnRenderCustomersV2())">↻ Actualizar</button></div>
+ mount.innerHTML=`<div class="box"><div class="row"><div><div class="eyebrow">CLIENTAS 3.1</div><h2 class="script">Perfiles Mistrielle</h2><p style="color:var(--muted)">Alias, roles, insignias, cupones, historial, comunidad y solicitudes de perfil. El WhatsApp sigue siendo privado.</p></div><button class="btn alt sm" onclick="mnRefreshCustomerProfiles().then(()=>mnRenderCustomersV2())">↻ Actualizar</button></div>
+ ${mnPendingAvatarRequestsHTML()}
  <div class="mn-customer-toolbar"><input style="max-width:320px" placeholder="Buscar ID, alias, WhatsApp, rol..." oninput="window.mnCustomerSearch=this.value;mnRenderCustomersV2()"><button class="btn ${f==='all'?'':'alt'} sm" onclick="mnSetCustomerFilter('all')">Todas</button><button class="btn ${f==='favorites'?'':'alt'} sm" onclick="mnSetCustomerFilter('favorites')">★ Favoritas</button><button class="btn ${f==='featured'?'':'alt'} sm" onclick="mnSetCustomerFilter('featured')">✦ En tablón</button><button class="btn ${f==='internal'?'':'alt'} sm" onclick="mnSetCustomerFilter('internal')">Internas / prueba</button></div>
- ${rows.length?`<div class="mn-customer-card-grid">${rows.map(p=>`<div class="mn-customer-card ${p.favorite?'favorite':''} ${p.featured?'featured':''}"><div class="mn-customer-head">${mnCustomerAvatarHTML(p)}<div><div class="mn-customer-big-id">${esc(p.customerId)}</div><b>${esc(mnProfileDisplay(p))}</b>${p.name&&p.alias?`<br><small>${esc(p.name)}</small>`:''}<br>${p.role?`<span class="mn-role-chip">${esc(p.role)}</span>`:''}<div class="mn-badges">${mnProfileBadges(p).map(b=>`<span class="mn-badge-chip">${esc(b)}</span>`).join('')}</div></div></div><div class="mn-customer-metrics"><div><b>${Number(p.orders||0)}</b><small>Pedidos</small></div><div><b>${money(p.spent||0)}</b><small>Gastado</small></div><div><b>${Number(p.reviews||0)}</b><small>Reseñas</small></div></div><small style="display:block;margin-top:9px;color:var(--muted)">${esc(p.whatsapp||'')} · ${Number(p.photos||0)} foto(s) · ${Number(p.coupons||0)} cupón(es)</small><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px"><button class="btn sm" onclick="mnOpenCustomerProfile('${esc(p.customerId)}')">Abrir perfil</button><button class="btn alt sm" onclick="mnGiveCustomerCoupon('${esc(p.customerId)}')">+ Cupón</button></div></div>`).join('')}</div>`:'<div class="empty">No hay clientas en este filtro.</div>'}</div>`;
+ ${rows.length?`<div class="mn-customer-card-grid">${rows.map(p=>`<div class="mn-customer-card ${p.favorite?'favorite':''} ${p.featured?'featured':''}"><div class="mn-customer-head">${mnCustomerAvatarHTML(p)}<div><div class="mn-customer-big-id">${esc(p.customerId)}</div><b>${esc(mnProfileDisplay(p))}</b>${p.name&&p.alias?`<br><small>${esc(p.name)}</small>`:''}<br>${p.role?`<span class="mn-role-chip">${esc(p.role)}</span>`:''}${p.avatarRequestStatus==='pending'&&p.pendingAvatar?`<br><span class="mn-card-pending-badge">📸 Foto pendiente</span>`:''}<div class="mn-badges">${mnProfileBadges(p).map(b=>`<span class="mn-badge-chip">${esc(b)}</span>`).join('')}</div></div></div><div class="mn-customer-metrics"><div><b>${Number(p.orders||0)}</b><small>Pedidos</small></div><div><b>${money(p.spent||0)}</b><small>Gastado</small></div><div><b>${Number(p.reviews||0)}</b><small>Reseñas</small></div></div><small style="display:block;margin-top:9px;color:var(--muted)">${esc(p.whatsapp||'')} · ${Number(p.photos||0)} foto(s) · ${Number(p.coupons||0)} cupón(es)</small><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px"><button class="btn sm" onclick="mnOpenCustomerProfile('${esc(p.customerId)}')">Abrir perfil</button><button class="btn alt sm" onclick="mnGiveCustomerCoupon('${esc(p.customerId)}')">+ Cupón</button></div></div>`).join('')}</div>`:'<div class="empty">No hay clientas en este filtro.</div>'}</div>`;
 }
 function mnCustomerPhotoCandidates(p){
  const urls=[];const seen=new Set();const add=u=>{u=String(u||'');if(u&&!seen.has(u)){seen.add(u);urls.push(u)}};
@@ -1999,10 +2116,148 @@ function mnCustomerPhotoCandidates(p){
 function mnPickCustomerAvatar(encoded){const u=decodeURIComponent(encoded||'');const x=$('cpAvatarUrl');if(x)x.value=u;window.mnCustomerAvatarTempSrc=u;window.mnCustomerAvatarSettingsEdit={x:50,y:50,z:1,r:0};const p=$('cpAvatarPreview');if(p)p.innerHTML=u?`<div class="mn-avatar-settings-preview"><img src="${esc(u)}" style="${mnAdmImageStyle(window.mnCustomerAvatarSettingsEdit)}"></div>`:'<div class="notice">Sin foto pública.</div>'}
 function mnCustomerAvatarFileChanged(input){const f=input?.files?.[0];if(!f)return;const fr=new FileReader();fr.onload=()=>{window.mnCustomerAvatarTempSrc=fr.result;window.mnCustomerAvatarSettingsEdit={x:50,y:50,z:1,r:0};const p=$('cpAvatarPreview');if(p)p.innerHTML=`<div class="mn-avatar-settings-preview"><img src="${fr.result}" style="${mnAdmImageStyle(window.mnCustomerAvatarSettingsEdit)}"></div>`};fr.readAsDataURL(f)}
 function mnOpenCustomerProfile(id){
- const p=(window.mnCustomerProfiles||[]).find(x=>String(x.customerId).toUpperCase()===String(id).toUpperCase());if(!p)return alert('Actualiza la lista de clientas.');
- window.mnCustomerAvatarSettingsEdit=mnAdmFrame(p.avatarSettings||{});window.mnCustomerAvatarTempSrc=p.avatarUrl||'';
- const cand=mnCustomerPhotoCandidates(p);const po=orders.filter(x=>String(x.customerId||'').toUpperCase()===String(id).toUpperCase()||mnNormWa(x.whatsapp)===mnNormWa(p.whatsapp));const pr=requests.filter(x=>String(x.customerId||'').toUpperCase()===String(id).toUpperCase()||mnNormWa(x.whatsapp)===mnNormWa(p.whatsapp));const rw=photoRewards.filter(x=>String(x.customerId||'').toUpperCase()===String(id).toUpperCase()||mnNormWa(x.whatsapp)===mnNormWa(p.whatsapp));const rv=(window.mnReviews||[]).filter(x=>String(x.customer_id||'').toUpperCase()===String(id).toUpperCase());const cps=discounts.filter(x=>String(x.customerId||'').toUpperCase()===String(id).toUpperCase());const unlinkedReviews=(window.mnReviews||[]).filter(x=>!String(x.customer_id||'').trim()&&String(x.status||'')!=='deleted');
- $('modalContent').innerHTML=`<div class="eyebrow">PERFIL DE CLIENTA</div><h2 class="script">${esc(mnProfileDisplay(p))}</h2><div class="mn-customer-big-id">${esc(p.customerId)}</div><p style="color:var(--muted)">${esc(p.whatsapp||'')}</p><div class="fields"><div class="field"><label>NOMBRE REAL / REGISTRO</label><input id="cpName" value="${esc(p.name||'')}"></div><div class="field"><label>ALIAS VISIBLE</label><input id="cpAlias" value="${esc(p.alias||'')}" placeholder="Ej. Mistrielle, Pau, Fer"></div><div class="field"><label>ROL</label><input id="cpRole" value="${esc(p.role||'')}" placeholder="CEO, Embajadora, VIP..."></div><div class="field"><label>INSIGNIAS (SEPARADAS POR COMAS)</label><input id="cpBadges" value="${esc(mnProfileBadges(p).join(', '))}" placeholder="Fundadora, VIP, Clienta frecuente"></div><div class="field"><label>ETIQUETA EN TABLÓN</label><input id="cpFeatureLabel" value="${esc(p.featureLabel||'')}" placeholder="Clienta del mes"></div><div class="field"><label>ORDEN EN TABLÓN</label><input id="cpFeatureSort" type="number" value="${Number(p.featureSort||0)}"></div><div class="field full"><label>TEXTO PÚBLICO</label><textarea id="cpPublicNote" maxlength="500">${esc(p.publicNote||'')}</textarea></div><div class="field full"><label class="mn-customer-flag"><input id="cpFavorite" type="checkbox" ${p.favorite?'checked':''}> ★ Marcar como favorita en Admin</label><label class="mn-customer-flag"><input id="cpFeatured" type="checkbox" ${p.featured?'checked':''}> ✦ Exhibir en tablón de la tienda</label><label class="mn-customer-flag"><input id="cpInternal" type="checkbox" ${p.internal?'checked':''}> Perfil interno / prueba</label><label class="mn-customer-flag"><input id="cpShowStats" type="checkbox" ${p.publicShowStats!==false?'checked':''}> Mostrar estadísticas públicas</label><label class="mn-customer-flag"><input id="cpShowPhotos" type="checkbox" ${p.publicShowPhotos!==false?'checked':''}> Mostrar portafolio público</label><label class="mn-customer-flag"><input id="cpShowReviews" type="checkbox" ${p.publicShowReviews!==false?'checked':''}> Mostrar reseñas públicas</label></div><div class="field full"><label>FOTO DE PERFIL / TABLÓN</label><input id="cpAvatarUrl" type="hidden" value="${esc(p.avatarUrl||'')}"><div id="cpAvatarPreview">${p.avatarUrl?`<div id="cpAvatarFramePreview" class="mn-avatar-settings-preview"><img src="${esc(p.avatarUrl)}" style="${mnAdmImageStyle(p.avatarSettings)}"></div>`:'<div class="notice">Sin foto pública. También se puede exhibir así.</div>'}</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><label class="btn alt sm" for="cpAvatarFile">Subir otra foto</label><input id="cpAvatarFile" type="file" accept="image/*" style="display:none" onchange="mnCustomerAvatarFileChanged(this)"><button class="btn alt sm" type="button" onclick="mnOpenCustomerAvatarFrame()">Ajustar encuadre</button><button class="btn alt sm" type="button" onclick="mnPickCustomerAvatar('')">Quitar foto</button></div>${cand.length?`<small style="display:block;margin:9px 0;color:var(--muted)">También puedes usar una foto de sus registros o de un producto que compró:</small><div class="mn-profile-photo-options">${cand.map(u=>`<button class="mn-profile-photo-option" onclick="mnPickCustomerAvatar('${encodeURIComponent(u)}')"><img src="${esc(u)}" alt=""></button>`).join('')}</div>`:''}</div></div><br><button class="btn" onclick="mnSaveCustomerProfile('${esc(p.customerId)}')">Guardar perfil</button> <button class="btn gold" onclick="mnGiveCustomerCoupon('${esc(p.customerId)}')">Dar cupón personal</button><hr style="border:0;border-top:1px solid var(--line);margin:20px 0">${p.avatarRequestStatus==='pending'&&p.pendingAvatar?`<div class="mn-avatar-pending"><div class="eyebrow">FOTO DE PERFIL PENDIENTE</div><div class="mn-avatar-pending-grid"><div class="mn-avatar-pending-img"><img src="${esc(p.pendingAvatar)}" style="${mnAdmImageStyle(p.pendingAvatarSettings)}"></div><div><b>${esc(mnProfileDisplay(p))} pidió cambiar su foto.</b><p>Puedes aprobarla o rechazarla. No se publica hasta que tú decidas.</p><button class="btn gold sm" onclick="mnModerateCustomerAvatar('${esc(p.customerId)}','approved')">Aprobar foto</button> <button class="btn danger sm" onclick="mnModerateCustomerAvatar('${esc(p.customerId)}','rejected')">Rechazar</button></div></div></div>`:''}<div class="stats"><div class="stat"><b>${po.length}</b><small>Pedidos</small></div><div class="stat"><b>${pr.length}</b><small>Solicitudes</small></div><div class="stat"><b>${rw.length}</b><small>Fotos</small></div><div class="stat"><b>${rv.length}</b><small>Reseñas vinculadas</small></div><div class="stat"><b>${cps.length}</b><small>Cupones personales</small></div><div class="stat"><b>${money(p.spent||0)}</b><small>Gastado</small></div></div>${unlinkedReviews.length?`<div class="box" style="margin-top:18px"><div class="eyebrow">RESEÑAS ANTERIORES</div><h3 class="script">Reseñas todavía sin clienta</h3><p style="color:var(--muted)">Las reseñas hechas antes del ID no se pueden asociar solas con seguridad. Aquí puedes vincular la correcta con un toque.</p><div class="mn-review-link-list">${unlinkedReviews.map(x=>`<div class="mn-review-link-row"><div><b>${esc(x.name||'Clienta')}</b> · ${'★'.repeat(Number(x.rating||0))}<br><small>${esc(x.product_name||x.product_id||'')} · ${esc(x.comment||'').slice(0,90)}</small></div><button class="btn sm" onclick="mnLinkReviewDirect(${Number(x.id)},'${esc(p.customerId)}')">Vincular aquí</button></div>`).join('')}</div></div>`:''}`;openModal()
+ const p=(window.mnCustomerProfiles||[]).find(x=>String(x.customerId).toUpperCase()===String(id).toUpperCase());
+ if(!p)return alert('Actualiza la lista de clientas.');
+
+ window.mnCustomerAvatarSettingsEdit=mnAdmFrame(p.avatarSettings||{});
+ window.mnCustomerAvatarTempSrc=p.avatarUrl||'';
+
+ const cand=mnCustomerPhotoCandidates(p);
+ const same=x=>String(x.customerId||'').toUpperCase()===String(id).toUpperCase()||mnNormWa(x.whatsapp)===mnNormWa(p.whatsapp);
+ const po=orders.filter(same);
+ const pr=requests.filter(same);
+ const rw=photoRewards.filter(same);
+ const rv=(window.mnReviews||[]).filter(x=>String(x.customer_id||'').toUpperCase()===String(id).toUpperCase());
+ const cps=discounts.filter(x=>String(x.customerId||'').toUpperCase()===String(id).toUpperCase());
+ const unlinkedReviews=(window.mnReviews||[]).filter(x=>!String(x.customer_id||'').trim()&&String(x.status||'')!=='deleted');
+
+ const historyHTML=`
+ <details class="mn-expediente-block">
+  <summary>Pedidos <span class="mn-expediente-count">${po.length}</span></summary>
+  <div class="mn-expediente-inner"><div class="mn-expediente-list">
+   ${po.length?po.map(o=>`<div class="mn-expediente-item"><b>${esc(o.number||'Pedido')}</b> · ${esc(o.status||'')}<br><small>${esc(String(o.created||'').slice(0,10))} · ${money(o.total||0)}</small></div>`).join(''):'<div class="empty">Sin pedidos.</div>'}
+  </div></div>
+ </details>
+ <details class="mn-expediente-block">
+  <summary>Solicitudes personalizadas <span class="mn-expediente-count">${pr.length}</span></summary>
+  <div class="mn-expediente-inner"><div class="mn-expediente-list">
+   ${pr.length?pr.map(r=>`<div class="mn-expediente-item"><b>${esc(r.number||'Solicitud')}</b> · ${esc(r.status||'')}<br><small>${esc(String(r.created||r.date||'').slice(0,10))}</small></div>`).join(''):'<div class="empty">Sin solicitudes.</div>'}
+  </div></div>
+ </details>
+ <details class="mn-expediente-block">
+  <summary>Fotos / recompensas <span class="mn-expediente-count">${rw.length}</span></summary>
+  <div class="mn-expediente-inner"><div class="mn-expediente-list">
+   ${rw.length?rw.map(r=>`<div class="mn-expediente-item"><b>${esc(r.date||'Foto')}</b>${r.rewardCode?` · ${esc(r.rewardCode)}`:''}<br><small>${r.portfolioApproved?'En portafolio · ':''}${r.rewarded?'Recompensada':'Pendiente'}</small></div>`).join(''):'<div class="empty">Sin fotos registradas.</div>'}
+  </div></div>
+ </details>
+ <details class="mn-expediente-block">
+  <summary>Reseñas vinculadas <span class="mn-expediente-count">${rv.length}</span></summary>
+  <div class="mn-expediente-inner"><div class="mn-expediente-list">
+   ${rv.length?rv.map(r=>`<div class="mn-expediente-item"><b>${'★'.repeat(Number(r.rating||0))} ${esc(r.product_name||r.product_id||'')}</b><br>${esc(r.comment||'')}<br><small>${esc(r.status||'')}</small></div>`).join(''):'<div class="empty">Sin reseñas vinculadas.</div>'}
+  </div></div>
+ </details>
+ <details class="mn-expediente-block">
+  <summary>Cupones personales <span class="mn-expediente-count">${cps.length}</span></summary>
+  <div class="mn-expediente-inner"><div class="mn-expediente-list">
+   ${cps.length?cps.map(c=>`<div class="mn-expediente-item"><b>${esc(c.code||'Cupón')}</b><br><small>${c.active===false?'Inactivo':'Activo'}${c.expires?` · vence ${esc(c.expires)}`:''} · ${Number(c.used||0)}/${Number(c.maxUses||1)} usos</small></div>`).join(''):'<div class="empty">Sin cupones personales.</div>'}
+  </div></div>
+ </details>`;
+
+ $('modalContent').innerHTML=`
+  <div class="eyebrow">EXPEDIENTE DE CLIENTA</div>
+  <h2 class="script">${esc(mnProfileDisplay(p))}</h2>
+  <div class="mn-customer-big-id">${esc(p.customerId)}</div>
+  <p style="color:var(--muted)">${esc(p.whatsapp||'')}</p>
+
+  ${p.avatarRequestStatus==='pending'&&p.pendingAvatar?`
+  <details class="mn-expediente-block" open>
+   <summary>📸 Solicitud de foto pendiente <span class="mn-expediente-count">1</span></summary>
+   <div class="mn-expediente-inner">
+    <div class="mn-avatar-pending" style="margin:0">
+     <div class="mn-avatar-pending-grid">
+      <div class="mn-avatar-pending-img"><img src="${esc(p.pendingAvatar)}" style="${mnAdmImageStyle(p.pendingAvatarSettings)}"></div>
+      <div>
+       <b>${esc(mnProfileDisplay(p))} pidió cambiar su foto.</b>
+       <p>La foto actual no cambia hasta que tú la apruebes.</p>
+       <button class="btn gold sm" onclick="mnModerateCustomerAvatar('${esc(p.customerId)}','approved')">Aprobar foto</button>
+       <button class="btn danger sm" onclick="mnModerateCustomerAvatar('${esc(p.customerId)}','rejected')">Rechazar</button>
+      </div>
+     </div>
+    </div>
+   </div>
+  </details>`:''}
+
+  <details class="mn-expediente-block" open>
+   <summary>Datos, alias, rol y visibilidad</summary>
+   <div class="mn-expediente-inner">
+    <div class="fields">
+     <div class="field"><label>NOMBRE REAL / REGISTRO</label><input id="cpName" value="${esc(p.name||'')}"></div>
+     <div class="field"><label>ALIAS VISIBLE</label><input id="cpAlias" value="${esc(p.alias||'')}" placeholder="Ej. Mistrielle, Pau, Fer"></div>
+     <div class="field"><label>ROL</label><input id="cpRole" value="${esc(p.role||'')}" placeholder="CEO, Embajadora, VIP..."></div>
+     <div class="field"><label>INSIGNIAS (SEPARADAS POR COMAS)</label><input id="cpBadges" value="${esc(mnProfileBadges(p).join(', '))}" placeholder="Fundadora, VIP, Clienta frecuente"></div>
+     <div class="field"><label>ETIQUETA EN TABLÓN</label><input id="cpFeatureLabel" value="${esc(p.featureLabel||'')}" placeholder="Clienta del mes"></div>
+     <div class="field"><label>ORDEN EN TABLÓN</label><input id="cpFeatureSort" type="number" value="${Number(p.featureSort||0)}"></div>
+     <div class="field full"><label>TEXTO PÚBLICO</label><textarea id="cpPublicNote" maxlength="500">${esc(p.publicNote||'')}</textarea></div>
+     <div class="field full">
+      <label class="mn-customer-flag"><input id="cpFavorite" type="checkbox" ${p.favorite?'checked':''}> ★ Favorita en Admin</label>
+      <label class="mn-customer-flag"><input id="cpFeatured" type="checkbox" ${p.featured?'checked':''}> ✦ Exhibir en Comunidad</label>
+      <label class="mn-customer-flag"><input id="cpInternal" type="checkbox" ${p.internal?'checked':''}> Perfil interno / prueba</label>
+      <label class="mn-customer-flag"><input id="cpShowStats" type="checkbox" ${p.publicShowStats!==false?'checked':''}> Mostrar estadísticas públicas</label>
+      <label class="mn-customer-flag"><input id="cpShowPhotos" type="checkbox" ${p.publicShowPhotos!==false?'checked':''}> Mostrar portafolio público</label>
+      <label class="mn-customer-flag"><input id="cpShowReviews" type="checkbox" ${p.publicShowReviews!==false?'checked':''}> Mostrar reseñas públicas</label>
+     </div>
+    </div>
+   </div>
+  </details>
+
+  <details class="mn-expediente-block">
+   <summary>Foto pública / Comunidad</summary>
+   <div class="mn-expediente-inner">
+    <input id="cpAvatarUrl" type="hidden" value="${esc(p.avatarUrl||'')}">
+    <div id="cpAvatarPreview">${p.avatarUrl?`<div id="cpAvatarFramePreview" class="mn-avatar-settings-preview"><img src="${esc(p.avatarUrl)}" style="${mnAdmImageStyle(p.avatarSettings)}"></div>`:'<div class="notice">Sin foto pública. También se puede exhibir así.</div>'}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+     <label class="btn alt sm" for="cpAvatarFile">Subir otra foto</label>
+     <input id="cpAvatarFile" type="file" accept="image/*" style="display:none" onchange="mnCustomerAvatarFileChanged(this)">
+     <button class="btn alt sm" type="button" onclick="mnOpenCustomerAvatarFrame()">Ajustar encuadre</button>
+     <button class="btn alt sm" type="button" onclick="mnPickCustomerAvatar('')">Quitar foto</button>
+    </div>
+    ${cand.length?`<small style="display:block;margin:9px 0;color:var(--muted)">También puedes usar una foto de sus registros o de un producto que compró:</small><div class="mn-profile-photo-options">${cand.map(u=>`<button class="mn-profile-photo-option" onclick="mnPickCustomerAvatar('${encodeURIComponent(u)}')"><img src="${esc(u)}" alt=""></button>`).join('')}</div>`:''}
+   </div>
+  </details>
+
+  <div class="mn-profile-actions">
+   <button class="btn" onclick="mnSaveCustomerProfile('${esc(p.customerId)}')">Guardar perfil</button>
+   <button class="btn gold" onclick="mnGiveCustomerCoupon('${esc(p.customerId)}')">Dar cupón personal</button>
+  </div>
+
+  <details class="mn-expediente-block">
+   <summary>Resumen del expediente</summary>
+   <div class="mn-expediente-inner">
+    <div class="stats">
+     <div class="stat"><b>${po.length}</b><small>Pedidos</small></div>
+     <div class="stat"><b>${pr.length}</b><small>Solicitudes</small></div>
+     <div class="stat"><b>${rw.length}</b><small>Fotos</small></div>
+     <div class="stat"><b>${rv.length}</b><small>Reseñas</small></div>
+     <div class="stat"><b>${cps.length}</b><small>Cupones</small></div>
+     <div class="stat"><b>${money(p.spent||0)}</b><small>Gastado</small></div>
+    </div>
+   </div>
+  </details>
+
+  ${historyHTML}
+
+  ${unlinkedReviews.length?`
+  <details class="mn-expediente-block">
+   <summary>Reseñas anteriores sin vincular <span class="mn-expediente-count">${unlinkedReviews.length}</span></summary>
+   <div class="mn-expediente-inner">
+    <p style="color:var(--muted)">Las reseñas hechas antes del ID no se pueden asociar solas con seguridad.</p>
+    <div class="mn-review-link-list">
+     ${unlinkedReviews.map(x=>`<div class="mn-review-link-row"><div><b>${esc(x.name||'Clienta')}</b> · ${'★'.repeat(Number(x.rating||0))}<br><small>${esc(x.product_name||x.product_id||'')} · ${esc(x.comment||'').slice(0,90)}</small></div><button class="btn sm" onclick="mnLinkReviewDirect(${Number(x.id)},'${esc(p.customerId)}')">Vincular aquí</button></div>`).join('')}
+    </div>
+   </div>
+  </details>`:''}
+ `;
+ openModal();
 }
 function mnOpenCustomerAvatarFrame(){const src=window.mnCustomerAvatarTempSrc||$('cpAvatarUrl')?.value||'';if(!src)return alert('Primero sube o elige una foto.');const st=window.mnCustomerAvatarSettingsEdit||{x:50,y:50,z:1,r:0};mnOpenFrameEditor({title:'Ajustar foto de perfil',src,...st,kind:'image',onSave:next=>{window.mnCustomerAvatarSettingsEdit=next;const box=$('cpAvatarPreview');if(box)box.innerHTML=`<div id="cpAvatarFramePreview" class="mn-avatar-settings-preview"><img src="${src}" style="${mnAdmImageStyle(next)}"></div>`}})}
 async function mnModerateCustomerAvatar(id,decision){const note=decision==='rejected'?(prompt('Motivo opcional para la clienta:','')||''):'';try{const{error}=await mnCloud.rpc('mn_admin_moderate_avatar',{target_customer_id:id,decision,admin_note:note});if(error)throw error;await mnRefreshCustomerProfiles();mnOpenCustomerProfile(id);mnRenderNotifications()}catch(e){alert('No se pudo actualizar la foto: '+e.message)}}
