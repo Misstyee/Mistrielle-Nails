@@ -728,8 +728,7 @@ function productForm(id){
 function mnFrameNormalize(st){return {x:Math.max(0,Math.min(100,Number(st?.x??50))),y:Math.max(0,Math.min(100,Number(st?.y??50))),z:Math.max(1,Math.min(3,Number(st?.z??1)))}}
 function mnFramePreviewStyle(st){
  st=mnFrameNormalize(st);
- const tx=(50-st.x)*(st.z-1),ty=(50-st.y)*(st.z-1);
- return `position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:translate(${tx}%,${ty}%) scale(${st.z});transform-origin:center center;pointer-events:none;user-select:none`
+ return `position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(${st.z});transform-origin:${st.x}% ${st.y}%;pointer-events:none;user-select:none`
 }
 function mnFrameImageHTML(src,st,id=''){
  return `<img ${id?`id="${id}"`:''} src="${src||''}" alt="" style="${mnFramePreviewStyle(st)}">`
@@ -737,7 +736,7 @@ function mnFrameImageHTML(src,st,id=''){
 function mnEnsureFrameModal(){
  if($('mnFrameEditor'))return;
  const wrap=document.createElement('div');
- wrap.innerHTML=`<div id="mnFrameEditor" class="mn-frame-editor"><div class="mn-frame-card"><div class="row" style="align-items:flex-start;gap:12px"><div><div class="eyebrow">EDITOR DE IMAGEN</div><h3 id="mnFrameTitle" class="script" style="margin:4px 0 0">Ajustar imagen</h3><small style="color:var(--muted)">Puedes moverla con tu dedo o mouse, además de usar los botones. En productos ya existentes, “Guardar encuadre” lo aplica inmediatamente a la tienda.</small></div><button type="button" class="btn alt sm" onclick="mnCloseFrameEditor()">Cerrar</button></div><div class="mn-frame-stage" id="mnFrameStage"><img id="mnFrameImg" alt=""></div><div class="mn-frame-store-wrap"><div class="eyebrow">VISTA EN TIENDA</div><div id="mnFrameStorePreview"></div><small style="display:block;color:var(--muted);margin-top:6px">Esta vista cambia en vivo mientras mueves o acercas la imagen.</small></div><div class="mn-frame-toolbar"><button type="button" class="btn alt sm" onclick="mnFrameNudge(-5,0,0)">←</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,-5,0)">↑</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,5,0)">↓</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(5,0,0)">→</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,0,-.1)">− Zoom</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,0,.1)">+ Zoom</button><button type="button" class="btn alt sm" onclick="mnFrameCenter()">Centrar</button><button type="button" class="btn gold sm" onclick="mnSaveFrameEditor()">Guardar encuadre</button></div><div class="mn-frame-sliders"><label>Horizontal · <span id="mnFrameXLabel">50%</span><input id="mnFrameX" type="range" min="0" max="100" value="50" oninput="mnFrameSliderSync()"></label><label>Vertical · <span id="mnFrameYLabel">50%</span><input id="mnFrameY" type="range" min="0" max="100" value="50" oninput="mnFrameSliderSync()"></label><label>Zoom · <span id="mnFrameZLabel">1.00x</span><input id="mnFrameZ" type="range" min="1" max="3" step=".05" value="1" oninput="mnFrameSliderSync()"></label></div></div></div>`;
+ wrap.innerHTML=`<div id="mnFrameEditor" class="mn-frame-editor"><div class="mn-frame-card"><div class="row" style="align-items:flex-start;gap:12px"><div><div class="eyebrow">EDITOR DE IMAGEN</div><h3 id="mnFrameTitle" class="script" style="margin:4px 0 0">Ajustar imagen</h3><small style="color:var(--muted)">Mueve el punto de enfoque con el dedo, flechas o sliders. Con Zoom 1.00x verás la imagen completa; al aumentar zoom, Horizontal y Vertical deciden qué parte permanece visible. “Guardar encuadre” lo aplica a la tienda.</small></div><button type="button" class="btn alt sm" onclick="mnCloseFrameEditor()">Cerrar</button></div><div class="mn-frame-stage" id="mnFrameStage"><img id="mnFrameImg" alt=""></div><div class="mn-frame-store-wrap"><div class="eyebrow">VISTA EN TIENDA</div><div id="mnFrameStorePreview"></div><small style="display:block;color:var(--muted);margin-top:6px">Esta vista cambia en vivo mientras mueves o acercas la imagen.</small></div><div class="mn-frame-toolbar"><button type="button" class="btn alt sm" onclick="mnFrameNudge(-10,0,0)">←</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,-10,0)">↑</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,10,0)">↓</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(10,0,0)">→</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,0,-.1)">− Zoom</button><button type="button" class="btn alt sm" onclick="mnFrameNudge(0,0,.1)">+ Zoom</button><button type="button" class="btn alt sm" onclick="mnFrameCenter()">Centrar</button><button type="button" class="btn gold sm" onclick="mnSaveFrameEditor()">Guardar encuadre</button></div><div class="mn-frame-sliders"><label>Horizontal · <span id="mnFrameXLabel">50%</span><input id="mnFrameX" type="range" min="0" max="100" value="50" oninput="mnFrameSliderSync()"></label><label>Vertical · <span id="mnFrameYLabel">50%</span><input id="mnFrameY" type="range" min="0" max="100" value="50" oninput="mnFrameSliderSync()"></label><label>Zoom · <span id="mnFrameZLabel">1.00x</span><input id="mnFrameZ" type="range" min="1" max="3" step=".05" value="1" oninput="mnFrameSliderSync()"></label></div></div></div>`;
  document.body.appendChild(wrap.firstChild);
  const stage=$('mnFrameStage');
  stage.addEventListener('pointerdown',mnFramePointerStart);
@@ -792,14 +791,13 @@ function mnFrameSyncInputs(){
 }
 function mnFrameSliderSync(){
  const s=window.mnFrameEditorState;if(!s)return;
- const x=Number($('mnFrameX')?.value||50),y=Number($('mnFrameY')?.value||50),z=Number($('mnFrameZ')?.value||1);
- s.x=x;s.y=y;s.z=z;
- if(s.z<=1.001&&(Math.abs(x-50)>1||Math.abs(y-50)>1))s.z=1.10;
+ s.x=Number($('mnFrameX')?.value||50);
+ s.y=Number($('mnFrameY')?.value||50);
+ s.z=Number($('mnFrameZ')?.value||1);
  mnFrameSyncInputs();
 }
 function mnFrameNudge(dx,dy,dz){
  const s=window.mnFrameEditorState;if(!s)return;
- if((dx||dy)&&Number(s.z)<=1.001)s.z=1.10;
  s.x=Math.max(0,Math.min(100,Number(s.x)+dx));
  s.y=Math.max(0,Math.min(100,Number(s.y)+dy));
  s.z=Math.max(1,Math.min(3,Number(s.z)+dz));
@@ -816,8 +814,7 @@ function mnFramePointerMove(e){
  const s=window.mnFrameEditorState,stage=$('mnFrameStage');if(!s?.drag||!stage)return;
  const rect=stage.getBoundingClientRect(),dx=e.clientX-s.lastX,dy=e.clientY-s.lastY;
  s.lastX=e.clientX;s.lastY=e.clientY;
- if(Number(s.z)<=1.001&&(Math.abs(dx)>1||Math.abs(dy)>1))s.z=1.10;
- const sensitivity=115/Math.max(Math.min(rect.width,rect.height),1);
+ const sensitivity=100/Math.max(Math.min(rect.width,rect.height),1);
  s.x=Math.max(0,Math.min(100,Number(s.x)-dx*sensitivity));
  s.y=Math.max(0,Math.min(100,Number(s.y)-dy*sensitivity));
  mnFrameSyncInputs();e.preventDefault();
@@ -919,10 +916,10 @@ function renderProductExistingImages(){
    </div>
    <small style="display:block;color:var(--muted);margin:7px 0">Encuadre · ${Math.round(Number(st.x??50))}% / ${Math.round(Number(st.y??50))}% · ${Number(st.z??1).toFixed(2)}x</small>
    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px">
-    <button type="button" class="btn alt sm" onclick="productImageAdjust(${i},-5,0,0)">←</button>
-    <button type="button" class="btn alt sm" onclick="productImageAdjust(${i},0,-5,0)">↑</button>
-    <button type="button" class="btn alt sm" onclick="productImageAdjust(${i},0,5,0)">↓</button>
-    <button type="button" class="btn alt sm" onclick="productImageAdjust(${i},5,0,0)">→</button>
+    <button type="button" class="btn alt sm" onclick="productImageAdjust(${i},-10,0,0)">←</button>
+    <button type="button" class="btn alt sm" onclick="productImageAdjust(${i},0,-10,0)">↑</button>
+    <button type="button" class="btn alt sm" onclick="productImageAdjust(${i},0,10,0)">↓</button>
+    <button type="button" class="btn alt sm" onclick="productImageAdjust(${i},10,0,0)">→</button>
     <button type="button" class="btn alt sm" onclick="productImageAdjust(${i},0,0,-.1)">− Zoom</button>
     <button type="button" class="btn alt sm" onclick="productImageAdjust(${i},0,0,.1)">+ Zoom</button>
     <button type="button" class="btn alt sm" onclick="productImageCenter(${i})">Centrar</button>
