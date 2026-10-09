@@ -341,16 +341,28 @@ window.mnAdminPreviewRequested=new URLSearchParams(location.search).get('adminPr
 <style id="mnCartCoupons32Styles">
 .mn-cart-coupons{margin-top:10px;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fffaf7}.mn-cart-coupons>summary{cursor:pointer;list-style:none;padding:11px 13px;display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--wine);font-size:11px;font-weight:900;letter-spacing:.05em}.mn-cart-coupons>summary::-webkit-details-marker{display:none}.mn-cart-coupons>summary:after{content:"VER ▾";font-size:8px;color:#9c6971}.mn-cart-coupons[open]>summary:after{content:"OCULTAR ▴"}.mn-cart-coupons-body{border-top:1px solid var(--line);padding:12px}.mn-cart-coupon-group{border:1px solid #ead1cd;border-radius:11px;overflow:hidden;margin:8px 0;background:#fff}.mn-cart-coupon-group>summary{cursor:pointer;list-style:none;padding:10px 11px;font-weight:900;color:var(--wine);display:flex;justify-content:space-between}.mn-cart-coupon-group>summary::-webkit-details-marker{display:none}.mn-cart-coupon-list{padding:0 9px 9px;display:grid;gap:7px}.mn-cart-coupon-card{padding:10px;border:1px dashed #c9a360;border-radius:10px;background:#fff9ef;color:var(--wine)}.mn-cart-coupon-card.used,.mn-cart-coupon-card.expired{opacity:.67;border-style:solid}.mn-cart-coupon-card .row{align-items:center}.mn-cart-coupon-login{display:grid;grid-template-columns:1fr 1fr auto;gap:7px;align-items:end}.mn-cart-coupon-login input{width:100%}@media(max-width:650px){.mn-cart-coupon-login{grid-template-columns:1fr}.mn-cart-coupon-login .btn{width:100%}}
 </style><style id="mnNoticeCarouselFix">
-.mn-notice-strip{padding:10px 42px 10px 14px;min-height:70px}
-.mn-notice-rotator{position:relative;display:flex;align-items:center;justify-content:center;gap:12px;width:100%;max-width:1300px;margin:auto;padding:0 10px}
-.mn-notice-message{min-width:0;max-width:100%;flex:1;text-align:center;line-height:1.5;overflow-wrap:anywhere}
-.mn-notice-message>.btn{display:inline-flex;align-items:center;justify-content:center;margin:4px 0 4px 9px;white-space:normal}
-.mn-notice-arrow{flex:0 0 30px;width:30px;height:30px;display:grid;place-items:center;border:1px solid rgba(236,208,155,.55);border-radius:50%;background:#3b0a16;color:#ffe9c7;font-size:25px;line-height:1;cursor:pointer;padding:0}
-.mn-notice-progress{display:flex;gap:6px;justify-content:center;align-items:center;margin-top:5px}
-.mn-notice-dot{width:7px;height:7px;min-width:7px;padding:0;border:1px solid #e5c68f;border-radius:99px;background:transparent;cursor:pointer}
-.mn-notice-dot.active{width:20px;background:#e5c68f}
-.mn-notice-strip-close{right:0}
-@media(max-width:620px){.mn-notice-strip{padding:10px 28px 10px 5px;font-size:11px}.mn-notice-rotator{gap:5px;padding:0}.mn-notice-arrow{flex-basis:25px;width:25px;height:25px;font-size:21px}.mn-notice-message>.btn{font-size:9px!important;padding:6px 9px!important}.mn-notice-separator{display:none}.mn-notice-message b{display:block}}
+/* Avisos Mistrielle 4.1: jerarquía editorial, controles separados y tres tamaños */
+.mn-notice-strip{padding:0!important;min-height:0!important;background:#24050c!important;border-bottom:1px solid #a8804a!important;color:#fff4ea!important}
+.mn-notice-rotator{max-width:1440px;margin:auto;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px;padding:13px 22px!important}
+.mn-notice-main{min-width:0;display:flex;align-items:center;gap:17px;justify-content:center}
+.mn-notice-typebadge{display:inline-flex;flex:none;align-items:center;gap:6px;border:1px solid #c7a66e;border-radius:999px;background:#4a2b1c;color:#ffe8b5;padding:7px 11px;font-size:10px;font-weight:900;letter-spacing:.11em;white-space:nowrap}
+.mn-notice-strip[data-type="important"]{background:linear-gradient(100deg,#38080f,#6c1e24,#38080f)!important;border-bottom-color:#e3bb72!important}
+.mn-notice-strip[data-type="important"] .mn-notice-typebadge{background:#f4d18e;color:#46101a;border-color:#f4d18e}
+.mn-notice-strip[data-type="update"]{background:linear-gradient(100deg,#1b142c,#443354,#1b142c)!important;border-bottom-color:#b9a1d8!important}
+.mn-notice-strip[data-type="update"] .mn-notice-typebadge{background:#e8dcf3;color:#382445;border-color:#e8dcf3}
+.mn-notice-copy{min-width:0;display:flex;flex-direction:column;gap:4px;line-height:1.4;text-align:left}
+.mn-notice-copy strong{font-size:14px;font-weight:900;letter-spacing:.035em;color:#fff7ef}
+.mn-notice-copy span{font-size:12px;color:#f1d4ca;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.mn-notice-cta{display:inline-flex!important;flex:none;align-items:center;justify-content:center;padding:10px 15px!important;min-height:37px;font-size:10px!important;white-space:nowrap;border:1px solid #e3c18b!important;color:#fff4db!important;background:#602439!important;text-decoration:none;max-width:220px}
+.mn-notice-tools{display:flex;align-items:center;gap:10px;border-left:1px solid rgba(255,235,212,.28);padding-left:17px;flex:none}
+.mn-notice-arrow,.mn-notice-strip-close{position:static!important;transform:none!important;flex:none;display:grid;place-items:center;margin:0!important;width:34px;height:34px;padding:0!important;border:1px solid rgba(238,211,176,.55);background:rgba(10,0,6,.22);color:#fff0db;border-radius:50%;font-size:21px;line-height:1;cursor:pointer}
+.mn-notice-strip-close{font-size:19px;border-color:rgba(255,255,255,.25);margin-left:6px!important}
+.mn-notice-progress{display:flex;gap:5px;align-items:center;justify-content:center;margin:0 2px}
+.mn-notice-dot{width:7px;height:7px;min-width:7px;padding:0;border:1px solid #f6dab3;border-radius:99px;background:transparent;cursor:pointer}
+.mn-notice-dot.active{width:17px;background:#f6dab3}
+@media(max-width:950px){.mn-notice-rotator{grid-template-columns:minmax(0,1fr);gap:10px;padding:13px 20px!important}.mn-notice-main{flex-wrap:wrap;justify-content:center;gap:9px 13px}.mn-notice-copy{text-align:center;flex:1 1 60%;min-width:200px}.mn-notice-tools{justify-content:center;border-left:0;border-top:1px solid rgba(255,235,212,.2);padding:9px 0 0;gap:13px}.mn-notice-cta{min-height:34px;padding:8px 12px!important}}
+@media(max-width:600px){.mn-notice-rotator{padding:12px 13px!important;gap:11px}.mn-notice-main{display:grid;grid-template-columns:1fr;justify-items:center;gap:8px}.mn-notice-copy{min-width:0;text-align:center;width:100%}.mn-notice-copy strong{font-size:13px}.mn-notice-copy span{font-size:11px;line-height:1.5;-webkit-line-clamp:3}.mn-notice-typebadge{font-size:9px;padding:5px 10px}.mn-notice-cta{max-width:100%;font-size:9px!important}.mn-notice-tools{gap:14px;width:100%}.mn-notice-arrow,.mn-notice-strip-close{width:32px;height:32px}.mn-notice-strip-close{margin-left:auto!important}}
+@media(prefers-reduced-motion:reduce){.mn-notice-strip *{transition:none!important}}
 </style></head><body>
 <div id="maintenanceGate" class="mn-maintenance" style="display:none"><div class="mn-maint-card"><div class="eyebrow">MISTRIELLE NAILS</div><h1 id="maintenanceTitle">Estamos preparando algo bonito</h1><p id="maintenanceMessage"></p></div></div><div id="announcementBar" class="mn-announcement" style="display:none"><span id="announcementText"></span><button id="announcementButton" class="btn alt sm" style="display:none"></button><button id="announcementClose" class="mn-banner-close" type="button" onclick="dismissAnnouncement()" aria-label="Ocultar anuncio" title="Ocultar anuncio">×</button></div><div class="top">PRESS-ON NAILS · HECHAS PARA TI</div><header><div class="head"><button class="icon" onclick="document.getElementById('catalogo').scrollIntoView()">⌕</button><div class="brand" id="brandLogo"><b>Mistrielle Nails</b><small>PRESS ON NAILS</small></div><div><button class="icon" onclick="openFavorites()">♡<span id="favBadge" class="badge">0</span></button><button class="icon" onclick="openCart()">🛍<span id="cartBadge" class="badge">0</span></button></div></div><nav><a href="#inicio">Inicio</a><a href="#catalogo">Catálogo</a><a href="#personalizadas">Personalizadas</a><a href="#portafolio">Portafolio</a><a href="#" onclick="openMistrielleSociety();return false">Comunidad</a><a href="#" onclick="openStoreNotices();return false">Avisos</a><a href="#faq">Preguntas frecuentes</a><a href="#contacto">Contacto</a><a href="#" onclick="customerSpace();return false">Mi espacio Mistrielle</a></nav></header><div id="mnNoticeStrip" class="mn-notice-strip" style="display:none"></div>
 <section id="inicio" class="hero"><div class="hero-inner"><div class="eyebrow">MISTRIELLE NAILS · PERSONAL LUXURY</div><h1>Un pequeño lujo hecho para tus manos.</h1><p id="heroSubtitle">Uñas Press-On Personalizadas y a la Medida. Tu mejor opción.</p><div class="hero-actions"><button id="heroButton" class="btn gold" onclick="document.getElementById('catalogo').scrollIntoView()">Catálogo de diseños</button><button class="btn hero-custom-btn" onclick="document.getElementById('personalizadas').scrollIntoView({behavior:'smooth'})">Quiero un set personalizado</button></div><button class="hero-scroll-cue" onclick="document.getElementById('personalizadas').scrollIntoView({behavior:'smooth'})"><span>La mayoría de nuestros diseños nacen de una idea tuya</span><b>↓ PERSONALIZA TU SET ↓</b></button></div></section>
@@ -1160,6 +1172,7 @@ function mnActiveStoreNotices(){const now=Date.now();return(storeNotices||[]).fi
 function mnNoticeKey(n){return'mn_notice_hide_'+String(n.id||n.title||'notice')}
 let mnNoticeCarouselIndex=0;
 let mnNoticeCarouselTimer=null;
+let mnNoticeCarouselTimerSpeed=0;
 function mnVisibleStripNotices(){return mnActiveStoreNotices().filter(n=>n.pinned!==false&&sessionStorage.getItem(mnNoticeKey(n))!=='1')}
 function mnNoticeStep(step){const notices=mnVisibleStripNotices();if(!notices.length)return;mnNoticeCarouselIndex=(mnNoticeCarouselIndex+step+notices.length)%notices.length;mnRenderStoreNotices();}
 function mnNoticeSelect(index){const notices=mnVisibleStripNotices();if(!notices.length)return;mnNoticeCarouselIndex=Math.max(0,Math.min(index,notices.length-1));mnRenderStoreNotices();}
@@ -1173,17 +1186,28 @@ function mnRenderStoreNotices(){
    const n=notices[mnNoticeCarouselIndex];
    const index=mnNoticeCarouselIndex;
    strip.style.display='block';
+   const type=n.type==='important'?'important':n.type==='update'?'update':'info';
+   const typetext=type==='important'?'✦ IMPORTANTE':type==='update'?'✧ NOVEDAD':'◈ AVISO';
+   strip.dataset.type=type;
    strip.innerHTML=`<div class="mn-notice-rotator">
-     ${notices.length>1?'<button type="button" class="mn-notice-arrow" onclick="mnNoticeStep(-1)" aria-label="Aviso anterior">‹</button>':''}
-     <div class="mn-notice-message" aria-live="polite"><b>${esc(n.title||'Aviso Mistrielle')}</b><span class="mn-notice-separator"> · </span>${esc(n.text||'')}
-     ${n.button&&n.target?`<button type="button" class="btn alt sm" onclick="mnNoticeGo(mnVisibleStripNotices()[${index}].target)">${esc(n.button)}</button>`:''}
-     ${notices.length>1?`<div class="mn-notice-progress">${notices.map((_,i)=>`<button type="button" class="mn-notice-dot ${i===index?'active':''}" onclick="mnNoticeSelect(${i})" aria-label="Mostrar aviso ${i+1} de ${notices.length}" aria-current="${i===index?'true':'false'}"></button>`).join('')}</div>`:''}
+     <div class="mn-notice-main">
+       <span class="mn-notice-typebadge">${typetext}</span>
+       <div class="mn-notice-copy" aria-live="polite"><strong>${esc(n.title||'Aviso Mistrielle')}</strong><span>${esc(n.text||'')}</span></div>
+       ${n.button&&n.target?`<button type="button" class="btn mn-notice-cta" onclick="mnNoticeGo(mnVisibleStripNotices()[${index}].target)">${esc(n.button)}</button>`:''}
      </div>
-     ${notices.length>1?'<button type="button" class="mn-notice-arrow" onclick="mnNoticeStep(1)" aria-label="Siguiente aviso">›</button>':''}
-     <button type="button" class="mn-notice-strip-close" onclick="mnNoticeDismiss()" aria-label="Ocultar este aviso" title="Ocultar este aviso">×</button>
-    </div>`;
-   if(notices.length>1&&!mnNoticeCarouselTimer)mnNoticeCarouselTimer=setInterval(()=>{if(!document.hidden)mnNoticeStep(1)},6000);
-   if(notices.length<2&&mnNoticeCarouselTimer){clearInterval(mnNoticeCarouselTimer);mnNoticeCarouselTimer=null;}
+     <div class="mn-notice-tools">
+       ${notices.length>1?'<button type="button" class="mn-notice-arrow" onclick="mnNoticeStep(-1)" aria-label="Aviso anterior">‹</button>':''}
+       ${notices.length>1?`<div class="mn-notice-progress">${notices.map((_,i)=>`<button type="button" class="mn-notice-dot ${i===index?'active':''}" onclick="mnNoticeSelect(${i})" aria-label="Mostrar aviso ${i+1} de ${notices.length}" aria-current="${i===index?'true':'false'}"></button>`).join('')}</div>`:''}
+       ${notices.length>1?'<button type="button" class="mn-notice-arrow" onclick="mnNoticeStep(1)" aria-label="Siguiente aviso">›</button>':''}
+       <button type="button" class="mn-notice-strip-close" onclick="mnNoticeDismiss()" aria-label="Ocultar este aviso" title="Ocultar este aviso">×</button>
+     </div></div>`;
+   const seconds=Math.max(3,Math.min(15,Number(storeOps?.noticeSpeed)||6));
+   if(notices.length>1&&(!mnNoticeCarouselTimer||mnNoticeCarouselTimerSpeed!==seconds)){
+     if(mnNoticeCarouselTimer)clearInterval(mnNoticeCarouselTimer);
+     mnNoticeCarouselTimerSpeed=seconds;
+     mnNoticeCarouselTimer=setInterval(()=>{if(!document.hidden)mnNoticeStep(1)},seconds*1000);
+   }
+   if(notices.length<2&&mnNoticeCarouselTimer){clearInterval(mnNoticeCarouselTimer);mnNoticeCarouselTimer=null;mnNoticeCarouselTimerSpeed=0;}
   }else{strip.style.display='none';if(mnNoticeCarouselTimer){clearInterval(mnNoticeCarouselTimer);mnNoticeCarouselTimer=null;}}
  }
  if(box)box.innerHTML=list.length?`<div class="section-title"><div class="eyebrow">INFORMACIÓN ACTUAL</div><h2>Todo lo importante, en un solo lugar</h2><p>Aunque cierres un aviso de la portada, seguirá disponible aquí mientras esté vigente.</p></div><div class="mn-notice-list">${list.map(n=>`<article class="mn-notice-card ${n.type==='important'?'important':''}"><div class="mn-notice-type">${n.type==='important'?'IMPORTANTE':n.type==='update'?'NOVEDAD':'AVISO'}</div><h3>${esc(n.title||'Aviso Mistrielle')}</h3><p>${esc(n.text||'')}</p>${n.endsAt?`<small>Vigente hasta ${esc(String(n.endsAt).replace('T',' '))}</small>`:''}${n.button&&n.target?`<br><button class="btn gold sm" style="margin-top:10px" onclick="mnNoticeGo('${esc(n.target)}')">${esc(n.button)}</button>`:''}</article>`).join('')}</div>`:'<div class="empty">No hay avisos vigentes ahora mismo.</div>'}
