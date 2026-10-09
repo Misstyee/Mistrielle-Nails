@@ -397,6 +397,12 @@ window.MN_SUPABASE_KEY='sb_publishable_5bOuzwywcvqzPEcGrQZEvw_2uEUUp2a';
 }
 #pexistingimgs .mn-product-photo-bottom .btn{font-size:8px!important;min-height:44px;}
 </style>
+<style id="mnGalleryOrderFix39">
+.mn-gallery-group .cartitem{grid-template-columns:60px minmax(0,1fr) minmax(155px,auto);align-items:center}
+.mn-gallery-position-label{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--gold2);white-space:nowrap;padding:4px 6px;border:1px solid var(--line);border-radius:12px}
+.mn-gallery-position-label select{background:#290610;color:#fff3e9;border:1px solid #b88a60;border-radius:7px;padding:7px;font-size:12px;min-width:49px;cursor:pointer}
+@media(max-width:700px){.mn-gallery-group .cartitem{grid-template-columns:55px minmax(0,1fr)}.mn-gallery-group .cartitem>div:last-child{grid-column:1/-1;justify-content:flex-start!important}}
+</style>
 </head><body class="admin">
 <div class="adminhead"><div class="row"><div><div class="eyebrow">MISTRIELLE NAILS · PRIVATE ATELIER</div><h1>Panel de Administración</h1><small style="color:var(--muted)">Catálogo, pedidos, solicitudes, stock y contenido.</small></div><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button id="mnNotifTopBtn" class="btn alt sm" type="button" onclick="openAdminTab('notifications')">🔔 Notificaciones <span id="mnNotifTopCount"></span></button><a class="btn alt sm" href="https://misstyee.github.io/Mistrielle-Nails/?adminPreview=1" target="_blank">Vista previa privada</a><button class="btn danger sm" type="button" onclick="mnLogout()">Cerrar sesión</button></div></div></div>
 <div class="adminwrap"><div class="mn-admin-toolbar"><div class="mn-admin-toolbar-row"><input id="mnAdminSearch" class="mn-admin-search" placeholder="Buscar pedido, producto, solicitud, cupón, reseña..." oninput="mnAdminSearchNow(this.value)"><button class="btn alt sm" onclick="mnAdminSearchNow($('mnAdminSearch').value)">Buscar</button></div><div class="mn-admin-groups"><button class="mn-group-btn active" onclick="setAdminGroup('all',this)">Todo</button><button class="mn-group-btn" onclick="setAdminGroup('resumen',this)">Resumen</button><button class="mn-group-btn" onclick="setAdminGroup('ventas',this)">Ventas</button><button class="mn-group-btn" onclick="setAdminGroup('catalogo',this)">Catálogo</button><button class="mn-group-btn" onclick="setAdminGroup('clientas',this)">Clientas</button><button class="mn-group-btn" onclick="setAdminGroup('contenido',this)">Contenido</button><button class="mn-group-btn" onclick="setAdminGroup('tienda',this)">Tienda</button></div><div id="mnAdminSearchResults" class="mn-search-results" style="display:none"></div></div><div class="tabs"><button class="tab active" data-tab="home" data-group="resumen">INICIO</button><button class="tab" data-tab="activity" data-group="resumen">ACTIVIDAD</button><button class="tab" data-tab="notifications" data-group="resumen">NOTIFICACIONES</button><button class="tab" data-tab="products" data-group="catalogo">PRODUCTOS</button><button class="tab" data-tab="extras" data-group="catalogo">EXTRAS / ACCESORIOS</button><button class="tab" data-tab="gallery" data-group="contenido">GALERÍA / PORTAFOLIO</button><button class="tab" data-tab="orders" data-group="ventas">PEDIDOS</button><button class="tab" data-tab="requests" data-group="ventas">SOLICITUDES</button><button class="tab" data-tab="stats" data-group="ventas">ESTADÍSTICAS</button><button class="tab" data-tab="customers" data-group="clientas">CLIENTAS</button><button class="tab" data-tab="reviews" data-group="clientas">RESEÑAS</button><button class="tab" data-tab="rewards" data-group="clientas">RECOMPENSAS</button><button class="tab" data-tab="seasons" data-group="contenido">TEMPORADAS</button><button class="tab" data-tab="operations" data-group="tienda">OPERACIÓN</button><button class="tab" data-tab="sales" data-group="ventas">VENTAS / GANANCIAS</button><button class="tab" data-tab="discounts" data-group="ventas">DESCUENTOS / ENVÍO</button><button class="tab" data-tab="notices" data-group="contenido">AVISOS</button><button class="tab" data-tab="faq" data-group="contenido">PREGUNTAS FRECUENTES</button><button class="tab" data-tab="design" data-group="tienda">DISEÑO DE LA TIENDA</button><button class="tab" data-tab="options" data-group="catalogo">CATEGORÍAS / TALLAS / FORMAS</button><button class="tab" data-tab="config" data-group="tienda">CONFIGURACIÓN / CONTACTO</button></div>
@@ -900,16 +906,36 @@ function removeOpt(k,i){
 function gallerySource(g){return (g?.sourceType||(g?.sourceRewardId?'client':'brand'))==='client'?'client':'brand'}
 function galleryAdminSection(type,title,desc){
  const items=galleryItems.map((g,i)=>({g,i})).filter(x=>gallerySource(x.g)===type);
- return `<details class="mn-gallery-group">
-  <summary><span class="mn-gallery-group-head"><span>${esc(title)}</span><span class="mn-gallery-count">${items.length}</span></span></summary>
-  <div class="mn-gallery-group-body"><p class="mn-gallery-group-desc">${esc(desc)}</p>${items.length?items.map(({g,i},pos)=>`<div class="cartitem">${g.image?`<img loading="lazy" decoding="async" fetchpriority="low" class="thumb" src="${g.image}" alt="">`:'<div class="thumb"></div>'}<div><b>${esc(g.title||'Diseño Mistrielle')}</b><br><small>${esc([...(g.groups?.colors||[]),...(g.groups?.designs||[]),...(g.groups?.effects||[]),...(g.tags||[])].slice(0,6).join(' · '))}</small><br><small><b>${type==='client'?'CLIENTA REAL':'MISTRIELLE / EDITORIAL'}</b> · ${g.active!==false?'VISIBLE':'OCULTA'} · ${g.featured!==false?'EN CARRUSEL':'SOLO PORTAFOLIO'} · ROTACIÓN ${Number(g.rotation||0)}°</small></div><div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end">${pos>0?`<button class="btn alt sm" onclick="moveGalleryWithin('${type}','${g.id}',-1)">↑ Subir</button><button class="btn alt sm" onclick="galleryToTop('${type}','${g.id}')">⇈ Primero</button>`:''}${pos<items.length-1?`<button class="btn alt sm" onclick="moveGalleryWithin('${type}','${g.id}',1)">↓ Bajar</button>`:''}<button class="btn alt sm" onclick="galleryForm(${i})">Editar</button><button class="btn danger sm" onclick="deleteGallery(${i})">Eliminar</button></div></div>`).join(''):`<div class="empty">No hay imágenes en este grupo.</div>`}</div>
+ return `<details class="mn-gallery-group" ${window.mnGalleryOpenState?.[type]?'open':''}>
+  <summary onclick="mnRememberGallerySection(event,'${type}')"><span class="mn-gallery-group-head"><span>${esc(title)}</span><span class="mn-gallery-count">${items.length}</span></span></summary>
+  <div class="mn-gallery-group-body"><p class="mn-gallery-group-desc">${esc(desc)}</p>${items.length?items.map(({g,i},pos)=>`<div class="cartitem">${g.image?`<img loading="lazy" decoding="async" fetchpriority="low" class="thumb" src="${g.image}" alt="">`:'<div class="thumb"></div>'}<div><b>${esc(g.title||'Diseño Mistrielle')}</b><br><small>${esc([...(g.groups?.colors||[]),...(g.groups?.designs||[]),...(g.groups?.effects||[]),...(g.tags||[])].slice(0,6).join(' · '))}</small><br><small><b>${type==='client'?'CLIENTA REAL':'MISTRIELLE / EDITORIAL'}</b> · ${g.active!==false?'VISIBLE':'OCULTA'} · ${g.featured!==false?'EN CARRUSEL':'SOLO PORTAFOLIO'} · ROTACIÓN ${Number(g.rotation||0)}°</small></div><div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end">${pos>0?`<button class="btn alt sm" onclick="moveGalleryWithin('${type}','${g.id}',-1)">↑ Subir</button><button class="btn alt sm" onclick="galleryToTop('${type}','${g.id}')">⇈ Primero</button>`:''}${pos<items.length-1?`<button class="btn alt sm" onclick="moveGalleryWithin('${type}','${g.id}',1)">↓ Bajar</button>`:''}<label class="mn-gallery-position-label">Posición <select aria-label="Mover ${esc(g.title||'imagen')} a la posición" onchange="galleryMoveToPosition('${type}','${g.id}',this.value)">${items.map((_,k)=>`<option value="${k+1}" ${k===pos?'selected':''}>${k+1}</option>`).join('')}</select> / ${items.length}</label><button class="btn alt sm" onclick="galleryForm(${i})">Editar</button><button class="btn danger sm" onclick="deleteGallery(${i})">Eliminar</button></div></div>`).join(''):`<div class="empty">No hay imágenes en este grupo.</div>`}</div>
  </details>`;
 }
+window.mnGalleryOpenState=window.mnGalleryOpenState||{};
+function mnRememberGallerySection(event,type){
+ const details=event.currentTarget.closest('details');
+ window.mnGalleryOpenState[type]=!details.open;
+}
+function mnKeepGalleryOpen(type){window.mnGalleryOpenState[type]=true}
+function galleryMoveToPosition(type,id,position){
+ const slots=galleryItems.map((g,i)=>gallerySource(g)===type?i:-1).filter(i=>i>=0);
+ const from=slots.findIndex(i=>String(galleryItems[i]?.id)===String(id));
+ const to=Number(position)-1;
+ if(from<0||!Number.isInteger(to)||to<0||to>=slots.length)return;
+ if(from!==to){
+  const item=galleryItems[slots[from]];
+  if(from<to){for(let p=from;p<to;p++)galleryItems[slots[p]]=galleryItems[slots[p+1]]}
+  else{for(let p=from;p>to;p--)galleryItems[slots[p]]=galleryItems[slots[p-1]]}
+  galleryItems[slots[to]]=item;
+  save('galleryItems',galleryItems);
+ }
+ mnKeepGalleryOpen(type);renderAdmin();
+}
 function moveGalleryWithin(type,id,dir){
- const slots=galleryItems.map((g,i)=>gallerySource(g)===type?i:-1).filter(i=>i>=0),from=slots.findIndex(i=>galleryItems[i]?.id===id),to=from+dir;if(from<0||to<0||to>=slots.length)return;const a=slots[from],b=slots[to];[galleryItems[a],galleryItems[b]]=[galleryItems[b],galleryItems[a]];save('galleryItems',galleryItems);renderAdmin()
+ const slots=galleryItems.map((g,i)=>gallerySource(g)===type?i:-1).filter(i=>i>=0),from=slots.findIndex(i=>galleryItems[i]?.id===id),to=from+dir;if(from<0||to<0||to>=slots.length)return;const a=slots[from],b=slots[to];[galleryItems[a],galleryItems[b]]=[galleryItems[b],galleryItems[a]];save('galleryItems',galleryItems);mnKeepGalleryOpen(type);renderAdmin()
 }
 function galleryToTop(type,id){
- const slots=galleryItems.map((g,i)=>gallerySource(g)===type?i:-1).filter(i=>i>=0),from=slots.findIndex(i=>galleryItems[i]?.id===id);if(from<=0)return;const item=galleryItems[slots[from]];for(let p=from;p>0;p--)galleryItems[slots[p]]=galleryItems[slots[p-1]];galleryItems[slots[0]]=item;save('galleryItems',galleryItems);renderAdmin()
+ const slots=galleryItems.map((g,i)=>gallerySource(g)===type?i:-1).filter(i=>i>=0),from=slots.findIndex(i=>galleryItems[i]?.id===id);if(from<=0)return;const item=galleryItems[slots[from]];for(let p=from;p>0;p--)galleryItems[slots[p]]=galleryItems[slots[p-1]];galleryItems[slots[0]]=item;save('galleryItems',galleryItems);mnKeepGalleryOpen(type);renderAdmin()
 }
 function galleryCsv(arr){return (Array.isArray(arr)?arr:[]).join(', ')}
 function galleryGroup(g,key){
