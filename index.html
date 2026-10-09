@@ -1043,7 +1043,12 @@ function openCustom(mode){
  $('modalContent').innerHTML=`<div class="eyebrow">${window.mnQuoteOnly?'COTIZACIÓN SIN COMPROMISO':'SET PERSONALIZADO'}</div><h2 class="script">${window.mnQuoteOnly?'¿Cuánto costaría mi idea?':'Cuéntame tu idea'}</h2><p style="color:var(--muted)">${window.mnQuoteOnly?'Cuéntanos tu idea o envía una foto y te compartiremos un precio aproximado. No estás realizando un pedido ni debes pagar ahora. La forma, el largo y la talla pueden definirse después.':'Envíame la referencia y los detalles. Recibirás tu cotización antes de que se cree el pedido.'}</p>${insp?`<div class="notice" style="display:grid;grid-template-columns:90px 1fr;gap:12px;align-items:center;margin-bottom:14px">${insp.image?`<img src="${insp.image}" alt="" style="width:90px;height:90px;object-fit:cover;border-radius:10px;cursor:zoom-in" onclick="openPublicViewer(this.src)">`:''}<div><b>Diseño elegido del portafolio</b><br>${esc(insp.title||'Diseño Mistrielle')}<br><small>${esc(insp.id||'')}</small><br><small style="color:var(--muted)">Puedes subir otra imagen adicional. No reemplazará esta referencia.</small></div></div>`:''}<div class="fields"><div class="field"><label>NOMBRE *</label><input id="rn"></div><div class="field"><label>WHATSAPP *</label><input id="rw"></div><div class="field"><label>FORMA *</label><select id="rf" required><option value="">Selecciona una forma</option>${forms.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`)}</select></div><div class="field"><label>LARGO *</label><select id="rl" required><option value="">Selecciona un largo</option>${lengths.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`)}</select></div><div class="field full"><label>TALLA *</label><select id="rs" required onchange="mnToggleRequestMeasurements()"><option value="">Selecciona tu talla</option>${sizes.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`)}<option value="Personalizada">Personalizada (mis medidas)</option></select><div id="mnRequestMeasurements" style="display:none;margin-top:10px" class="notice"><b>Medidas de tus uñas (en mm)</b><p style="font-size:11px;margin:5px 0 10px">Indica el ancho de cada uña. Si cada mano es diferente, escríbelo en tu descripción.</p><div class="mn-request-measure-grid">${['Pulgar','Índice','Medio','Anular','Meñique'].map((x,i)=>`<label>${x}<input type="number" min="1" max="35" step="0.1" inputmode="decimal" id="rmeasure${i}" placeholder="mm"></label>`).join('')}</div></div></div><div class="field full"><label>${insp?'OTRA REFERENCIA / FOTO ADICIONAL':'REFERENCIA'}</label><input id="ri" type="file" accept="image/*" onchange="previewCustomImage(this)"><div id="riPreview" style="display:none;margin-top:12px"><img id="riPreviewImg" alt="Vista previa de tu referencia" style="display:block;width:min(100%,320px);max-height:320px;object-fit:contain;border:1px solid var(--line);border-radius:10px;background:#180309;padding:6px"><small id="riPreviewName" style="display:block;margin-top:7px;color:var(--muted)"></small></div></div><div class="field full"><label>CUÉNTAME TU IDEA *</label><textarea id="rd"></textarea></div><div class="field full"><label>¿TIENES UN CUPÓN? <span style="font-weight:400">(opcional)</span></label><input id="rcoupon" placeholder="Ej. MISTRIELLE10" style="text-transform:uppercase"><small style="color:var(--muted)">El cupón se validará cuando Mistrielle cotice y acepte tu solicitud.</small></div></div>
  <div style="margin-top:16px"><button id="requestExtrasToggle" type="button" class="btn alt sm" onclick="toggleRequestExtras()">Mostrar complementos extra</button><div id="requestExtrasBox" class="request-extras-box" style="display:none"><div class="row"><div><b>Complementos opcionales</b><br><small style="color:var(--muted)">Tu set ya incluye su kit de aplicación. Aquí puedes añadir repuestos o extras.</small></div><div><small>Extras:</small> <b id="requestExtrasTotal">$0</b></div></div><div id="requestExtrasList" style="margin-top:8px"></div></div></div>
  <br><button id="mnRequestMainSubmit" class="btn gold personalized-main-btn" onclick="saveRequest()">${window.mnQuoteOnly?"Consultar precio sin compromiso":"Enviar mi solicitud"}</button>`;
- if(window.mnQuoteOnly){["rf","rl","rs"].forEach(id=>{const el=$(id);if(el){el.required=false;const label=el.closest(".field")?.querySelector("label");if(label)label.textContent=label.textContent.replace(" *"," (opcional)")}})}
+ if(window.mnQuoteOnly){
+  const sizeField=$('rs')?.closest('.field');if(sizeField)sizeField.remove();
+  const extra=$('requestExtrasToggle')?.parentElement;if(extra)extra.style.display='none';
+  const coupon=$('rcoupon')?.closest('.field');if(coupon)coupon.style.display='none';
+  const imageInput=$('ri');if(imageInput){imageInput.required=!insp;const label=imageInput.closest('.field')?.querySelector('label');if(label)label.textContent=insp?'OTRA IMAGEN (OPCIONAL)':'IMAGEN DE REFERENCIA *';}
+ }
  openModal();
 }
 function mnToggleRequestMeasurements(){const select=$('rs'),panel=$('mnRequestMeasurements');if(panel)panel.style.display=select?.value==='Personalizada'?'block':'none';}
@@ -1052,6 +1057,8 @@ function previewCustomImage(input){let box=$('riPreview'),img=$('riPreviewImg'),
 function saveRequest(){
  let n=$('rn').value.trim(),w=$('rw').value.trim(),d=$('rd').value.trim(),coupon=($('rcoupon')?.value||'').trim().toUpperCase().replace(/\s+/g,'');
  if(!n||!w||!d)return alert('Completa nombre, WhatsApp y tu idea.');
+ if(window.mnQuoteOnly && (!$('rf')?.value || !$('rl')?.value))return alert('Para cotizar, selecciona forma y largo.');
+ if(window.mnQuoteOnly && !$('ri')?.files?.length && !window.mnGalleryInspiration?.image)return alert('Adjunta una imagen de referencia para tu cotización.');
  const chosenForm=$('rf')?.value||'',chosenLength=$('rl')?.value||'',chosenSize=$('rs')?.value||'';
  if(!window.mnQuoteOnly&&(!chosenForm||!chosenLength||!chosenSize))return alert('Selecciona forma, largo y talla antes de enviar tu solicitud.');
  const measures=chosenSize==='Personalizada'?mnRequestMeasurementValues():[];
@@ -1177,7 +1184,8 @@ saveRequest=function(){
  $('modalContent').innerHTML='<div class="box" role="status" style="text-align:center"><h2 class="script">Enviando tu solicitud…</h2><p>Estamos confirmando el registro en Mistrielle. No cierres esta ventana.</p></div>';
  (async()=>{
   try{
-   const {data,error}=await mnCloud.rpc('mn_create_request',{request_data:fresh});
+   const rpcJob=mnCloud.rpc('mn_create_request',{request_data:fresh});
+   const {data,error}=await Promise.race([rpcJob,new Promise((_,reject)=>setTimeout(()=>reject(new Error('No se recibió confirmación del servidor. Consulta tu seguimiento antes de repetir el envío.')),20000))]);
    if(error)throw error;
    const cloudNumber=String(data||tentativeNumber).toUpperCase();
    fresh.number=cloudNumber;
@@ -1195,7 +1203,7 @@ saveRequest=function(){
    requests=after.filter(x=>x.number!==tentativeNumber);
    save('requests',requests);
    const mc=$('modalContent');
-   if(mc)mc.innerHTML='<div class="box"><h2 class="script">No se registró tu solicitud</h2><p>Hubo un problema al confirmar el envío. No tenemos confirmación de que Mistrielle la haya recibido.</p><div class="notice" style="overflow-wrap:anywhere">'+esc(e.message||String(e))+'</div><p>Puedes volver al formulario y enviarla otra vez. Si vuelve a fallar, contáctanos directamente por WhatsApp.</p><button class="btn alt" onclick="openCustom()">Volver a intentar</button></div>';
+   if(mc)mc.innerHTML='<div class="box"><h2 class="script">No se registró tu solicitud</h2><p>Hubo un problema al confirmar el envío. No tenemos confirmación de que Mistrielle la haya recibido.</p><div class="notice" style="overflow-wrap:anywhere">'+esc(e.message||String(e))+'</div><p>No repitas el envío automáticamente. Consulta primero con Mistrielle usando tu WhatsApp para evitar solicitudes duplicadas.</p><button class="btn alt" onclick="openCustom()">Volver a intentar</button></div>';
   }finally{mnRequestSending=false}
  })();
 };
