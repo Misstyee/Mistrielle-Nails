@@ -380,6 +380,23 @@ window.MN_SUPABASE_KEY='sb_publishable_5bOuzwywcvqzPEcGrQZEvw_2uEUUp2a';
 .mn-list-counter{font-size:10px;color:#f0c990;font-weight:800;white-space:nowrap}
 @media(max-width:700px){.mn-ranking{padding:0}.mn-rank-row{grid-template-columns:34px minmax(0,1fr);}.mn-rank-value{grid-column:2;text-align:left}.mn-single-panel-body{padding:7px}}
 </style>
+
+<style id="mnProductImageButtonsLayoutFix">
+/* Controles de imágenes guardadas: evitar botones superpuestos en tarjetas estrechas. */
+#pexistingimgs .mn-product-photo-actions,
+#pexistingimgs .mn-product-photo-bottom{display:grid;gap:6px;min-width:0;width:100%;}
+#pexistingimgs .mn-product-photo-actions{grid-template-columns:repeat(2,minmax(0,1fr));}
+#pexistingimgs .mn-product-photo-bottom{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:7px;}
+#pexistingimgs .mn-product-photo-actions .btn,
+#pexistingimgs .mn-product-photo-bottom .btn{
+  box-sizing:border-box;min-width:0;width:100%;max-width:100%;height:auto;min-height:37px;
+  padding:7px 4px!important;margin:0!important;
+  font-size:9px!important;line-height:1.2!important;letter-spacing:0!important;
+  text-align:center;white-space:normal!important;overflow-wrap:break-word;
+  display:flex;align-items:center;justify-content:center;box-shadow:none!important;
+}
+#pexistingimgs .mn-product-photo-bottom .btn{font-size:8px!important;min-height:44px;}
+</style>
 </head><body class="admin">
 <div class="adminhead"><div class="row"><div><div class="eyebrow">MISTRIELLE NAILS · PRIVATE ATELIER</div><h1>Panel de Administración</h1><small style="color:var(--muted)">Catálogo, pedidos, solicitudes, stock y contenido.</small></div><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button id="mnNotifTopBtn" class="btn alt sm" type="button" onclick="openAdminTab('notifications')">🔔 Notificaciones <span id="mnNotifTopCount"></span></button><a class="btn alt sm" href="https://misstyee.github.io/Mistrielle-Nails/?adminPreview=1" target="_blank">Vista previa privada</a><button class="btn danger sm" type="button" onclick="mnLogout()">Cerrar sesión</button></div></div></div>
 <div class="adminwrap"><div class="mn-admin-toolbar"><div class="mn-admin-toolbar-row"><input id="mnAdminSearch" class="mn-admin-search" placeholder="Buscar pedido, producto, solicitud, cupón, reseña..." oninput="mnAdminSearchNow(this.value)"><button class="btn alt sm" onclick="mnAdminSearchNow($('mnAdminSearch').value)">Buscar</button></div><div class="mn-admin-groups"><button class="mn-group-btn active" onclick="setAdminGroup('all',this)">Todo</button><button class="mn-group-btn" onclick="setAdminGroup('resumen',this)">Resumen</button><button class="mn-group-btn" onclick="setAdminGroup('ventas',this)">Ventas</button><button class="mn-group-btn" onclick="setAdminGroup('catalogo',this)">Catálogo</button><button class="mn-group-btn" onclick="setAdminGroup('clientas',this)">Clientas</button><button class="mn-group-btn" onclick="setAdminGroup('contenido',this)">Contenido</button><button class="mn-group-btn" onclick="setAdminGroup('tienda',this)">Tienda</button></div><div id="mnAdminSearchResults" class="mn-search-results" style="display:none"></div></div><div class="tabs"><button class="tab active" data-tab="home" data-group="resumen">INICIO</button><button class="tab" data-tab="activity" data-group="resumen">ACTIVIDAD</button><button class="tab" data-tab="notifications" data-group="resumen">NOTIFICACIONES</button><button class="tab" data-tab="products" data-group="catalogo">PRODUCTOS</button><button class="tab" data-tab="extras" data-group="catalogo">EXTRAS / ACCESORIOS</button><button class="tab" data-tab="gallery" data-group="contenido">GALERÍA / PORTAFOLIO</button><button class="tab" data-tab="orders" data-group="ventas">PEDIDOS</button><button class="tab" data-tab="requests" data-group="ventas">SOLICITUDES</button><button class="tab" data-tab="stats" data-group="ventas">ESTADÍSTICAS</button><button class="tab" data-tab="customers" data-group="clientas">CLIENTAS</button><button class="tab" data-tab="reviews" data-group="clientas">RESEÑAS</button><button class="tab" data-tab="rewards" data-group="clientas">RECOMPENSAS</button><button class="tab" data-tab="seasons" data-group="contenido">TEMPORADAS</button><button class="tab" data-tab="operations" data-group="tienda">OPERACIÓN</button><button class="tab" data-tab="sales" data-group="ventas">VENTAS / GANANCIAS</button><button class="tab" data-tab="discounts" data-group="ventas">DESCUENTOS / ENVÍO</button><button class="tab" data-tab="notices" data-group="contenido">AVISOS</button><button class="tab" data-tab="faq" data-group="contenido">PREGUNTAS FRECUENTES</button><button class="tab" data-tab="design" data-group="tienda">DISEÑO DE LA TIENDA</button><button class="tab" data-tab="options" data-group="catalogo">CATEGORÍAS / TALLAS / FORMAS</button><button class="tab" data-tab="config" data-group="tienda">CONFIGURACIÓN / CONTACTO</button></div>
@@ -1215,7 +1232,7 @@ function renderProductExistingImages(){
     ${i===0?'<span style="position:absolute;left:5px;top:5px;background:#c5a05a;color:#2b0710;padding:2px 5px;border-radius:5px;font-size:9px;font-weight:900">PORTADA</span>':''}
    </div>
    <small style="display:block;color:var(--muted);margin:7px 0">Encuadre · ${Math.round(Number(st.x??50))}% / ${Math.round(Number(st.y??50))}% · ${Number(st.z??1).toFixed(2)}x</small>
-   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px">
+   <div class="mn-product-photo-actions">
     <button type="button" class="btn alt sm" onclick="productImageAdjust(${i},-10,0,0)">←</button>
     <button type="button" class="btn alt sm" onclick="productImageAdjust(${i},0,-10,0)">↑</button>
     <button type="button" class="btn alt sm" onclick="productImageAdjust(${i},0,10,0)">↓</button>
@@ -1225,7 +1242,7 @@ function renderProductExistingImages(){
     <button type="button" class="btn alt sm" onclick="productImageCenter(${i})">Centrar</button>
     <button type="button" class="btn alt sm" onclick="openProductFrameEditor(${i})">Vista en tienda / Ajustar</button>
    </div>
-   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:5px">
+   <div class="mn-product-photo-bottom">
     <button type="button" class="btn alt sm" onclick="mnSafeOpen('${src}')">Ver</button>
     <button type="button" class="btn alt sm" onclick="productImageCover(${i})">${i===0?'✓ Portada':'Hacer portada'}</button>
     <button type="button" class="btn danger sm" onclick="productImageRemove(${i})">Quitar</button>
