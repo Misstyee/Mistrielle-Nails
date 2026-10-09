@@ -389,6 +389,19 @@ window.mnAdminPreviewRequested=new URLSearchParams(location.search).get('adminPr
 @media(max-width:650px){.mn-gift-inner{min-height:94px!important;padding:13px 14px!important;text-align:left!important;grid-template-columns:1fr auto!important}.mn-gift-button{width:auto!important}.mn-gift-inner h2{font-size:20px!important}}
 .mn43-extra-filters{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 15px}.mn43-extra-filters select{min-width:115px;flex:1;border:1px solid #b18b91;background:#23050f;color:#f7d9d5;border-radius:9px;padding:10px;font-size:12px}
 .mn43-filter-title{color:#f2cfa0;font-weight:800;font-size:11px;margin-top:12px}.mn43-empty-filter{padding:14px;color:#efc3bd}
+</style><style id="mn44NoticeResponsive">
+#mnNoticeStrip.mn-notice-strip{height:65px!important;min-height:65px!important;max-height:65px!important;padding:0 12px!important;overflow:hidden!important;display:flex!important;align-items:center;justify-content:center;touch-action:pan-y}
+#mnNoticeStrip.mn-notice-strip[style*="none"]{display:none!important}
+.mn44-notice-inner{width:100%;max-width:1400px;min-width:0;display:flex;align-items:center;justify-content:center;gap:12px}
+.mn44-notice-inner .mn-notice-typebadge{font-size:9px;padding:5px 8px;flex:0 0 auto}
+.mn44-notice-title{flex:1 1 auto;min-width:0;display:block;background:none;border:0;text-align:left;padding:5px 0;font:800 12px/1.35 Arial,sans-serif;color:#fff3ea;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.mn44-read{color:#efd19e;font-weight:700;font-size:10px;margin-left:5px;white-space:nowrap}
+.mn44-notice-cta{flex:0 0 auto;max-width:175px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:8px 10px;border:1px solid #e8c58a;border-radius:999px;background:#5e2030;color:#fff4e6;font-size:10px;font-weight:800;cursor:pointer}
+.mn44-notice-actions{display:flex;align-items:center;justify-content:flex-end;gap:5px;flex:0 0 auto}
+.mn44-notice-actions button{width:30px;height:30px;border:1px solid #b48d80;border-radius:50%;background:#350b19;color:#fff0df;font-size:18px;line-height:1;cursor:pointer;padding:0}
+.mn44-counter{font-size:10px;color:#f2d8ae;white-space:nowrap}
+@media(max-width:700px){#mnNoticeStrip.mn-notice-strip{height:76px!important;min-height:76px!important;max-height:76px!important;padding:6px 10px!important}.mn44-notice-inner{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:30px 29px;gap:3px 8px;align-items:center;justify-content:stretch}.mn44-notice-inner .mn-notice-typebadge{grid-column:1;grid-row:1;font-size:8px;padding:5px 7px}.mn44-notice-title{grid-column:2/4;grid-row:1;font-size:11px}.mn44-read{font-size:9px}.mn44-notice-cta{grid-column:1/3;grid-row:2;max-width:100%;width:max-content;justify-self:start;padding:6px 9px;font-size:9px}.mn44-notice-actions{grid-column:3;grid-row:2;gap:3px}.mn44-notice-actions button{width:27px;height:27px;font-size:16px}.mn44-counter{font-size:9px}}
+@media(max-width:350px){.mn44-notice-inner{gap:3px}.mn44-notice-title{font-size:10px}.mn44-notice-cta{font-size:8px}.mn44-notice-actions button{width:24px;height:24px}}
 </style></head><body>
 <div id="mn43Drawer" class="mn43-drawer" onclick="if(event.target===this)mn43Menu(false)"><aside class="mn43-drawer-panel" aria-label="Secciones de la tienda"><div class="mn43-drawer-head">Mistrielle <button class="mn43-drawer-close" onclick="mn43Menu(false)" aria-label="Cerrar menú">×</button></div><div id="mn43DrawerLinks"></div></aside></div><div id="maintenanceGate" class="mn-maintenance" style="display:none"><div class="mn-maint-card"><div class="eyebrow">MISTRIELLE NAILS</div><h1 id="maintenanceTitle">Estamos preparando algo bonito</h1><p id="maintenanceMessage"></p></div></div><div id="announcementBar" class="mn-announcement" style="display:none"><span id="announcementText"></span><button id="announcementButton" class="btn alt sm" style="display:none"></button><button id="announcementClose" class="mn-banner-close" type="button" onclick="dismissAnnouncement()" aria-label="Ocultar anuncio" title="Ocultar anuncio">×</button></div><div class="top">PRESS-ON NAILS · HECHAS PARA TI</div><header><div class="head"><button class="mn43-menu-toggle" type="button" aria-label="Abrir todas las secciones" onclick="mn43Menu(true)">☰</button><button class="icon" onclick="document.getElementById('catalogo').scrollIntoView()">⌕</button><div class="brand" id="brandLogo"><b>Mistrielle Nails</b><small>PRESS ON NAILS</small></div><div><button class="icon" onclick="openFavorites()">♡<span id="favBadge" class="badge">0</span></button><button class="icon" onclick="openCart()">🛍<span id="cartBadge" class="badge">0</span></button></div></div><nav><a href="#inicio">Inicio</a><a href="#catalogo">Catálogo</a><a href="#personalizadas">Personalizadas</a><a href="#portafolio">Portafolio</a><a href="#" onclick="openMistrielleSociety();return false">Comunidad</a><a href="#" onclick="openStoreNotices();return false">Avisos</a><a href="#faq">Preguntas frecuentes</a><a href="#contacto">Contacto</a><a href="#" onclick="customerSpace();return false">Mi espacio Mistrielle</a></nav></header>
 <section id="inicio" class="hero"><div class="hero-inner"><div class="eyebrow">MISTRIELLE NAILS · PERSONAL LUXURY</div><h1>Un pequeño lujo hecho para tus manos.</h1><p id="heroSubtitle">Uñas Press-On Personalizadas y a la Medida. Tu mejor opción.</p><div class="hero-actions"><button id="heroButton" class="btn gold" onclick="document.getElementById('catalogo').scrollIntoView()">Catálogo de diseños</button><button class="btn hero-custom-btn" onclick="document.getElementById('personalizadas').scrollIntoView({behavior:'smooth'})">Quiero un set personalizado</button></div><button class="hero-scroll-cue" onclick="document.getElementById('personalizadas').scrollIntoView({behavior:'smooth'})"><span>La mayoría de nuestros diseños nacen de una idea tuya</span><b>↓ PERSONALIZA TU SET ↓</b></button></div></section>
@@ -1219,18 +1232,17 @@ function mnRenderStoreNotices(){
    const type=n.type==='important'?'important':n.type==='update'?'update':'info';
    const typetext=type==='important'?'✦ IMPORTANTE':type==='update'?'✧ NOVEDAD':'◈ AVISO';
    strip.dataset.type=type;
-   strip.innerHTML=`<div class="mn-notice-rotator">
-     <div class="mn-notice-main">
-       <span class="mn-notice-typebadge">${typetext}</span>
-       <div class="mn-notice-copy" aria-live="polite"><strong>${esc(n.title||'Aviso Mistrielle')}</strong><span class="mn-notice-message" id="mnNoticeMessage">${esc(n.text||'')}</span><button type="button" class="mn-notice-more" onclick="mnNoticeToggleMore()">Ver aviso</button></div>
-       ${n.button&&n.target?`<button type="button" class="btn mn-notice-cta" onclick="mnNoticeGo(mnVisibleStripNotices()[${index}].target)">${esc(n.button)}</button>`:''}
-     </div>
-     <div class="mn-notice-tools">
-       ${notices.length>1?'<button type="button" class="mn-notice-arrow" onclick="mnNoticeStep(-1)" aria-label="Aviso anterior">‹</button>':''}
-       ${notices.length>1?`<div class="mn-notice-progress">${notices.map((_,i)=>`<button type="button" class="mn-notice-dot ${i===index?'active':''}" onclick="mnNoticeSelect(${i})" aria-label="Mostrar aviso ${i+1} de ${notices.length}" aria-current="${i===index?'true':'false'}"></button>`).join('')}</div>`:''}
-       ${notices.length>1?'<button type="button" class="mn-notice-arrow" onclick="mnNoticeStep(1)" aria-label="Siguiente aviso">›</button>':''}
-       <button type="button" class="mn-notice-strip-close" onclick="mnNoticeDismiss()" aria-label="Ocultar este aviso" title="Ocultar este aviso">×</button>
-     </div></div>`;
+   strip.innerHTML=`<div class="mn44-notice-inner">
+      <span class="mn-notice-typebadge">${typetext}</span>
+      <button type="button" class="mn44-notice-title" onclick="mnNoticeToggleMore()" title="Leer aviso completo">${esc(n.title||'Aviso Mistrielle')} <span class="mn44-read">Leer más ›</span></button>
+      ${n.button&&n.target?`<button type="button" class="mn44-notice-cta" onclick="mnNoticeGo(mnVisibleStripNotices()[${index}].target)">${esc(n.button)}</button>`:''}
+      <div class="mn44-notice-actions">
+        ${notices.length>1?'<button type="button" onclick="mnNoticeStep(-1)" aria-label="Anterior aviso">‹</button>':''}
+        ${notices.length>1?`<span class="mn44-counter">${index+1}/${notices.length}</span>`:''}
+        ${notices.length>1?'<button type="button" onclick="mnNoticeStep(1)" aria-label="Siguiente aviso">›</button>':''}
+        <button type="button" onclick="mnNoticeDismiss()" aria-label="Ocultar aviso">×</button>
+      </div>
+   </div>`;
    const seconds=Math.max(3,Math.min(15,Number(storeOps?.noticeSpeed)||6));
    if(notices.length>1&&(!mnNoticeCarouselTimer||mnNoticeCarouselTimerSpeed!==seconds)){
      if(mnNoticeCarouselTimer)clearInterval(mnNoticeCarouselTimer);
@@ -1341,7 +1353,7 @@ function mn43Go(id){mn43Menu(false);if(id==='avisos')return openStoreNotices();i
 function mn43GiftDetails(){const c=window.mnActiveGift;if(!c)return;const box=document.getElementById('modalContent');if(!box)return;box.innerHTML=`<div class="eyebrow">REGALO MISTRIELLE</div><h2 class="script">${esc(c.title||'Campaña')}</h2><p style="white-space:pre-wrap;line-height:1.6">${esc(c.message||'')}</p><button class="btn gold" onclick="openActiveGift()">${esc(c.buttonText||'Reclamar código')}</button>`;openModal()}
 const mn43FilterState={form:'',length:'',size:'',color:'',availability:''};
 function mn43SetFilter(name,value){mn43FilterState[name]=value;render()}
-function mn43PopulateFilters(){const root=document.getElementById('mn43FilterBox');if(!root)return;const choices=[['form','Forma',forms],['length','Largo',lengths],['size','Talla',sizes],['color','Color',['Negro','Blanco','Rosa','Rojo','Azul','Morado','Verde','Amarillo','Dorado','Plateado']],['availability','Disponibilidad',['Disponible','Bajo pedido']]];root.innerHTML=choices.map(([key,title,values])=>`<select aria-label="${title}" onchange="mn43SetFilter('${key}',this.value)"><option value="">${title}: Todos</option>${values.map(v=>{const val=key==='availability'?(v==='Bajo pedido'?'order':'available'):v;return `<option value="${esc(val)}" ${mn43FilterState[key]===val?'selected':''}>${esc(v)}</option>`}).join('')}</select>`).join('')+`<button type="button" class="btn alt sm" onclick="Object.keys(mn43FilterState).forEach(k=>mn43FilterState[k]='');render()">Limpiar filtros</button>`}
+function mn43PopulateFilters(){const root=document.getElementById('mn43FilterBox');if(!root)return;const choices=[['form','Forma',forms],['length','Largo',lengths],['size','Talla',sizes],['color','Color',(Array.isArray(config.catalogColors)&&config.catalogColors.length?config.catalogColors:['Negro','Blanco','Rosa','Rojo','Azul','Morado','Verde','Amarillo','Dorado','Plateado'])],['availability','Disponibilidad',['Disponible','Bajo pedido']]];root.innerHTML=choices.map(([key,title,values])=>`<select aria-label="${title}" onchange="mn43SetFilter('${key}',this.value)"><option value="">${title}: Todos</option>${values.map(v=>{const val=key==='availability'?(v==='Bajo pedido'?'order':'available'):v;return `<option value="${esc(val)}" ${mn43FilterState[key]===val?'selected':''}>${esc(v)}</option>`}).join('')}</select>`).join('')+`<button type="button" class="btn alt sm" onclick="Object.keys(mn43FilterState).forEach(k=>mn43FilterState[k]='');render()">Limpiar filtros</button>`}
 // Do not trust a cached maintenance flag as current until remote state was fetched.
 window.mn43CloudStateLoaded=false;
 const mn43OldLoadPublicState=mnLoadPublicState;
