@@ -434,6 +434,12 @@ window.mnAdminPreviewRequested=new URLSearchParams(location.search).get('adminPr
 @media(max-width:620px){.mn60-custom{padding:25px 14px 23px!important}.mn60-option-grid{grid-template-columns:1fr;gap:10px}.mn60-option-card{padding:14px 12px}.mn60-custom #customTitle{font-size:43px!important}.mn60-custom #customText{font-size:14px!important}}
 @media(prefers-reduced-motion:reduce){.mn60-custom .personalized-main-btn,.mn60-custom .personalized-quote-btn,.mn60-custom .personalized-main-btn::after,.mn60-custom .personalized-quote-btn::after{animation:none!important;transition:none!important}}
 </style>
+
+<style id="mn61CustomBackground">
+/* Foto editable desde Administración; capa vino que no tapa la imagen */
+#customLuxe.mn60-custom{background:linear-gradient(115deg,rgba(27,2,10,.83),rgba(65,8,28,.70)),var(--custom-image,none) center/cover no-repeat!important}
+#customLuxe.mn60-custom .mn60-option-card{background:rgba(60,10,29,.76)!important;backdrop-filter:blur(3px)}
+</style>
 </head><body>
 <div id="mn43Drawer" class="mn43-drawer" onclick="if(event.target===this)mn43Menu(false)"><aside class="mn43-drawer-panel" aria-label="Secciones de la tienda"><div class="mn43-drawer-head">Mistrielle <button class="mn43-drawer-close" onclick="mn43Menu(false)" aria-label="Cerrar menú">×</button></div><div id="mn43DrawerLinks"></div></aside></div><div id="maintenanceGate" class="mn-maintenance" style="display:none"><div class="mn-maint-card"><div class="eyebrow">MISTRIELLE NAILS</div><h1 id="maintenanceTitle">Estamos preparando algo bonito</h1><p id="maintenanceMessage"></p></div></div><div id="announcementBar" class="mn-announcement" style="display:none"><span id="announcementText"></span><button id="announcementButton" class="btn alt sm" style="display:none"></button><button id="announcementClose" class="mn-banner-close" type="button" onclick="dismissAnnouncement()" aria-label="Ocultar anuncio" title="Ocultar anuncio">×</button></div><div class="top">PRESS-ON NAILS · HECHAS PARA TI</div><header><div class="head"><button class="mn43-menu-toggle" type="button" aria-label="Abrir todas las secciones" onclick="mn43Menu(true)">☰</button><button class="icon" onclick="document.getElementById('catalogo').scrollIntoView()">⌕</button><div class="brand" id="brandLogo"><b>Mistrielle Nails</b><small>PRESS ON NAILS</small></div><div><button class="icon" onclick="openFavorites()">♡<span id="favBadge" class="badge">0</span></button><button class="icon" onclick="openCart()">🛍<span id="cartBadge" class="badge">0</span></button></div></div><nav><a href="#inicio">Inicio</a><a href="#catalogo">Catálogo</a><a href="#personalizadas">Personalizadas</a><a href="#portafolio">Portafolio</a><a href="#" onclick="openMistrielleSociety();return false">Comunidad</a><a href="#" onclick="openStoreNotices();return false">Avisos</a><a href="#faq">Preguntas frecuentes</a><a href="#contacto">Contacto</a><a href="#" onclick="customerSpace();return false">Mi espacio Mistrielle</a></nav></header>
 <section id="inicio" class="hero"><div class="hero-inner"><div class="eyebrow">MISTRIELLE NAILS · PERSONAL LUXURY</div><h1>Un pequeño lujo hecho para tus manos.</h1><p id="heroSubtitle">Uñas Press-On Personalizadas y a la Medida. Tu mejor opción.</p><div class="hero-actions"><button id="heroButton" class="btn gold" onclick="document.getElementById('catalogo').scrollIntoView()">Catálogo de diseños</button><button class="btn hero-custom-btn" onclick="document.getElementById('personalizadas').scrollIntoView({behavior:'smooth'})">Quiero un set personalizado</button></div><button class="hero-scroll-cue" onclick="document.getElementById('personalizadas').scrollIntoView({behavior:'smooth'})"><span>La mayoría de nuestros diseños nacen de una idea tuya</span><b>↓ PERSONALIZA TU SET ↓</b></button></div></section>
@@ -882,15 +888,18 @@ async function applyOperationalState(){
 }
 function render(){
  applyOperationalState();
- if(config.customImage)$('customLuxe').style.setProperty('--custom-image',`url("${config.customImage}")`);
+ $('customLuxe').style.setProperty('--custom-image',config.customImage?`url("${String(config.customImage).replace(/\"/g,'')}")`:'none');
  $('brandLogo').innerHTML=config.logo?`<img class="logo-img" src="${config.logo}" alt="Mistrielle Nails">`:`<b>Mistrielle Nails</b><small>PRESS ON NAILS</small>`;
  const season=activeSeason();
  if(typeof mnRenderHeroCarousel==='function')mnRenderHeroCarousel();if(typeof mnRenderStoreNotices==='function')mnRenderStoreNotices();
  document.querySelector('.hero h1').textContent=season?.heroTitle||config.welcome||'Un pequeño lujo hecho para tus manos.';
  $('heroSubtitle').textContent=season?.heroSubtitle||config.heroSubtitle||'Uñas Press-On Personalizadas y a la Medida. Tu mejor opción.';
  $('heroButton').textContent=season?.heroButtonText||config.heroButton||'Descubrir diseños';
- $('customTitle').textContent='Set Personalizado';
- $('customText').textContent='Creamos el diseño que imaginas. ♡';
+ $('customTitle').textContent=config.customTitle||'Set Personalizado';
+ $('customText').textContent=config.customText||'Creamos el diseño que imaginas. ♡';
+ const titles=document.querySelectorAll('.mn60-option-card h3'),descs=document.querySelectorAll('.mn60-option-card .mn60-card-top p');
+ if(titles[0])titles[0].textContent=config.customCard1Title||'Diseña tu propio set';if(descs[0])descs[0].textContent=config.customCard1Text||'Personalizado a tu gusto y talla.';
+ if(titles[1])titles[1].textContent=config.customCard2Title||'¿Cuánto costaría mi idea?';if(descs[1])descs[1].textContent=config.customCard2Text||'Pregunta sin compromiso.';
  let slot=$('mnCustomSlots');if(!slot){slot=document.createElement('div');slot.id='mnCustomSlots';slot.className='mn-slot-note';$('customText').insertAdjacentElement('afterend',slot)}
  slot.textContent=storeOps.customOpen!==false?`${Number(storeOps.customSlots||0)} ${storeOps.customSlotsLabel||'espacios disponibles'}`:'Agenda de personalizados cerrada temporalmente';
  const customBtn=document.querySelector('#personalizadas .personalized-main-btn');if(customBtn){customBtn.disabled=storeOps.customOpen===false;customBtn.textContent=storeOps.customOpen===false?'AGENDA CERRADA':'QUIERO MI SET →'}
