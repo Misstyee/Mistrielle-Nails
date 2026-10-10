@@ -440,6 +440,14 @@ window.mnAdminPreviewRequested=new URLSearchParams(location.search).get('adminPr
 #customLuxe.mn60-custom{background:linear-gradient(115deg,rgba(27,2,10,.83),rgba(65,8,28,.70)),var(--custom-image,none) center/cover no-repeat!important}
 #customLuxe.mn60-custom .mn60-option-card{background:rgba(60,10,29,.76)!important;backdrop-filter:blur(3px)}
 </style>
+<style id="mnCartExtrasMobileFix">
+/* Complementos del carrito: cerrados al entrar, en todos los dispositivos. */
+@media (max-width: 900px){
+  .mn-cart-extras-header{flex-wrap:wrap!important;align-items:flex-start!important;}
+  .mn-cart-extras-header>button{width:100%;min-height:42px;}
+}
+@media (prefers-reduced-motion:reduce){.mn-cart-extras-header>button{animation:none!important}}
+</style>
 </head><body>
 <div id="mn43Drawer" class="mn43-drawer" onclick="if(event.target===this)mn43Menu(false)"><aside class="mn43-drawer-panel" aria-label="Secciones de la tienda"><div class="mn43-drawer-head">Mistrielle <button class="mn43-drawer-close" onclick="mn43Menu(false)" aria-label="Cerrar menú">×</button></div><div id="mn43DrawerLinks"></div></aside></div><div id="maintenanceGate" class="mn-maintenance" style="display:none"><div class="mn-maint-card"><div class="eyebrow">MISTRIELLE NAILS</div><h1 id="maintenanceTitle">Estamos preparando algo bonito</h1><p id="maintenanceMessage"></p></div></div><div id="announcementBar" class="mn-announcement" style="display:none"><span id="announcementText"></span><button id="announcementButton" class="btn alt sm" style="display:none"></button><button id="announcementClose" class="mn-banner-close" type="button" onclick="dismissAnnouncement()" aria-label="Ocultar anuncio" title="Ocultar anuncio">×</button></div><div class="top">PRESS-ON NAILS · HECHAS PARA TI</div><header><div class="head"><button class="mn43-menu-toggle" type="button" aria-label="Abrir todas las secciones" onclick="mn43Menu(true)">☰</button><button class="icon" onclick="document.getElementById('catalogo').scrollIntoView()">⌕</button><div class="brand" id="brandLogo"><b>Mistrielle Nails</b><small>PRESS ON NAILS</small></div><div><button class="icon" onclick="openFavorites()">♡<span id="favBadge" class="badge">0</span></button><button class="icon" onclick="openCart()">🛍<span id="cartBadge" class="badge">0</span></button></div></div><nav><a href="#inicio">Inicio</a><a href="#catalogo">Catálogo</a><a href="#personalizadas">Personalizadas</a><a href="#portafolio">Portafolio</a><a href="#" onclick="openMistrielleSociety();return false">Comunidad</a><a href="#" onclick="openStoreNotices();return false">Avisos</a><a href="#faq">Preguntas frecuentes</a><a href="#contacto">Contacto</a><a href="#" onclick="customerSpace();return false">Mi espacio Mistrielle</a></nav></header>
 <section id="inicio" class="hero"><div class="hero-inner"><div class="eyebrow">MISTRIELLE NAILS · PERSONAL LUXURY</div><h1>Un pequeño lujo hecho para tus manos.</h1><p id="heroSubtitle">Uñas Press-On Personalizadas y a la Medida. Tu mejor opción.</p><div class="hero-actions"><button id="heroButton" class="btn gold" onclick="document.getElementById('catalogo').scrollIntoView()">Catálogo de diseños</button><button class="btn hero-custom-btn" onclick="document.getElementById('personalizadas').scrollIntoView({behavior:'smooth'})">Quiero un set personalizado</button></div><button class="hero-scroll-cue" onclick="document.getElementById('personalizadas').scrollIntoView({behavior:'smooth'})"><span>La mayoría de nuestros diseños nacen de una idea tuya</span><b>↓ PERSONALIZA TU SET ↓</b></button></div></section>
@@ -1012,12 +1020,12 @@ function toggleCartExtras(){
 }
 function extrasCartHTML(){
  const xs=availableExtras();if(!xs.length)return '';
- if(typeof window.mnCartExtrasOpen==='undefined')window.mnCartExtrasOpen=window.innerWidth>620;
+ if(typeof window.mnCartExtrasOpen==='undefined')window.mnCartExtrasOpen=false;
  const open=!!window.mnCartExtrasOpen;
  return `<div class="box" style="margin-top:14px">
-  <div class="row" style="align-items:center;gap:10px">
+  <div class="row mn-cart-extras-header" style="align-items:center;gap:10px">
    <div><div class="eyebrow">COMPLEMENTA TU PEDIDO</div><h3 style="margin:5px 0">Complementos extra</h3><small style="color:var(--muted)">Opcionales. Tu set ya incluye su kit de aplicación.</small></div>
-   <button type="button" class="btn alt sm" onclick="toggleCartExtras()">${open?'Ocultar complementos':'Ver complementos'} · ${xs.length}</button>
+   <button type="button" class="btn alt sm" onclick="toggleCartExtras()">${open?'Ocultar complementos extra':'Mostrar complementos extra'} · ${xs.length}</button>
   </div>
   ${open?`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:12px">${xs.map(x=>`<div style="border:1px solid var(--line);border-radius:12px;padding:10px">${x.image?extraImageHTML(x,{height:'110px',radius:'9px',marginBottom:'8px'}):''}<b>${esc(x.name)}</b>${x.description?`<div style="font-size:12px;color:var(--muted);margin:4px 0">${esc(x.description)}</div>`:''}<div style="margin:7px 0"><b>${money(x.price)}</b> · <small>${Number(x.stock||0)} disponibles</small></div><button class="btn sm" onclick="addExtraToCart('${x.id}')">+ Agregar</button></div>`).join('')}</div>`:''}
  </div>`;
