@@ -441,6 +441,23 @@ html,body.admin{max-width:100%;overflow-x:hidden}
 .mn45-colors{border-top:1px solid var(--line);padding-top:16px;margin-top:14px}
 @media(max-width:650px){.mn45-filter-grid{grid-template-columns:1fr}}
 </style>
+
+<style id="mn55AdminSummaryStyles">
+/* Datos esenciales siempre visibles; los detalles administrativos quedan plegados. */
+.mn53-accordion>summary{display:grid!important;grid-template-columns:minmax(0,1fr) auto;gap:12px!important;align-items:center!important;padding:12px 14px!important;min-height:88px}
+.mn53-accordion>summary::after{display:none!important}
+.mn53-summary-label{display:flex;align-items:center;gap:13px;min-width:0}
+.mn55-thumb{width:65px;height:65px;flex:0 0 65px;object-fit:cover;border-radius:9px;border:1px solid #986476;background:#21040b}
+.mn55-main{display:flex;flex-direction:column;gap:4px;min-width:0}
+.mn55-main strong{font-size:13px;color:#ffe8e1;overflow-wrap:anywhere}
+.mn55-attributes{color:#dbb4aa;font-size:11px}
+.mn55-price{font-weight:800;color:#edd19d;font-size:12px}
+.mn53-summary-meta{display:flex;align-items:flex-end;flex-direction:column;gap:5px;text-align:right;min-width:0}
+.mn55-state{font-size:10px;font-weight:800;color:#f0d2c5;border:1px solid #925a66;border-radius:999px;padding:4px 7px}
+.mn55-folio{font-size:10px;color:#d4a9a0;overflow-wrap:anywhere;max-width:260px}
+.mn55-hint{font-size:10px;color:#f0d4a0;font-weight:800;white-space:nowrap}
+@media(max-width:680px){.mn53-accordion>summary{grid-template-columns:minmax(0,1fr)!important}.mn53-summary-meta{align-items:flex-start;text-align:left;padding-left:78px}.mn55-thumb{width:62px;height:62px;flex-basis:62px}.mn55-folio{max-width:100%}}
+</style>
 </head><body class="admin">
 <div class="adminhead"><div class="row"><div><div class="eyebrow">MISTRIELLE NAILS · PRIVATE ATELIER</div><h1>Panel de Administración</h1><small style="color:var(--muted)">Catálogo, pedidos, solicitudes, stock y contenido.</small></div><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button id="mnNotifTopBtn" class="btn alt sm" type="button" onclick="openAdminTab('notifications')">🔔 Notificaciones <span id="mnNotifTopCount"></span></button><a class="btn alt sm" href="https://misstyee.github.io/Mistrielle-Nails/?adminPreview=1" target="_blank">Vista previa privada</a><button class="btn danger sm" type="button" onclick="mnLogout()">Cerrar sesión</button></div></div></div>
 <div class="adminwrap"><div class="mn-admin-toolbar"><div class="mn-admin-toolbar-row"><input id="mnAdminSearch" class="mn-admin-search" placeholder="Buscar pedido, producto, solicitud, cupón, reseña..." oninput="mnAdminSearchNow(this.value)"><button class="btn alt sm" onclick="mnAdminSearchNow($('mnAdminSearch').value)">Buscar</button></div><div class="mn-admin-groups"><button class="mn-group-btn active" onclick="setAdminGroup('all',this)">Todo</button><button class="mn-group-btn" onclick="setAdminGroup('resumen',this)">Resumen</button><button class="mn-group-btn" onclick="setAdminGroup('ventas',this)">Ventas</button><button class="mn-group-btn" onclick="setAdminGroup('catalogo',this)">Catálogo</button><button class="mn-group-btn" onclick="setAdminGroup('clientas',this)">Clientas</button><button class="mn-group-btn" onclick="setAdminGroup('contenido',this)">Contenido</button><button class="mn-group-btn" onclick="setAdminGroup('tienda',this)">Tienda</button></div><div id="mnAdminSearchResults" class="mn-search-results" style="display:none"></div></div><div class="tabs"><button class="tab active" data-tab="home" data-group="resumen">INICIO</button><button class="tab" data-tab="activity" data-group="resumen">ACTIVIDAD</button><button class="tab" data-tab="notifications" data-group="resumen">NOTIFICACIONES</button><button class="tab" data-tab="products" data-group="catalogo">PRODUCTOS</button><button class="tab" data-tab="extras" data-group="catalogo">EXTRAS / ACCESORIOS</button><button class="tab" data-tab="gallery" data-group="contenido">GALERÍA / PORTAFOLIO</button><button class="tab" data-tab="orders" data-group="ventas">PEDIDOS</button><button class="tab" data-tab="requests" data-group="ventas">SOLICITUDES</button><button class="tab" data-tab="quotes" data-group="ventas">COTIZACIONES</button><button class="tab" data-tab="stats" data-group="ventas">ESTADÍSTICAS</button><button class="tab" data-tab="customers" data-group="clientas">CLIENTAS</button><button class="tab" data-tab="reviews" data-group="clientas">RESEÑAS</button><button class="tab" data-tab="rewards" data-group="clientas">RECOMPENSAS</button><button class="tab" data-tab="seasons" data-group="contenido">TEMPORADAS</button><button class="tab" data-tab="operations" data-group="tienda">OPERACIÓN</button><button class="tab" data-tab="sales" data-group="ventas">VENTAS / GANANCIAS</button><button class="tab" data-tab="discounts" data-group="ventas">DESCUENTOS / ENVÍO</button><button class="tab" data-tab="notices" data-group="contenido">AVISOS</button><button class="tab" data-tab="faq" data-group="contenido">PREGUNTAS FRECUENTES</button><button class="tab" data-tab="design" data-group="tienda">DISEÑO DE LA TIENDA</button><button class="tab" data-tab="options" data-group="catalogo">CATEGORÍAS / TALLAS / FORMAS</button><button class="tab" data-tab="config" data-group="tienda">CONFIGURACIÓN / CONTACTO</button></div>
@@ -2775,7 +2792,7 @@ function mn43SaveOrder(){const inputs=[...document.querySelectorAll('.mn43-posit
   let stage='all';
   let quoteStage='all';
   const openCards=new Set();
-  document.addEventListener('click',function(ev){const sum=ev.target.closest?.('.mn53-accordion > summary');if(!sum)return;const wrap=sum.parentElement;const key=wrap.dataset.mnFolio;if(!key)return;ev.preventDefault();wrap.open=!wrap.open;if(wrap.open)openCards.add(key);else openCards.delete(key);},true);
+  document.addEventListener('click',function(ev){const sum=ev.target.closest?.('.mn53-accordion > summary');if(!sum)return;const wrap=sum.parentElement;const key=wrap.dataset.mnFolio;if(!key)return;ev.preventDefault();wrap.open=!wrap.open;if(wrap.open)openCards.add(key);else openCards.delete(key);const hint=wrap.querySelector('.mn55-hint');if(hint)hint.textContent=wrap.open?'Ocultar detalles ▴':'Ver detalles ▾';},true);
   window.mn53SetStage=function(kind,v){if(kind==='quotes')quoteStage=v;else stage=v;mn53Present()};
   function mn53Stage(r){
     if(r.requestType==='cotizacion'){
@@ -2813,12 +2830,28 @@ function mn43SaveOrder(){const inputs=[...document.querySelectorAll('.mn43-posit
         const sum=document.createElement('summary');sum.innerHTML='<span class="mn53-summary-label"></span><span class="mn53-summary-meta"></span>';wrapper.append(sum);
         card.parentNode.insertBefore(wrapper,card);wrapper.append(card);
       }
-      wrapper.querySelector('.mn53-summary-label').textContent=(r.name||'Clienta')+' · '+(r.requestType==='cotizacion'?'Cotización':'Solicitud');
+      const label=wrapper.querySelector('.mn53-summary-label');
+      label.replaceChildren();
+      const thumb=card.querySelector('img');
+      if(thumb){const img=document.createElement('img');img.className='mn55-thumb';img.src=thumb.currentSrc||thumb.src;img.alt='Referencia del diseño';img.loading='lazy';label.append(img)}
+      const info=document.createElement('span');info.className='mn55-main';
+      const who=document.createElement('strong');who.textContent=r.name||'Clienta';info.append(who);
+      const attributes=document.createElement('span');attributes.className='mn55-attributes';
+      attributes.textContent=[r.requestType==='cotizacion'?'Cotización':'Solicitud',r.form,r.length,r.size].filter(Boolean).join(' · ');info.append(attributes);
+      const price=document.createElement('span');price.className='mn55-price';
+      const originalQuote=r.sourceQuoteNumber?requests.find(x=>x.number===r.sourceQuoteNumber):null;
+      const amount=Number(r.quotedPrice||r.sourceQuotePrice||originalQuote?.quotedPrice||0);
+      price.textContent=amount>0?'Precio: $'+amount.toLocaleString('es-MX',{maximumFractionDigits:2}):'Precio pendiente';info.append(price);
+      label.append(info);
       const child= requests.find(x=>x.sourceQuoteNumber===r.number&&x.requestType!=='cotizacion');
       const converted=Boolean(child)||!!r.convertedRequestNumber;
       const state=converted&&id==='quotes'?'converted':mn53Stage(r);
       wrapper.dataset.mnFolio=r.number;wrapper.open=openCards.has(r.number);
-      wrapper.querySelector('.mn53-summary-meta').textContent=(String(r.number).length>23?String(r.number).slice(0,14)+'…'+String(r.number).slice(-5):r.number)+' · '+(converted?'Convertida en solicitud':r.status||'Nueva');
+      const meta=wrapper.querySelector('.mn53-summary-meta');
+      meta.replaceChildren();
+      const stateBadge=document.createElement('span');stateBadge.className='mn55-state';stateBadge.textContent=converted?'Convertida en solicitud':r.convertedOrder?'Con pedido':r.status||'Nueva';meta.append(stateBadge);
+      const folioLabel=document.createElement('span');folioLabel.className='mn55-folio';folioLabel.textContent=r.number;folioLabel.title=r.number;meta.append(folioLabel);
+      const hint=document.createElement('span');hint.className='mn55-hint';hint.textContent=wrapper.open?'Ocultar detalles ▴':'Ver detalles ▾';meta.append(hint);
       wrapper.style.display=(selected==='all'||selected===state)?'block':'none';
       if(id==='quotes'){
         let bar=card.querySelector('.mn53-quote-action');
