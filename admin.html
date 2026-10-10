@@ -2761,23 +2761,38 @@ function mn43SaveOrder(){const inputs=[...document.querySelectorAll('.mn43-posit
 #requests .request-card,#quotes .request-card{min-width:0!important}
 @media(max-width:700px){.mn53-accordion>summary{align-items:flex-start}.mn53-accordion>.request-card{display:grid!important;grid-template-columns:minmax(0,1fr)!important}}
 </style>
+<style id="mn54AdminStyle">
+.mn53-filters{position:relative;max-width:100%;overflow-x:auto;scrollbar-width:thin}
+.mn53-filters .mn54-count{display:inline-block;min-width:19px;text-align:center;border:1px solid rgba(239,201,170,.32);border-radius:20px;padding:2px 5px;margin-left:5px;font-variant-numeric:tabular-nums}
+.mn53-accordion>summary{user-select:none;touch-action:manipulation}
+.mn53-accordion[open]>summary{border-bottom:1px solid rgba(231,194,178,.18)}
+@media(max-width:700px){.mn53-accordion>summary{gap:6px}.mn53-summary-meta{overflow-wrap:anywhere}}
+</style>
 <script id="mn53AdminScript">
 (function(){
   const prior=window.renderAdmin;
   if(typeof prior!=='function')return;
   let stage='all';
   let quoteStage='all';
+  const openCards=new Set();
+  document.addEventListener('click',function(ev){const sum=ev.target.closest?.('.mn53-accordion > summary');if(!sum)return;const wrap=sum.parentElement;const key=wrap.dataset.mnFolio;if(!key)return;ev.preventDefault();wrap.open=!wrap.open;if(wrap.open)openCards.add(key);else openCards.delete(key);},true);
   window.mn53SetStage=function(kind,v){if(kind==='quotes')quoteStage=v;else stage=v;mn53Present()};
   function mn53Stage(r){
     if(r.requestType==='cotizacion'){
-      if(r.convertedRequestNumber||r.status==='Convertida en solicitud')return 'converted';
-      if(r.status==='Rechazada'||r.status==='Cerrada')return 'closed';
-      if(Number(r.quotedPrice||0)>0)return 'priced';
+      if(r.convertedRequestNumber||requests.some(x=>x.sourceQuoteNumber===r.number&&x.requestType!=='cotizacion'))return 'converted';
+      if(r.status==='Rechazada')return 'rejected';
+      if(r.status==='Cerrada')return 'closed';
+      if(r.status==='Aceptada')return 'accepted';
+      if(Number(r.quotedPrice||0)>0||r.status==='Cotizada')return 'priced';
+      if(r.status==='En revisión')return 'review';
       return 'new';
     }
-    if(r.convertedOrder)return 'converted';
-    if(r.status==='Rechazada'||r.status==='Cerrada')return 'closed';
-    if(r.status==='Aceptada'||r.status==='Cotizada')return 'priced';
+    if(r.convertedOrder)return 'order';
+    if(r.status==='Rechazada')return 'rejected';
+    if(r.status==='Cerrada')return 'closed';
+    if(r.status==='Aceptada')return 'accepted';
+    if(r.status==='Cotizada')return 'priced';
+    if(r.status==='En revisión')return 'review';
     return 'new';
   }
   function mn53Present(){
@@ -2785,8 +2800,10 @@ function mn43SaveOrder(){const inputs=[...document.querySelectorAll('.mn43-posit
     const root=document.getElementById(id);if(!root)return;
     let filters=root.querySelector('.mn53-filters');
     if(!filters){filters=document.createElement('div');filters.className='mn53-filters'; const first=root.querySelector('.box');(first||root).prepend(filters)}
-    const pairs=id==='quotes'?[['all','Todas'],['new','Nuevas'],['priced','Cotizadas'],['converted','Convertidas'],['closed','Cerradas']]:[['all','Todas'],['new','Nuevas'],['priced','Cotizadas / aceptadas'],['converted','Con pedido'],['closed','Cerradas']];
-    filters.innerHTML=pairs.map(([val,title])=>'<button type="button" class="btn '+(selected===val?'':'alt')+' sm" onclick="mn53SetStage(\''+id+'\',\''+val+'\')">'+title+'</button>').join('');
+    const pairs=id==='quotes'?[['all','Todas'],['new','Nuevas'],['review','En revisión'],['priced','Cotizadas'],['accepted','Aceptadas'],['converted','Convertidas en solicitud'],['rejected','Rechazadas'],['closed','Cerradas']]:[['all','Todas'],['new','Nuevas'],['review','En revisión'],['priced','Cotizadas'],['accepted','Aceptadas'],['order','Con pedido'],['rejected','Rechazadas'],['closed','Cerradas']];
+    const group=requests.filter(r=>!r.hidden&&(id==='quotes'?r.requestType==='cotizacion':r.requestType!=='cotizacion'));
+    const counts={all:group.length};group.forEach(r=>{const st=mn53Stage(r);counts[st]=(counts[st]||0)+1});
+    filters.innerHTML=pairs.map(([val,title])=>'<button type="button" class="btn '+(selected===val?'':'alt')+' sm" onclick="mn53SetStage(\''+id+'\',\''+val+'\')">'+title+' <span class="mn54-count">'+(counts[val]||0)+'</span></button>').join('');
     root.querySelectorAll('.request-card').forEach(card=>{
       const folio=(card.querySelector('b')?.textContent||'').split(' · ')[0].trim();
       const r=requests.find(x=>x.number===folio);if(!r)return;
@@ -2799,7 +2816,8 @@ function mn43SaveOrder(){const inputs=[...document.querySelectorAll('.mn43-posit
       wrapper.querySelector('.mn53-summary-label').textContent=(r.name||'Clienta')+' · '+(r.requestType==='cotizacion'?'Cotización':'Solicitud');
       const child= requests.find(x=>x.sourceQuoteNumber===r.number&&x.requestType!=='cotizacion');
       const converted=Boolean(child)||!!r.convertedRequestNumber;
-      const state=converted?'converted':mn53Stage(r);
+      const state=converted&&id==='quotes'?'converted':mn53Stage(r);
+      wrapper.dataset.mnFolio=r.number;wrapper.open=openCards.has(r.number);
       wrapper.querySelector('.mn53-summary-meta').textContent=(String(r.number).length>23?String(r.number).slice(0,14)+'…'+String(r.number).slice(-5):r.number)+' · '+(converted?'Convertida en solicitud':r.status||'Nueva');
       wrapper.style.display=(selected==='all'||selected===state)?'block':'none';
       if(id==='quotes'){
