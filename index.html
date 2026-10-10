@@ -1079,7 +1079,7 @@ function saveRequest(){
  if(chosenSize==='Personalizada'&&measures.some(x=>!Number.isFinite(x.mm)||x.mm<=0||x.mm>35))return alert('Escribe las cinco medidas personalizadas en milímetros.');
  const selectedExtras=activeRequestExtras().filter(x=>requestExtraQty(x.id)>0).map(x=>({id:x.id,name:x.name,image:x.image||'',price:Number(x.price||0),qty:requestExtraQty(x.id),isExtra:true}));
  let done=image=>{requestCounter++;save('requestCounter',requestCounter);let insp=window.mnGalleryInspiration||null;
-  let r={number:'SOL-'+String(requestCounter).padStart(4,'0'),created:Date.now(),name:n,whatsapp:w,requestType:window.mnQuoteOnly?'cotizacion':'pedido_personalizado',sourceQuoteNumber:window.mnQuoteConversionSource||'',form:chosenForm||'Por definir',length:chosenLength||'Por definir',size:chosenSize||'Por definir',customMeasurements:measures,details:d,image:image||(insp?.image||''),customerReferenceImage:image||'',inspirationGalleryId:insp?.id||'',inspirationTitle:insp?.title||'',inspirationImage:insp?.image||'',inspirationTags:insp?galleryAllTerms(insp):[],requestExtras:selectedExtras,extraSubtotal:selectedExtras.reduce((s,x)=>s+x.price*x.qty,0),status:'Nueva',reply:'',convertedOrder:'',discountCodeRequested:coupon,discountAmount:0,finalPrice:0};
+  let r={number:'SOL-'+String(requestCounter).padStart(4,'0'),created:Date.now(),name:n,whatsapp:w,requestType:window.mnQuoteOnly?'cotizacion':'pedido_personalizado',sourceQuoteNumber:window.mnQuoteConversionSource||'',sourceQuotePrice:Number(window.mnQuoteConversionPrice||0),quotedPrice:Number(window.mnQuoteConversionPrice||0),form:chosenForm||'Por definir',length:chosenLength||'Por definir',size:chosenSize||'Por definir',customMeasurements:measures,details:d,image:image||(insp?.image||''),customerReferenceImage:image||'',inspirationGalleryId:insp?.id||'',inspirationTitle:insp?.title||'',inspirationImage:insp?.image||'',inspirationTags:insp?galleryAllTerms(insp):[],requestExtras:selectedExtras,extraSubtotal:selectedExtras.reduce((s,x)=>s+x.price*x.qty,0),status:'Nueva',reply:'',convertedOrder:'',discountCodeRequested:coupon,discountAmount:0,finalPrice:0};
   window.mnGalleryInspiration=null;window.mnRequestExtras={};requests.unshift(r);save('requests',requests);
   let extrasText=selectedExtras.length?`\nComplementos extra:\n${selectedExtras.map(x=>`- ${x.name} x${x.qty} (${money(x.price*x.qty)})`).join('\n')}`:'';
   let msg=`Hola, Mistrielle Nails. ${r.requestType==='cotizacion'?'Solicité únicamente una cotización sin compromiso.':'Envié una solicitud de diseño personalizado.'}\n\nMi código de seguimiento es: ${r.number}\nNombre: ${r.name}\nForma: ${r.form}\nLargo: ${r.length}\nTalla: ${r.size}${measures.length?'\nMedidas: '+measures.map(x=>x.dedo+' '+x.mm+' mm').join(', '):''}\nIdea: ${r.details}${r.inspirationGalleryId?`\nInspiración del portafolio: ${r.inspirationTitle||'Diseño Mistrielle'} (${r.inspirationGalleryId})`:''}${extrasText}${coupon?`\nCupón solicitado: ${coupon}`:''}\n\nGuardaré este mensaje para consultar después el estado de mi solicitud.`;
@@ -1237,7 +1237,7 @@ saveRequest=function(){
     fresh.number=cloudNumber;
    requests=after.map(x=>x.number===tentativeNumber?fresh:x);
    save('requests',requests);
-   window.mnQuoteConversionSource='';
+   window.mnQuoteConversionSource='';window.mnQuoteConversionPrice=0;
    const mc=$('modalContent');
    if(mc)mc.innerHTML=confirmHtml.split(originalNumber).join(cloudNumber);
    try{
@@ -1260,6 +1260,7 @@ window.mnConvertQuoteToRequest=function(){
  if(!q||q.requestType!=='cotizacion'||!Number(q.quotedPrice||0))return alert('La cotización todavía no tiene un precio confirmado.');
  if(!confirm('¿Quieres continuar con esta cotización de '+money(Number(q.quotedPrice))+'? No se cobrará nada automáticamente. Completarás los datos faltantes para solicitar tu set.'))return;
  window.mnQuoteConversionSource=q.number;
+ window.mnQuoteConversionPrice=Number(q.quotedPrice||0);
  window.mnGalleryInspiration=q.image?{image:q.image,title:q.inspirationTitle||'Referencia de tu cotización',id:q.inspirationGalleryId||''}:null;
  openCustom();
  if($('rn'))$('rn').value=q.name||'';
@@ -1525,5 +1526,30 @@ applyOperationalState=function(){if(!window.mn43CloudStateLoaded&&storeOps.store
    finally{sending=false;}
  };
 })();
-</script></body></html>
+</script>
+<style id="mn53TrackingStyle">
+.mn53-folio-long{font-size:clamp(12px,2.5vw,19px)!important;letter-spacing:0!important;overflow-wrap:anywhere;word-break:break-all;line-height:1.5!important}
+.mn53-folio-help{font-size:11px;color:#f3d4c5;display:block;margin-top:6px}
+</style>
+<script id="mn53TrackingScript">
+(function(){
+  const watch=new MutationObserver(()=>{
+    const modal=document.getElementById('modalContent');if(!modal)return;
+    modal.querySelectorAll('div').forEach(node=>{
+      if(node.children.length || node.classList.contains('mn53-folio-long'))return;
+      const n=(node.textContent||'').trim();
+      if(/^SOL-\d{16,}$/.test(n) && node.style.fontFamily.toLowerCase().includes('georgia')){
+        node.classList.add('mn53-folio-long');
+        node.title='Folio completo de seguimiento. No modificar.';
+        if(!node.nextElementSibling?.classList?.contains('mn53-folio-help')){
+          const small=document.createElement('small');small.className='mn53-folio-help';small.textContent='Folio completo: consérvalo para consultar tu cotización.';node.after(small);
+        }
+      }
+    });
+  });
+  const init=()=>{const el=document.getElementById('modalContent');if(el)watch.observe(el,{childList:true,subtree:true})};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+</body></html>
 ```
