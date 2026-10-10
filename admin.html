@@ -2745,4 +2745,101 @@ function mn43SaveOrder(){const inputs=[...document.querySelectorAll('.mn43-posit
  try{window.renderAdmin()}catch(e){console.warn('Vista cotizaciones:',e)}
 })();
 </script>
+
+<style id="mn53AdminStyle">
+.mn53-filters{display:flex;gap:7px;overflow-x:auto;padding:10px 0 14px;scrollbar-width:thin}
+.mn53-filters button{flex:0 0 auto;white-space:nowrap}
+.mn53-accordion{border:1px solid #743440;border-radius:12px;padding:0;margin:9px 0;background:rgba(255,255,255,.025);min-width:0}
+.mn53-accordion>summary{list-style:none;cursor:pointer;padding:11px;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.mn53-accordion>summary::-webkit-details-marker{display:none}
+.mn53-accordion>summary:after{content:'MOSTRAR ▾';font-size:10px;color:#f3d2bd}
+.mn53-accordion[open]>summary:after{content:'OCULTAR ▴'}
+.mn53-accordion>.request-card{margin:0!important;border:0!important;padding:10px!important}
+.mn53-summary-label{font-weight:800;overflow-wrap:anywhere;font-size:12px}
+.mn53-summary-meta{color:#dcb8b1;font-size:11px}
+.mn53-quote-action{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:11px;color:#f3d2bd}
+#requests .request-card,#quotes .request-card{min-width:0!important}
+@media(max-width:700px){.mn53-accordion>summary{align-items:flex-start}.mn53-accordion>.request-card{display:grid!important;grid-template-columns:minmax(0,1fr)!important}}
+</style>
+<script id="mn53AdminScript">
+(function(){
+  const prior=window.renderAdmin;
+  if(typeof prior!=='function')return;
+  let stage='all';
+  let quoteStage='all';
+  window.mn53SetStage=function(kind,v){if(kind==='quotes')quoteStage=v;else stage=v;mn53Present()};
+  function mn53Stage(r){
+    if(r.requestType==='cotizacion'){
+      if(r.convertedRequestNumber||r.status==='Convertida en solicitud')return 'converted';
+      if(r.status==='Rechazada'||r.status==='Cerrada')return 'closed';
+      if(Number(r.quotedPrice||0)>0)return 'priced';
+      return 'new';
+    }
+    if(r.convertedOrder)return 'converted';
+    if(r.status==='Rechazada'||r.status==='Cerrada')return 'closed';
+    if(r.status==='Aceptada'||r.status==='Cotizada')return 'priced';
+    return 'new';
+  }
+  function mn53Present(){
+   [['requests',stage],['quotes',quoteStage]].forEach(([id,selected])=>{
+    const root=document.getElementById(id);if(!root)return;
+    let filters=root.querySelector('.mn53-filters');
+    if(!filters){filters=document.createElement('div');filters.className='mn53-filters'; const first=root.querySelector('.box');(first||root).prepend(filters)}
+    const pairs=id==='quotes'?[['all','Todas'],['new','Nuevas'],['priced','Cotizadas'],['converted','Convertidas'],['closed','Cerradas']]:[['all','Todas'],['new','Nuevas'],['priced','Cotizadas / aceptadas'],['converted','Con pedido'],['closed','Cerradas']];
+    filters.innerHTML=pairs.map(([val,title])=>'<button type="button" class="btn '+(selected===val?'':'alt')+' sm" onclick="mn53SetStage(\''+id+'\',\''+val+'\')">'+title+'</button>').join('');
+    root.querySelectorAll('.request-card').forEach(card=>{
+      const folio=(card.querySelector('b')?.textContent||'').split(' · ')[0].trim();
+      const r=requests.find(x=>x.number===folio);if(!r)return;
+      if(id==='requests'&&r.sourceQuoteNumber){const q=requests.find(x=>x.number===r.sourceQuoteNumber&&x.requestType==='cotizacion');const quoted=Number(q?.quotedPrice||r.sourceQuotePrice||0);const priceInput=document.getElementById('rprice_'+requests.indexOf(r));if(quoted>0&&priceInput&&!Number(priceInput.value||0))priceInput.value=String(quoted);}
+      let wrapper=card.closest('.mn53-accordion');
+      if(!wrapper){wrapper=document.createElement('details');wrapper.className='mn53-accordion';
+        const sum=document.createElement('summary');sum.innerHTML='<span class="mn53-summary-label"></span><span class="mn53-summary-meta"></span>';wrapper.append(sum);
+        card.parentNode.insertBefore(wrapper,card);wrapper.append(card);
+      }
+      wrapper.querySelector('.mn53-summary-label').textContent=(r.name||'Clienta')+' · '+(r.requestType==='cotizacion'?'Cotización':'Solicitud');
+      const child= requests.find(x=>x.sourceQuoteNumber===r.number&&x.requestType!=='cotizacion');
+      const converted=Boolean(child)||!!r.convertedRequestNumber;
+      const state=converted?'converted':mn53Stage(r);
+      wrapper.querySelector('.mn53-summary-meta').textContent=(String(r.number).length>23?String(r.number).slice(0,14)+'…'+String(r.number).slice(-5):r.number)+' · '+(converted?'Convertida en solicitud':r.status||'Nueva');
+      wrapper.style.display=(selected==='all'||selected===state)?'block':'none';
+      if(id==='quotes'){
+        let bar=card.querySelector('.mn53-quote-action');
+        if(!bar){bar=document.createElement('div');bar.className='mn53-quote-action';const mid=card.children[1]||card;mid.prepend(bar)}
+        bar.textContent=converted?'✓ Continuada como '+(child?.number||r.convertedRequestNumber)+' · Precio cotizado: $'+Number(r.quotedPrice||0).toFixed(2):'Cotización pendiente de convertirse en solicitud';
+      }
+    });
+   });
+  }
+  window.renderAdmin=function(){const result=prior.apply(this,arguments);try{mn53Present()}catch(e){console.warn('Presentación compacta',e)}return result};
+  const previousSave=window.saveRequestAdmin;
+  if(typeof previousSave==='function')window.saveRequestAdmin=async function(i){
+    const item=requests[i];if(item?.sourceQuoteNumber && !Number(document.getElementById('rprice_'+i)?.value||0)){
+      const parent=requests.find(r=>r.number===item.sourceQuoteNumber&&r.requestType==='cotizacion');
+      const price=Number(parent?.quotedPrice||item.sourceQuotePrice||0);
+      const priceInput=document.getElementById('rprice_'+i);if(priceInput&&price>0)priceInput.value=String(price);
+    }
+    return previousSave.apply(this,arguments);
+  };
+  // Sync quote linkage on explicit action, after child is confirmed in the cloud.
+  window.mn53SyncConversions=async function(){
+    const pairs=requests.filter(r=>r.requestType==='cotizacion').map(q=>({q,child:requests.find(r=>r.sourceQuoteNumber===q.number&&r.requestType!=='cotizacion')})).filter(x=>x.child);
+    if(!pairs.length)return alert('No hay conversiones pendientes para sincronizar.');
+    try{
+      for(const {q,child} of pairs){
+        const changed={...q,convertedRequestNumber:child.number,conversionStatus:'Convertida en solicitud'};
+        const {error}=await mnCloud.from('mn_requests_cloud').update({payload:changed,updated_at:new Date().toISOString()}).eq('request_number',q.number);
+        if(error)throw error;
+        Object.assign(q,changed);
+      }
+      save('requests',requests);await mnRefreshAdminCloud();alert('Cotizaciones vinculadas con sus solicitudes: '+pairs.length);
+    }catch(e){alert('No se pudo sincronizar: '+(e.message||e))}
+  };
+  const priorPresent=window.renderAdmin;
+  window.renderAdmin=function(){const result=priorPresent.apply(this,arguments);const q=document.querySelector('#quotes .mn48-head');if(q&&!q.querySelector('.mn53-sync-btn')){
+    const b=document.createElement('button');b.type='button';b.className='btn alt sm mn53-sync-btn';b.textContent='↻ Vincular solicitudes completadas';b.onclick=window.mn53SyncConversions;q.append(b);
+  }
+  return result};
+  try{window.renderAdmin()}catch(e){console.warn(e)}
+})();
+</script>
 </body></html>
