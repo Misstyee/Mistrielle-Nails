@@ -1474,5 +1474,56 @@ mnLoadPublicState=async function(){try{const {data,error}=await mnCloud.from('mn
 const mn43OriginalApply=applyOperationalState;
 applyOperationalState=function(){if(!window.mn43CloudStateLoaded&&storeOps.storeOpen===false){const gate=document.getElementById('maintenanceGate');if(gate){gate.style.display='grid';document.getElementById('maintenanceMessage').innerHTML='Comprobando si la tienda ya está abierta… <button class="btn alt sm" onclick="mnLoadPublicState()">Actualizar estado</button>'}return}return mn43OriginalApply()};
 // Actively refresh on resumed tabs, with existing public refresh logic.
+</script><script id="mnQuoteV52Reliable">
+/* Mistrielle 5.2: cotizaciones sin lectura asíncrona de archivos en el flujo antiguo. */
+(function(){
+ const priorSaveRequest=saveRequest;
+ let sending=false;
+ function clean(v){return String(v||'').replace(/\D/g,'');}
+ function timeout(p,ms,message){return Promise.race([p,new Promise((_,reject)=>setTimeout(()=>reject(new Error(message)),ms))]);}
+ function optimizePhoto(file){return new Promise((resolve,reject)=>{
+   if(!file)return resolve('');
+   if(!file.type.startsWith('image/'))return reject(new Error('Selecciona una fotografía válida.'));
+   const reader=new FileReader();reader.onerror=()=>reject(new Error('No se pudo leer la fotografía.'));
+   reader.onload=()=>{const img=new Image();img.onerror=()=>reject(new Error('La fotografía no se pudo abrir.'));
+     img.onload=()=>{try{const scale=Math.min(1,950/Math.max(img.width,img.height));const cv=document.createElement('canvas');cv.width=Math.max(1,Math.round(img.width*scale));cv.height=Math.max(1,Math.round(img.height*scale));cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);resolve(cv.toDataURL('image/jpeg',0.62));}catch(e){reject(e)}};
+     img.src=reader.result;};reader.readAsDataURL(file);
+ });}
+ saveRequest=async function(){
+   if(!window.mnQuoteOnly)return priorSaveRequest();
+   if(sending)return;
+   const name=document.getElementById('rn')?.value.trim()||'',wa=clean(document.getElementById('rw')?.value),form=document.getElementById('rf')?.value||'',length=document.getElementById('rl')?.value||'',details=document.getElementById('rd')?.value.trim()||'';
+   const file=document.getElementById('ri')?.files?.[0], insp=window.mnGalleryInspiration||null;
+   if(!name||wa.length<7||!form||!length||!details)return alert('Completa nombre, WhatsApp válido, forma, largo y descripción de tu idea.');
+   if(!file&&!insp?.image)return alert('Adjunta una imagen de referencia o elige una del portafolio.');
+   if(!mnCloud)return alert('La conexión a Supabase no está disponible. Vuelve a intentar cuando haya conexión.');
+   sending=true;const button=document.getElementById('mnRequestMainSubmit');if(button){button.disabled=true;button.textContent='Enviando cotización…'};
+   const modal=document.getElementById('modalContent');
+   try{
+     const image=file?await optimizePhoto(file):String(insp.image||'');
+     if(image.length>650000)throw new Error('La imagen es demasiado grande. Selecciona una de menor tamaño.');
+     const random=new Uint32Array(2);crypto.getRandomValues(random);
+     const number='SOL-'+String(Date.now())+String(random[0]).padStart(10,'0')+String(random[1]).padStart(10,'0');
+     const data={number,created:Date.now(),name,whatsapp:wa,requestType:'cotizacion',form,length,size:'Por definir',details,image,customerReferenceImage:image,inspirationGalleryId:insp?.id||'',inspirationTitle:insp?.title||'',inspirationImage:insp?.image||'',status:'Nueva',reply:'',convertedOrder:'',quotedPrice:0,finalPrice:0,discountAmount:0,requestExtras:[],extraSubtotal:0};
+     const response=await timeout(mnCloud.rpc('mn_create_request',{request_data:data}),25000,'La nube no respondió dentro de 25 segundos. No envíes otra vez sin consultar el estado.');
+     if(response.error)throw response.error;
+     const serverNumber=typeof response.data==='string'?response.data:(response.data?.request_number||response.data?.number||'');
+     if(String(serverNumber).toUpperCase()!==number)throw new Error('El servidor no devolvió el mismo folio de la cotización.');
+     // mn_track es la consulta de lectura de la tienda. No informar éxito sin comprobación.
+     const verify=await timeout(mnCloud.rpc('mn_track',{record_number:number,customer_whatsapp:wa}),15000,'No se pudo comprobar la cotización en Supabase.');
+     if(verify.error)throw verify.error;
+     const record=verify.data;
+     if(!record||String(record.requestType||'').toLowerCase()!=='cotizacion')throw new Error('El servidor devolvió un folio, pero no fue posible confirmar una cotización guardada.');
+     window.mnGalleryInspiration=null;
+     const phone=clean(config?.whatsapp||'');
+     const msg=`Hola, Mistrielle Nails. Envié una cotización sin compromiso. Folio: ${number}. Nombre: ${name}. Forma: ${form}. Largo: ${length}. Idea: ${details}`;
+     modal.innerHTML=`<div style="text-align:center"><div class="eyebrow">COTIZACIÓN REGISTRADA EN LA NUBE</div><h2 class="script">¡Recibida!</h2><p>Tu folio de seguimiento:</p><div style="font:700 28px Georgia;color:var(--gold2);padding:14px;background:#21040c;border:1px solid var(--gold);border-radius:12px">${number}</div><div class="notice" id="mnCustomerIdResult" style="margin:12px 0">Cotización guardada. Asignando tu ID Mistrielle…</div>${phone?`<a class="btn" target="_blank" rel="noopener" href="https://wa.me/${phone}?text=${encodeURIComponent(msg)}">Enviar también por WhatsApp</a>`:''}<br><button class="btn alt" style="margin-top:12px" onclick="tracking()">Consultar seguimiento</button></div>`;
+     try{const id=await timeout(mnClaimCustomerIdForRecord(number,name,wa),10000,'La asignación del ID tardó demasiado');
+       const box=document.getElementById('mnCustomerIdResult');if(id){mnShowCustomerIdInModal(id,wa)}else if(box)box.textContent='Cotización guardada. Tu ID Mistrielle todavía no está disponible.';
+     }catch(e){const box=document.getElementById('mnCustomerIdResult');if(box)box.textContent='Cotización guardada, pero no se pudo asignar el ID. Conserva tu folio y WhatsApp.';console.warn('ID no asignado:',e)}
+   }catch(e){console.error('Cotización no confirmada:',e);alert('No podemos confirmar tu cotización en Supabase: '+(e.message||e)+'. Conserva tus datos y no repitas inmediatamente si hubo un error de conexión.');if(button){button.disabled=false;button.textContent='Consultar precio sin compromiso';}}
+   finally{sending=false;}
+ };
+})();
 </script></body></html>
 ```
