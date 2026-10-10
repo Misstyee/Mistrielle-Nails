@@ -1164,7 +1164,10 @@ placeOrder=async function(){
  try{
   const {data,error}=await mnCloud.rpc('mn_create_order',{order_data:fresh});if(error)throw error;
   const cloudNumber=String(data||oldNumber).toUpperCase();
-  const customerId=await mnClaimCustomerIdForRecord(cloudNumber,fresh.name,fresh.whatsapp);fresh.customerId=customerId;orders=after.map(x=>x.number===oldNumber?{...x,number:cloudNumber,customerId}:x);save('orders',orders);mnShowCustomerIdInModal(customerId,fresh.whatsapp);
+  const customerId=await Promise.race([
+      mnClaimCustomerIdForRecord(cloudNumber,fresh.name,fresh.whatsapp),
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error('Tiempo de espera del ID agotado')),10000))
+    ]);fresh.customerId=customerId;orders=after.map(x=>x.number===oldNumber?{...x,number:cloudNumber,customerId}:x);save('orders',orders);mnShowCustomerIdInModal(customerId,fresh.whatsapp);
   if(cloudNumber!==oldNumber){
    fresh.number=cloudNumber;
    orders=orders.map(x=>x.number===cloudNumber?{...x,customerId:fresh.customerId||x.customerId}:x);
@@ -1192,8 +1195,20 @@ saveRequest=function(){
   const after=Array.isArray(requests)?[...requests]:[];
  const fresh=after.find(x=>!before.has(x.number));
  if(!fresh)return; // Validación incompleta, no se generó solicitud.
+ // Las cotizaciones no pueden reutilizar folios secuenciales que genera cada navegador.
+ // Se reserva un identificador numérico con baja probabilidad de colisión; la BD lo valida.
+ if(fresh.requestType==='cotizacion'){
+   const old=fresh.number;
+   const suffix=(typeof crypto!=='undefined' && crypto.getRandomValues)
+     ? crypto.getRandomValues(new Uint32Array(1))[0]%1000000
+     : Math.floor(Math.random()*1000000);
+   fresh.number='SOL-'+String(Date.now())+String(suffix).padStart(6,'0');
+   requests=after.map(x=>x===fresh?fresh:x);
+   // Reconstruir la confirmación después de cambiar el folio, sin publicarla aún.
+ }
  mnRequestSending=true;
  const tentativeNumber=fresh.number;
+ const originalNumber=before.has(fresh.number)?fresh.number:(($('modalContent')?.textContent||'').match(/SOL-\d{4,}/)||[])[0]||fresh.number;
  const confirmHtml=$('modalContent')?.innerHTML||'';
  $('modalContent').innerHTML='<div class="box" role="status" style="text-align:center"><h2 class="script">Enviando tu solicitud…</h2><p>Estamos confirmando el registro en Mistrielle. No cierres esta ventana.</p></div>';
  (async()=>{
@@ -1215,6 +1230,8 @@ saveRequest=function(){
       if(verification.error)throw verification.error;
       const found=verification.data;
       verified=!!found && String(found.number||found.request_number||cloudNumber).toUpperCase()===cloudNumber;
+      if(verified && fresh.requestType==='cotizacion' && found.requestType!=='cotizacion')
+        throw new Error('El registro existe, pero no se identificó como cotización.');
     }catch(checkError){console.warn('No fue posible comprobar el registro después del envío:',checkError)}
     if(!verified)throw new Error('Supabase devolvió un folio, pero NO pudimos confirmar el registro consultándolo. No vuelvas a enviar automáticamente: consulta a Mistrielle para evitar duplicados.');
     fresh.number=cloudNumber;
@@ -1222,7 +1239,7 @@ saveRequest=function(){
    save('requests',requests);
    window.mnQuoteConversionSource='';
    const mc=$('modalContent');
-   if(mc)mc.innerHTML=confirmHtml.split(tentativeNumber).join(cloudNumber);
+   if(mc)mc.innerHTML=confirmHtml.split(originalNumber).join(cloudNumber);
    try{
     const customerId=await mnClaimCustomerIdForRecord(cloudNumber,fresh.name,fresh.whatsapp);
     if(customerId){fresh.customerId=customerId;requests=requests.map(x=>x.number===cloudNumber?fresh:x);save('requests',requests);mnShowCustomerIdInModal(customerId,fresh.whatsapp)}
@@ -1230,7 +1247,7 @@ saveRequest=function(){
    }catch(idError){console.warn('Solicitud guardada; no se pudo asignar ID:',idError);const b=$('mnCustomerIdResult');if(b)b.textContent='Solicitud guardada. No fue posible asignar tu ID de clienta en este momento.'}
   }catch(e){
    console.error('Error al registrar solicitud en Supabase:',e);
-   requests=after.filter(x=>x.number!==tentativeNumber);
+   requests=after.filter(x=>x.number!==tentativeNumber && x.number!==originalNumber);
    save('requests',requests);
    const mc=$('modalContent');
    if(mc)mc.innerHTML='<div class="box"><h2 class="script">No se registró tu solicitud</h2><p>Hubo un problema al confirmar el envío. No tenemos confirmación de que Mistrielle la haya recibido.</p><div class="notice" style="overflow-wrap:anywhere">'+esc(e.message||String(e))+'</div><p>No repitas el envío automáticamente. Consulta primero con Mistrielle usando tu WhatsApp para evitar solicitudes duplicadas.</p><button class="btn alt" onclick="openCustom()">Volver a intentar</button></div>';
