@@ -593,7 +593,7 @@ function extraImageSetting(x){const st=x?.imageSettings||{};return {x:Number(st.
 function extraImageHTML(x,{width='100%',height='110px',radius='9px',className='',marginBottom='0'}={}){
  if(!x?.image)return '';
  const st=extraImageSetting(x),r=((Math.round(Number(st.r||0)/90)*90)%360+360)%360;
- return `<span style="position:relative;display:block;width:${width};height:${height};overflow:hidden;border-radius:${radius};margin-bottom:${marginBottom}"><img ${className?`class="${className}"`:''} src="${x.image}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:${Number(st.x??50)}% ${Number(st.y??50)}%;transform:scale(${Number(st.z??1)}) rotate(${r}deg);transform-origin:${Number(st.x??50)}% ${Number(st.y??50)}%"></span>`;
+ return `<span style="position:relative;display:block;width:${width};height:${height};overflow:hidden;border-radius:${radius};margin-bottom:${marginBottom}"><img loading="lazy" decoding="async" ${className?`class="${className}"`:''} src="${x.image}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:${Number(st.x??50)}% ${Number(st.y??50)}%;transform:scale(${Number(st.z??1)}) rotate(${r}deg);transform-origin:${Number(st.x??50)}% ${Number(st.y??50)}%"></span>`;
 }
 function cartThumbHTML(item){
  if(!item?.image)return '<div class="thumb"></div>';
@@ -605,7 +605,7 @@ function galleryCardHTML(g,cls='mn-portfolio-card'){
  const details=galleryAllTerms(g).slice(0,4);
  return `<article class="${cls}" onclick="openGalleryItem('${g.id}')">
   <div class="mn-gallery-image-wrap" style="position:relative;overflow:hidden">
-   <img src="${g.image}" alt="${esc(g.title||'Diseño Mistrielle')}" style="${galleryImageStyle(g)}">
+   <img loading="lazy" decoding="async" src="${g.image}" alt="${esc(g.title||'Diseño Mistrielle')}" style="${galleryImageStyle(g)}">
   </div>
   ${cls==='mn-gallery-card'
     ?`<div class="meta"><b>${esc(g.title||'Diseño Mistrielle')}</b>${gallerySourceType(g)==='client'?'<br><small>Foto real de clienta</small>':''}${galleryTagText(g)?`<br><small>${esc(galleryTagText(g))}</small>`:''}</div>`
@@ -776,7 +776,7 @@ function productImageStyle(st){
 function productImageHTML(p,src){
  if(!src)return '<span class="placeholder">Mistrielle</span>';
  const st=productImageSetting(p,src);
- return `<img class="mn-product-framed-img" src="${src}" alt="" style="${productImageStyle(st)}">`
+ return `<img class="mn-product-framed-img" loading="lazy" decoding="async" src="${src}" alt="" style="${productImageStyle(st)}">`
 }
 
 function productLabels(p){const m=metaFor(p.id),s=activeSeason(),live=(s?.featuredCategory&&p.category===s.featuredCategory)?['Selección de temporada']:[];return [...new Set([...live,...(m.autoLabels||[]),...(m.labels||[])])]}
@@ -1140,17 +1140,17 @@ async function mnLoadCloudProducts(){
     const {data,error}=await mnCloud.from('products').select('*').eq('visible',true).order('created_at',{ascending:false});
     if(error) throw error;
     products=(data||[]).map(mnFromDb);
-    localStorage.setItem('mn_products',JSON.stringify(products));
+    // No guardar las fotos del catálogo completas en localStorage.
     render();
   }catch(e){console.error('Mistrielle cloud:',e);const g=document.getElementById('grid');if(g&&!products.length)g.innerHTML='<div class="empty"><b>No pudimos cargar el catálogo.</b><br>La conexión con la tienda no respondió. Recarga la página en unos segundos.</div>';}
 }
-window.addEventListener('load',async()=>{const g=document.getElementById('grid');if(g&&!products.length)g.innerHTML='<div class="empty">Cargando catálogo…</div>';await mnLoadCloudProducts();});
+// El catálogo se actualiza una sola vez al iniciar mediante mnRefreshPublicCloud().
 </script>
 <script>
 // V14.1: pedidos, solicitudes, seguimiento y configuración en Supabase.
 async function mnLoadPublicState(){
  try{const {data,error}=await mnCloud.from('mn_store_state').select('key,payload').eq('public_read',true);if(error)throw error;
-  for(const x of data||[]){if(x.key==='faqs')faqs=x.payload;if(x.key==='config')config=x.payload;if(x.key==='categories')categories=x.payload;if(x.key==='sizes')sizes=x.payload;if(x.key==='forms')forms=x.payload;if(x.key==='lengths')lengths=x.payload;if(x.key==='extras')extras=Array.isArray(x.payload)?x.payload:[];if(x.key==='galleryItems')galleryItems=Array.isArray(x.payload)?x.payload:[];if(x.key==='storeNotices')storeNotices=Array.isArray(x.payload)?x.payload:[];if(x.key==='gallerySettings')gallerySettings=(x.payload&&typeof x.payload==='object')?x.payload:gallerySettings;if(x.key==='discountCampaigns')discountCampaigns=Array.isArray(x.payload)?x.payload:[];if(x.key==='productMeta')productMeta=(x.payload&&typeof x.payload==='object')?x.payload:{};if(x.key==='storeOps')storeOps=(x.payload&&typeof x.payload==='object')?x.payload:storeOps;if(x.key==='seasonThemes')seasonThemes=Array.isArray(x.payload)?x.payload:[];if(x.key==='activeSeasonId')activeSeasonId=String(x.payload||'');localStorage.setItem('mn_'+x.key,JSON.stringify(x.payload));}render();
+  window.mn43CloudStateLoaded=true;for(const x of data||[]){if(x.key==='faqs')faqs=x.payload;if(x.key==='config')config=x.payload;if(x.key==='categories')categories=x.payload;if(x.key==='sizes')sizes=x.payload;if(x.key==='forms')forms=x.payload;if(x.key==='lengths')lengths=x.payload;if(x.key==='extras')extras=Array.isArray(x.payload)?x.payload:[];if(x.key==='galleryItems')galleryItems=Array.isArray(x.payload)?x.payload:[];if(x.key==='storeNotices')storeNotices=Array.isArray(x.payload)?x.payload:[];if(x.key==='gallerySettings')gallerySettings=(x.payload&&typeof x.payload==='object')?x.payload:gallerySettings;if(x.key==='discountCampaigns')discountCampaigns=Array.isArray(x.payload)?x.payload:[];if(x.key==='productMeta')productMeta=(x.payload&&typeof x.payload==='object')?x.payload:{};if(x.key==='storeOps')storeOps=(x.payload&&typeof x.payload==='object')?x.payload:storeOps;if(x.key==='seasonThemes')seasonThemes=Array.isArray(x.payload)?x.payload:[];if(x.key==='activeSeasonId')activeSeasonId=String(x.payload||'');if(['storeOps','config','categories','sizes','forms','lengths','activeSeasonId'].includes(x.key)){try{localStorage.setItem('mn_'+x.key,JSON.stringify(x.payload))}catch(e){console.warn('Caché ligera omitida:',x.key)}}}render();
  }catch(e){console.error('Estado público:',e)}
 }
 const mnLocalPlaceOrder=placeOrder;
@@ -1307,11 +1307,13 @@ checkout=async function(){
  }
  return mnCheckoutLocal();
 };
-async function mnLoadApprovedReviews(){try{const {data,error}=await mnCloud.rpc('mn_public_reviews');if(error)throw error;reviews=Array.isArray(data)?data:[];localStorage.setItem('mn_approvedReviews',JSON.stringify(reviews));render()}catch(e){console.error('Reseñas:',e)}}
-window.addEventListener('load',()=>{mnLoadPublicState();mnLoadApprovedReviews()});
-window.addEventListener('pageshow',()=>mnRefreshPublicCloud());
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')mnRefreshPublicCloud()});
-window.addEventListener('focus',()=>mnRefreshPublicCloud());
+async function mnLoadApprovedReviews(){try{const {data,error}=await mnCloud.rpc('mn_public_reviews');if(error)throw error;reviews=Array.isArray(data)?data:[];render()}catch(e){console.error('Reseñas:',e)}}
+// Las consultas iniciales ya se ejecutan en pageshow; sin duplicarlas en load.
+let mn57LastRefresh=0, mn57InFlight=null;
+function mn57RefreshThrottled(){const now=Date.now();if(mn57InFlight||now-mn57LastRefresh<45000)return mn57InFlight||Promise.resolve();mn57LastRefresh=now;mn57InFlight=mnRefreshPublicCloud().finally(()=>{mn57InFlight=null});return mn57InFlight}
+window.addEventListener('pageshow',()=>mn57RefreshThrottled());
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')mn57RefreshThrottled()});
+window.addEventListener('focus',()=>mn57RefreshThrottled());
 
 </script>
 
@@ -1472,7 +1474,8 @@ function mn43PopulateFilters(){const root=document.getElementById('mn43FilterBox
 // Do not trust a cached maintenance flag as current until remote state was fetched.
 window.mn43CloudStateLoaded=false;
 const mn43OldLoadPublicState=mnLoadPublicState;
-mnLoadPublicState=async function(){try{const {data,error}=await mnCloud.from('mn_store_state').select('key,payload').eq('public_read',true);if(error)throw error;const entry=(data||[]).find(x=>x.key==='storeOps');if(entry){storeOps=(entry.payload&&typeof entry.payload==='object')?entry.payload:storeOps;localStorage.setItem('mn_storeOps',JSON.stringify(storeOps))}window.mn43CloudStateLoaded=true;await mn43OldLoadPublicState();}catch(e){console.error('No se pudo verificar mantenimiento en la nube:',e);const gate=document.getElementById('maintenanceGate');if(gate&&gate.style.display==='grid'){const msg=document.getElementById('maintenanceMessage');if(msg)msg.innerHTML='No pudimos verificar el estado actual de la tienda. <button class="btn alt sm" onclick="mnLoadPublicState()">Volver a comprobar</button>'}}};
+// Estado remoto se comprueba dentro de mnLoadPublicState en una sola consulta.
+
 const mn43OriginalApply=applyOperationalState;
 applyOperationalState=function(){if(!window.mn43CloudStateLoaded&&storeOps.storeOpen===false){const gate=document.getElementById('maintenanceGate');if(gate){gate.style.display='grid';document.getElementById('maintenanceMessage').innerHTML='Comprobando si la tienda ya está abierta… <button class="btn alt sm" onclick="mnLoadPublicState()">Actualizar estado</button>'}return}return mn43OriginalApply()};
 // Actively refresh on resumed tabs, with existing public refresh logic.
