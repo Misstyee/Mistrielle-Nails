@@ -1657,20 +1657,35 @@ applyOperationalState=function(){if(!window.mn43CloudStateLoaded&&storeOps.store
  function photoFileLabel(name){return 'Mistrielle-referencia-'+String(name||'diseno').trim().replace(/[^a-zA-Z0-9_-]/g,'-').slice(0,30)+'.jpg'}
  async function prepareImage(file){
   if(!file)return '';
-  return await new Promise((resolve,reject)=>{
-   const fr=new FileReader();fr.onerror=()=>reject(new Error('No se pudo leer la fotografía.'));fr.onload=()=>{
-    const im=new Image();im.onerror=()=>reject(new Error('No se pudo abrir la fotografía.'));im.onload=()=>{
-     try{const scale=Math.min(1,1100/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*scale));c.height=Math.max(1,Math.round(im.height*scale));c.getContext('2d').drawImage(im,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',.72))}catch(e){reject(e)}
-    };im.src=String(fr.result||'');
-   };fr.readAsDataURL(file);
-  });
+  if(!file.type.startsWith('image/')&&!/\.(jpg|jpeg|png|webp|heic|heif|gif)$/i.test(file.name||''))throw new Error('El archivo no parece una fotografía. Selecciona JPG, PNG o WebP.');
+  let url='';
+  try{
+   // Crear una URL temporal evita los errores de FileReader en ciertos navegadores móviles.
+   url=URL.createObjectURL(file);
+   const image=await new Promise((resolve,reject)=>{
+    const im=new Image();
+    const tm=setTimeout(()=>reject(new Error('La foto tardó demasiado en abrirse. Vuelve a seleccionarla como JPG o PNG.')),20000);
+    im.onload=()=>{clearTimeout(tm);resolve(im)};
+    im.onerror=()=>{clearTimeout(tm);reject(new Error('No pudimos abrir esta fotografía. Prueba una captura de pantalla en JPG o PNG.'))};
+    im.src=url;
+   });
+   const w=image.naturalWidth||image.width,h=image.naturalHeight||image.height;
+   if(!w||!h)throw new Error('La foto no tiene dimensiones válidas.');
+   const scale=Math.min(1,1100/Math.max(w,h));
+   const c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*scale));c.height=Math.max(1,Math.round(h*scale));
+   const ctx=c.getContext('2d');if(!ctx)throw new Error('No se pudo preparar la foto en este navegador.');
+   ctx.drawImage(image,0,0,c.width,c.height);
+   let out=c.toDataURL('image/jpeg',.7);
+   if(out.length>750000)out=c.toDataURL('image/jpeg',.53);
+   return out;
+  }finally{if(url)URL.revokeObjectURL(url)}
  }
  function fallbackPanel(info,reason,uncertain){
   const modal=document.getElementById('modalContent');if(!modal)return;
   const phone=String(config?.whatsapp||'').replace(/\D/g,'');
   const wmsg='Hola, Mistrielle Nails. Mi solicitud personalizada NO obtuvo confirmación en la tienda. Por favor revisa si ya se guardó antes de registrarla manualmente.\nNombre: '+info.name+'\nWhatsApp: '+info.whatsapp+'\nForma: '+info.form+'\nLargo: '+info.length+'\nTalla: '+info.size+'\nMedidas: '+info.measures.map(x=>x.dedo+': '+x.mm+' mm').join(', ')+'\nDiseño: '+info.details+(info.coupon?'\nCupón solicitado: '+info.coupon:'')+(info.source?'\nCotización anterior: '+info.source:'')+'\nAdjuntaré mi foto de referencia en este chat.';
   const link=phone?'https://wa.me/'+phone+'?text='+encodeURIComponent(wmsg):'';
-  modal.innerHTML='<div class="box" role="alert"><h2 class="script">Tu solicitud necesita confirmación</h2><p><b>No se asignó ningún folio confirmado. Envío seguro 6.6.</b></p><div class="notice">'+escLocal(reason)+'</div><p>'+ (uncertain?'El envío pudo llegar a Supabase aunque la comprobación haya fallado. Mistrielle debe verificarlo para evitar duplicados.':'Puedes enviar tu solicitud directamente por WhatsApp.')+'</p><div class="notice"><b>Tu diseño sigue aquí:</b><br>'+escLocal(info.name)+' · '+escLocal(info.form)+' · '+escLocal(info.length)+' · '+escLocal(info.size)+'<br>'+escLocal(info.details)+'</div>'+(pendingImage?'<p><b>Tu imagen de referencia:</b></p><img src="'+pendingImage+'" alt="Foto de referencia" style="display:block;max-width:240px;max-height:280px;object-fit:contain;border-radius:12px;margin:10px auto"><a class="btn alt" download="'+escLocal(photoFileLabel(info.name))+'" href="'+pendingImage+'">DESCARGAR MI FOTO DE REFERENCIA</a><p><small>Descarga la foto y adjúntala manualmente en el chat de WhatsApp. El botón de WhatsApp no puede adjuntar fotos automáticamente.</small></p>':'<p><small>Si elegiste una imagen del portafolio, indica el diseño al escribir por WhatsApp.</small></p>')+(link?'<p><a class="btn gold" target="_blank" rel="noopener" href="'+link+'">ENVIAR MI SOLICITUD POR WHATSAPP ↗</a></p>':'<p>El WhatsApp de Mistrielle no está configurado. Conserva esta pantalla y contacta a la tienda directamente.</p>')+'<p><small>No reenvíes varias veces desde el formulario hasta comprobar si se recibió.</small></p></div>';
+  modal.innerHTML='<div class="box" role="alert"><h2 class="script">Tu solicitud necesita confirmación</h2><p><b>No se asignó ningún folio confirmado. Envío seguro 6.9.</b></p><div class="notice">'+escLocal(reason)+'</div><p>'+ (uncertain?'El envío pudo llegar a Supabase aunque la comprobación haya fallado. Mistrielle debe verificarlo para evitar duplicados.':'Puedes enviar tu solicitud directamente por WhatsApp.')+'</p><div class="notice"><b>Tu diseño sigue aquí:</b><br>'+escLocal(info.name)+' · '+escLocal(info.form)+' · '+escLocal(info.length)+' · '+escLocal(info.size)+'<br>'+escLocal(info.details)+'</div>'+(pendingImage?'<p><b>Tu imagen de referencia:</b></p><img src="'+pendingImage+'" alt="Foto de referencia" style="display:block;max-width:240px;max-height:280px;object-fit:contain;border-radius:12px;margin:10px auto"><a class="btn alt" download="'+escLocal(photoFileLabel(info.name))+'" href="'+pendingImage+'">DESCARGAR MI FOTO DE REFERENCIA</a><p><small>Descarga la foto y adjúntala manualmente en el chat de WhatsApp. El botón de WhatsApp no puede adjuntar fotos automáticamente.</small></p>':'<p><small>Si elegiste una imagen del portafolio, indica el diseño al escribir por WhatsApp.</small></p>')+(link?'<p><a class="btn gold" target="_blank" rel="noopener" href="'+link+'">ENVIAR MI SOLICITUD POR WHATSAPP ↗</a></p>':'<p>El WhatsApp de Mistrielle no está configurado. Conserva esta pantalla y contacta a la tienda directamente.</p>')+'<p><small>No reenvíes varias veces desde el formulario hasta comprobar si se recibió.</small></p></div>';
  }
  saveRequest=async function(){
   if(window.mnQuoteOnly)return previousSave();
@@ -1694,7 +1709,7 @@ applyOperationalState=function(){if(!window.mn43CloudStateLoaded&&storeOps.store
    if(pendingImage.length>750000)throw new Error('La imagen es muy grande. Usa otra fotografía de menor tamaño.');
    if(typeof mnCloud==='undefined'||!mnCloud)throw new Error('La conexión a Supabase no está disponible.');
    const request={number:'SOL-0000',clientSubmissionId:crypto.randomUUID?crypto.randomUUID():(Date.now()+'-'+Math.random()),created:Date.now(),name,whatsapp,requestType:'pedido_personalizado',sourceQuoteNumber:info.source,sourceQuotePrice:Number(window.mnQuoteConversionPrice||0),quotedPrice:Number(window.mnQuoteConversionPrice||0),form,length,size,customMeasurements:measures,details,image:pendingImage,customerReferenceImage:file?pendingImage:'',inspirationGalleryId:insp?.id||'',inspirationTitle:insp?.title||'',inspirationImage:insp?.image||'',requestExtras:extras,extraSubtotal:extras.reduce((sum,e)=>sum+e.price*e.qty,0),status:'Nueva',reply:'',convertedOrder:'',discountCodeRequested:coupon,discountAmount:0,finalPrice:0};
-   const modal=el('modalContent');if(modal)modal.innerHTML='<div class="box" role="status" style="text-align:center"><h2 class="script">Guardando tu solicitud…</h2><p>Esperando confirmación de Supabase · Envío 6.6. No cierres esta pantalla.</p></div>';
+   const modal=el('modalContent');if(modal)modal.innerHTML='<div class="box" role="status" style="text-align:center"><h2 class="script">Guardando tu solicitud…</h2><p>Esperando confirmación de Supabase · Envío 6.9. No cierres esta pantalla.</p></div>';
    dbMayHaveReceived=true;
    console.info('[Mistrielle 6.6] Enviando solicitud a Supabase; no mostrar éxito hasta verificar');
    const result=await withTimeout(mnCloud.rpc('mn_create_request',{request_data:request}),25000);
@@ -1712,7 +1727,19 @@ applyOperationalState=function(){if(!window.mn43CloudStateLoaded&&storeOps.store
    const msg='Hola, Mistrielle Nails. Mi solicitud '+number+' ya está registrada. Nombre: '+name+'. Diseño: '+details+'. Enviaré la foto de referencia en el chat.';
    if(modal)modal.innerHTML='<div style="text-align:center"><div class="eyebrow">CONFIRMADA EN LA NUBE</div><h2 class="script">Solicitud registrada y verificada ✓</h2><p>Folio oficial:</p><div style="font:700 26px Georgia;color:var(--gold2);padding:14px;background:#21040c;border-radius:12px">'+escLocal(number)+'</div><div id="mnCustomerIdResult" class="notice" style="margin:12px 0">Asignando tu ID Mistrielle…</div>'+(phone?'<p><b>Último paso:</b> confirma por WhatsApp y adjunta la referencia.</p><a class="btn gold" href="https://wa.me/'+phone+'?text='+encodeURIComponent(msg)+'" target="_blank" rel="noopener">CONFIRMAR POR WHATSAPP ↗</a>':'')+'<br><button class="btn alt" style="margin-top:12px" onclick="customerSpace()">Mi espacio Mistrielle</button></div>';
    try{const id=await withTimeout(mnClaimCustomerIdForRecord(number,name,whatsapp),12000);if(id){request.customerId=id;mnShowCustomerIdInModal(id,whatsapp)}else{const x=el('mnCustomerIdResult');if(x)x.textContent='La solicitud quedó guardada; el ID está pendiente.'}}catch(e){const x=el('mnCustomerIdResult');if(x)x.textContent='Tu solicitud sí quedó guardada; el ID aún está pendiente.';console.warn('ID pendiente:',e)}
-  }catch(e){console.error('Solicitud sin confirmar:',e);fallbackPanel(info,e.message||String(e),dbMayHaveReceived||!!savedNumber)}
+  }catch(e){
+   console.error('Solicitud sin confirmar:',e);
+   if(!dbMayHaveReceived){
+    // El problema ocurrió antes del RPC. El formulario y su selector de foto deben permanecer intactos.
+    const mc=el('modalContent');
+    if(mc){
+     let notice=el('mn69ImageError');
+     if(!notice){notice=document.createElement('div');notice.id='mn69ImageError';notice.className='notice';notice.setAttribute('role','alert');notice.style.cssText='margin:12px 0;border:1px solid #b97878';mc.prepend(notice)}
+     notice.textContent='NO se envió la solicitud. '+(e.message||String(e))+' Tus datos siguen aquí: vuelve a seleccionar la foto y pulsa Enviar. Si no abre, prueba enviando una captura de pantalla JPG/PNG.';
+     mc.scrollTop=0;
+    }
+   }else fallbackPanel(info,e.message||String(e),true);
+  }
   finally{sending=false;if(button){button.disabled=false;button.textContent='Enviar mi solicitud'}}
  };
 })();
