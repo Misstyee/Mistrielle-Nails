@@ -1470,7 +1470,23 @@ window.addEventListener('load',()=>mnLoadFeaturedCustomers());window.addEventLis
 
 function mnRememberCustomer(id,whatsapp){if(id&&whatsapp)save('customerHint',{id:String(id).toUpperCase(),whatsapp:mnNormCustomerWa(whatsapp)})}
 function mnShowCustomerIdInModal(id,whatsapp){if(!id)return;mnRememberCustomer(id,whatsapp);const box=$('mnCustomerIdResult');if(box){box.className='mn-customer-id-card';box.innerHTML=`<div class="eyebrow" style="color:#e8c57e">TU ID MISTRIELLE</div><b>${esc(id)}</b><small>Guárdalo. Junto con tu WhatsApp te permite consultar pedidos, personalizados, fotos, cupones y reseñas.</small><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px"><button class="btn gold sm" onclick="navigator.clipboard?.writeText('${String(id).replace(/'/g,"\\'")}')">COPIAR MI ID</button><button class="btn alt sm" onclick="mnCustomerQuickSpace('${String(id).replace(/'/g,"\\'")}','${String(whatsapp||'').replace(/'/g,"\\'")}')">IR A MI ESPACIO</button></div>`}document.querySelectorAll('#modalContent .notice').forEach(n=>{if(/^IMPORTANTE:/i.test(n.textContent.trim()))n.classList.add('mn-critical-notice')})}
-function mnCustomerQuickSpace(id,wa){mnRememberCustomer(id,wa);closeModal();customerSpace()}
+function mnCustomerQuickSpace(id,wa){
+ const cid=String(id||'').trim().toUpperCase(),phone=mnNormCustomerWa(wa||'');
+ if(!cid||phone.length<8){alert('Falta el ID o WhatsApp para consultar Mi espacio.');return;}
+ mnRememberCustomer(cid,phone);
+ closeModal();
+ customerSpace();
+ const ci=document.getElementById('csid'),wi=document.getElementById('cswa');
+ if(ci)ci.value=cid;
+ if(wi)wi.value=phone;
+ // El botón proviene de una solicitud ya vinculada a este ID: entrar directamente.
+ if(ci&&wi&&document.getElementById('customerSpaceResult')){
+   Promise.resolve().then(()=>findCustomerSpace()).catch(e=>{
+     const result=document.getElementById('customerSpaceResult');
+     if(result)result.textContent='No pudimos consultar tu historial. Conserva tu ID y WhatsApp: '+String(e?.message||e);
+   });
+ }
+}
 
 function mnCustomerSpaceLoginHTML(){
  const h=load('customerHint',{});
@@ -1498,7 +1514,7 @@ function mnCustomerSpaceBack(){
  const profile=$('mnSpaceProfileTop');if(profile)profile.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function mn56IsQuote(x){return String(x?.requestType||x?.request_type||x?.type||'').toLowerCase()==='cotizacion'}
-function mn59CustomerWhatsAppPhone(){return clean(config?.whatsapp||'')}
+function mn59CustomerWhatsAppPhone(){return String(config?.whatsapp||'').replace(/\D/g,'')}
 function mn59CustomerWaHref(text){const phone=mn59CustomerWhatsAppPhone();return phone?`https://wa.me/${phone}?text=${encodeURIComponent(text)}`:''}
 function mn59OrderText(x){return `Hola, Mistrielle Nails. Quiero retomar mi pedido ${x?.number||''}. ¿Podrían ayudarme a finalizarlo o confirmarlo por WhatsApp?`}
 function mn59RequestText(x){return `Hola, Mistrielle Nails. Quiero retomar mi solicitud ${x?.number||''} de set personalizado. ¿Podrían ayudarme a continuarla o confirmarla por WhatsApp?`}
