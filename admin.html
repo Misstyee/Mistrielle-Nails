@@ -837,7 +837,7 @@ function renderAdmin(){
 
  let orderView=window.mnOrderView||'active';
  let orderRows=orders.map((o,i)=>({o,i})).filter(x=>orderView==='all'||(orderView==='hidden'?!!x.o.hidden:!x.o.hidden));
- $('orders').innerHTML=`<div class="box"><div class="row"><div><div class="eyebrow">CONTROL POR ESTADO</div><h2 class="script">Pedidos</h2><small style="color:#f0c7c0">${orders.filter(o=>!o.hidden).length} visibles · ${orders.filter(o=>o.hidden).length} ocultos · ${orders.filter(o=>o.status==='Entregado'&&!o.hidden).length} ventas realizadas</small></div><div style="display:flex;gap:7px;flex-wrap:wrap"><button class="btn ${orderView==='active'?'':'alt'} sm" onclick="window.mnOrderView='active';renderAdmin()">Visibles</button><button class="btn ${orderView==='hidden'?'':'alt'} sm" onclick="window.mnOrderView='hidden';renderAdmin()">Ocultos</button><button class="btn ${orderView==='all'?'':'alt'} sm" onclick="window.mnOrderView='all';renderAdmin()">Todos</button><button class="btn alt sm" onclick="mnRefreshAdminCloud(this)">↻ Actualizar nube</button></div></div>${mnOrdersByStatus38(orderRows)}</div>`;
+ $('orders').innerHTML=`<div class="box"><div class="row"><div><div class="eyebrow">CONTROL POR ESTADO</div><h2 class="script">Pedidos</h2><small style="color:#f0c7c0">${orders.filter(o=>!o.hidden).length} visibles · ${orders.filter(o=>o.hidden).length} ocultos · ${orders.filter(o=>o.status==='Entregado'&&!o.hidden).length} ventas realizadas</small></div><div style="display:flex;gap:7px;flex-wrap:wrap"><button class="btn ${orderView==='active'?'':'alt'} sm" onclick="window.mnOrderView='active';renderAdmin()">Visibles</button><button class="btn ${orderView==='hidden'?'':'alt'} sm" onclick="window.mnOrderView='hidden';renderAdmin()">Ocultos</button><button class="btn ${orderView==='all'?'':'alt'} sm" onclick="window.mnOrderView='all';renderAdmin()">Todos</button><button class="btn gold sm" onclick="mnManualOrderOpen()">+ Registrar pedido externo</button><button class="btn alt sm" onclick="mnRefreshAdminCloud(this)">↻ Actualizar nube</button></div></div>${mnOrdersByStatus38(orderRows)}</div>`;
  $('requests').innerHTML=`<div class="box"><div class="row"><div><h2 class="script">Solicitudes personalizadas</h2><p style="color:var(--muted)">Aquí ves la referencia exacta elegida del portafolio y cualquier imagen adicional de la clienta.</p></div><div><input id="requestQuickSearch" placeholder="Buscar SOL, nombre o WhatsApp…" oninput="filterRequestCards(this.value)" style="min-width:260px"></div></div>${requests.length?requests.map((r,i)=>({r,i})).map(({r,i})=>{
  const g=r.inspirationGalleryId?galleryItems.find(x=>x.id===r.inspirationGalleryId):null;
  const inspImg=r.inspirationImage||g?.image||((r.inspirationGalleryId&&!r.customerReferenceImage)?r.image:'');
@@ -2634,6 +2634,11 @@ async function mnModerateCustomerAvatarQuick(id,decision){
   mnRenderNotifications();
  }catch(e){alert('No se pudo actualizar la foto: '+e.message)}
 }
+function mnCustomerPaidTotal(p){
+ const id=String(p?.customerId||'').toUpperCase(),wa=mnNormWa(p?.whatsapp||'');
+ return (orders||[]).filter(o=>(id&&String(o.customerId||'').toUpperCase()===id)||(!o.customerId&&wa&&mnNormWa(o.whatsapp)===wa))
+ .reduce((sum,o)=>sum+Math.max(0,mnDepositNet(o)+Number(o.finalPaymentRecorded||0)),0);
+}
 function mnRenderCustomersV2(){
  const mount=$('mnCustomersV2Mount')||$('customers');if(!mount)return;
  const all=window.mnCustomerProfiles||[];const f=window.mnCustomerAdminFilter||'all';
@@ -2642,7 +2647,7 @@ function mnRenderCustomersV2(){
  mount.innerHTML=`<div class="box"><div class="row"><div><div class="eyebrow">CLIENTAS 3.1</div><h2 class="script">Perfiles Mistrielle</h2><p style="color:var(--muted)">Alias, roles, insignias, cupones, historial, comunidad y solicitudes de perfil. El WhatsApp sigue siendo privado.</p></div><button class="btn alt sm" onclick="mnRefreshCustomerProfiles().then(()=>mnRenderCustomersV2())">↻ Actualizar</button></div>
  ${mnPendingAvatarRequestsHTML()}
  <div class="mn-customer-toolbar"><input style="max-width:320px" placeholder="Buscar ID, alias, WhatsApp, rol..." oninput="window.mnCustomerSearch=this.value;mnRenderCustomersV2()"><button class="btn ${f==='all'?'':'alt'} sm" onclick="mnSetCustomerFilter('all')">Todas</button><button class="btn ${f==='favorites'?'':'alt'} sm" onclick="mnSetCustomerFilter('favorites')">★ Favoritas</button><button class="btn ${f==='featured'?'':'alt'} sm" onclick="mnSetCustomerFilter('featured')">✦ En tablón</button><button class="btn ${f==='internal'?'':'alt'} sm" onclick="mnSetCustomerFilter('internal')">Internas / prueba</button></div>
- ${rows.length?`<div class="mn-customer-card-grid">${mnLimit38('customers',rows,6).map(p=>`<div class="mn-customer-card ${p.favorite?'favorite':''} ${p.featured?'featured':''}"><div class="mn-customer-head">${mnCustomerAvatarHTML(p)}<div><div class="mn-customer-big-id">${esc(p.customerId)}</div><b>${esc(mnProfileDisplay(p))}</b>${p.name&&p.alias?`<br><small>${esc(p.name)}</small>`:''}<br>${p.role?`<span class="mn-role-chip">${esc(p.role)}</span>`:''}${p.avatarRequestStatus==='pending'&&p.pendingAvatar?`<br><span class="mn-card-pending-badge">📸 Foto pendiente</span>`:''}<div class="mn-badges">${mnProfileBadges(p).map(b=>`<span class="mn-badge-chip">${esc(b)}</span>`).join('')}</div></div></div><div class="mn-customer-metrics"><div><b>${Number(p.orders||0)}</b><small>Pedidos</small></div><div><b>${money(p.spent||0)}</b><small>Gastado</small></div><div><b>${Number(p.reviews||0)}</b><small>Reseñas</small></div></div><small style="display:block;margin-top:9px;color:var(--muted)">${esc(p.whatsapp||'')} · ${Number(p.photos||0)} foto(s) · ${Number(p.coupons||0)} cupón(es)</small><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px"><button class="btn sm" onclick="mnOpenCustomerProfile('${esc(p.customerId)}')">Abrir perfil</button><button class="btn alt sm" onclick="mnGiveCustomerCoupon('${esc(p.customerId)}')">+ Cupón</button>${p.internal?`<button class="btn danger sm" onclick="mnDeleteInternalTestCustomer('${esc(p.customerId)}')">Eliminar prueba</button>`:''}</div></div>`).join('')}</div>${mnMore38('customers',rows.length,6,'clientas')}`:'<div class="empty">No hay clientas en este filtro.</div>'}</div>`;
+ ${rows.length?`<div class="mn-customer-card-grid">${mnLimit38('customers',rows,6).map(p=>`<div class="mn-customer-card ${p.favorite?'favorite':''} ${p.featured?'featured':''}"><div class="mn-customer-head">${mnCustomerAvatarHTML(p)}<div><div class="mn-customer-big-id">${esc(p.customerId)}</div><b>${esc(mnProfileDisplay(p))}</b>${p.name&&p.alias?`<br><small>${esc(p.name)}</small>`:''}<br>${p.role?`<span class="mn-role-chip">${esc(p.role)}</span>`:''}${p.avatarRequestStatus==='pending'&&p.pendingAvatar?`<br><span class="mn-card-pending-badge">📸 Foto pendiente</span>`:''}<div class="mn-badges">${mnProfileBadges(p).map(b=>`<span class="mn-badge-chip">${esc(b)}</span>`).join('')}</div></div></div><div class="mn-customer-metrics"><div><b>${Number(p.orders||0)}</b><small>Pedidos</small></div><div><b>${money(mnCustomerPaidTotal(p))}</b><small>Gastado</small></div><div><b>${Number(p.reviews||0)}</b><small>Reseñas</small></div></div><small style="display:block;margin-top:9px;color:var(--muted)">${esc(p.whatsapp||'')} · ${Number(p.photos||0)} foto(s) · ${Number(p.coupons||0)} cupón(es)</small><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px"><button class="btn sm" onclick="mnOpenCustomerProfile('${esc(p.customerId)}')">Abrir perfil</button><button class="btn alt sm" onclick="mnGiveCustomerCoupon('${esc(p.customerId)}')">+ Cupón</button>${p.internal?`<button class="btn danger sm" onclick="mnDeleteInternalTestCustomer('${esc(p.customerId)}')">Eliminar prueba</button>`:''}</div></div>`).join('')}</div>${mnMore38('customers',rows.length,6,'clientas')}`:'<div class="empty">No hay clientas en este filtro.</div>'}</div>`;
 }
 async function mnDeleteInternalTestCustomer(id){
  const p=(window.mnCustomerProfiles||[]).find(x=>String(x.customerId||'').toUpperCase()===String(id||'').toUpperCase());
@@ -2686,7 +2691,7 @@ function mnOpenCustomerProfile(id){
  <details class="mn-expediente-block">
   <summary>Pedidos <span class="mn-expediente-count">${po.length}</span></summary>
   <div class="mn-expediente-inner"><div class="mn-expediente-list">
-   ${po.length?po.map(o=>`<div class="mn-expediente-item"><b>${esc(o.number||'Pedido')}</b> · ${esc(o.status||'')}<br><small>${esc(String(o.created||'').slice(0,10))} · ${money(o.total||0)}</small></div>`).join(''):'<div class="empty">Sin pedidos.</div>'}
+   ${po.length?po.map(o=>`<div class="mn-expediente-item"><b>${esc(o.number||'Pedido')}</b> · ${esc(o.status||'')}<br><small>${esc(String(o.created||'').slice(0,10))} · ${money(o.total||0)} · Pagado ${money(mnDepositNet(o)+Number(o.finalPaymentRecorded||0))} · ${esc(o.source||'Tienda online')}</small></div>`).join(''):'<div class="empty">Sin pedidos.</div>'}
   </div></div>
  </details>
  <details class="mn-expediente-block">
@@ -3029,5 +3034,49 @@ function mn43SaveOrder(){const inputs=[...document.querySelectorAll('.mn43-posit
   return result};
   try{window.renderAdmin()}catch(e){console.warn(e)}
 })();
+</script>
+
+<script id="mnManualOrdersV1">
+function mnManualOrderOpen(){
+ const opts=(products||[]).filter(p=>p.status!=='Oculto').map(p=>`<option value="${esc(p.id)}">${esc(p.name)} · ${money(p.price||0)}</option>`).join('');
+ $('modalContent').innerHTML=`<div class="eyebrow">REGISTRO ADMINISTRATIVO</div><h2 class="script">Registrar pedido externo</h2><p style="color:var(--muted)">Para pedidos recibidos por WhatsApp o fuera de la tienda. Se vinculará al perfil de la clienta mediante su WhatsApp.</p>
+ <div class="fields">
+  <div class="field"><label>NOMBRE DE LA CLIENTA *</label><input id="mnoName" placeholder="Nombre completo"></div>
+  <div class="field"><label>WHATSAPP *</label><input id="mnoWa" inputmode="tel" placeholder="52..."></div>
+  <div class="field"><label>ORIGEN</label><select id="mnoSource"><option value="WhatsApp">WhatsApp</option><option value="Registro manual">Registro manual</option></select></div>
+  <div class="field"><label>PRODUCTO DEL CATÁLOGO</label><select id="mnoProduct"><option value="">Pedido personalizado / externo</option>${opts}</select></div>
+  <div class="field"><label>DESCRIPCIÓN DEL SET *</label><input id="mnoItem" placeholder="Ej. Set rosa con flores 3D"></div>
+  <div class="field"><label>CANTIDAD</label><input id="mnoQty" type="number" min="1" value="1"></div>
+  <div class="field"><label>TOTAL DEL PEDIDO *</label><input id="mnoTotal" type="number" min="0" step="0.01" placeholder="0"></div>
+  <div class="field"><label>ADELANTO RECIBIDO</label><input id="mnoPaid" type="number" min="0" step="0.01" value="0"></div>
+  <div class="field"><label>ESTADO</label><select id="mnoStatus"><option>Nuevo</option><option>Confirmado</option><option>En preparación</option><option>Listo</option><option>Entregado</option></select></div>
+  <div class="field"><label>ENTREGA</label><input id="mnoDelivery" placeholder="Lugar acordado / envío"></div>
+  <div class="field full"><label>NOTAS</label><textarea id="mnoNotes" rows="2" placeholder="Detalles, fecha prometida, etc."></textarea></div>
+ </div><div class="notice" style="margin:12px 0">El registro no marcará el pedido como pagado. Solo contará el adelanto y el saldo que registres después.</div>
+ <button class="btn gold" id="mnoSave" onclick="mnManualOrderSave()">Guardar pedido y vincular clienta</button>`;
+ openModal();
+}
+async function mnManualOrderSave(){
+ const name=$('mnoName')?.value.trim(),whatsapp=$('mnoWa')?.value.trim(),wa=mnNormWa(whatsapp);
+ const total=Math.max(0,Number($('mnoTotal')?.value||0)),paid=Math.max(0,Number($('mnoPaid')?.value||0));
+ const qty=Math.max(1,Math.floor(Number($('mnoQty')?.value||1))),desc=$('mnoItem')?.value.trim();
+ if(!name||wa.length<8||!desc||!total)return alert('Completa nombre, WhatsApp, descripción y total.');
+ if(paid>total)return alert('El adelanto no puede superar el total.');
+ const btn=$('mnoSave');if(btn)btn.disabled=true;
+ try{
+  const {data:customerId,error:ce}=await mnCloud.rpc('mn_admin_get_or_create_customer',{customer_whatsapp:wa,customer_name:name});
+  if(ce)throw ce;if(!customerId)throw new Error('No se pudo asignar el ID de clienta.');
+  const prodId=$('mnoProduct')?.value||'EXTERNO';
+  const prod=products.find(p=>String(p.id)===String(prodId));
+  const orderData={name,whatsapp,customerId:String(customerId).toUpperCase(),source:$('mnoSource').value,items:[{id:prodId,name:desc,price:total/qty,qty,form:'',length:'',size:'',image:prod?.images?.[0]||''}],subtotal:total,total,discountAmount:0,depositAgreed:Math.round(total*.5*100)/100,depositPaid:paid,depositRefunded:0,depositMethod:paid?'No especificado':'',depositDate:paid?new Date().toISOString().slice(0,10):'',status:$('mnoStatus').value,delivery:$('mnoDelivery').value.trim(),notes:$('mnoNotes').value.trim(),created:Date.now(),hidden:false,manualEntry:true};
+  const {data:number,error}=await mnCloud.rpc('mn_create_order',{order_data:orderData});if(error)throw error;
+  orderData.number=String(number||'').toUpperCase();if(!orderData.number)throw new Error('La nube no devolvió un folio para el pedido.');
+  orders=load('orders',orders).filter(o=>o.number!==orderData.number);orders.unshift(orderData);save('orders',orders);
+  await mnSyncCollection('orders');
+  logActivity(`Pedido externo ${orderData.number} registrado para ${name}`,'orders',orderData.number);
+  await mnRefreshCustomerProfiles();closeModal();renderAdmin();openAdminTab('orders');
+  alert(`Pedido ${orderData.number} registrado.\nClienta: ${customerId}`);
+ }catch(e){if(btn)btn.disabled=false;alert('No se pudo registrar el pedido: '+(e.message||e));}
+}
 </script>
 </body></html>
