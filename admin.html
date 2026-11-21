@@ -935,7 +935,8 @@ ${i<faqs.length-1?`<button class="btn alt sm" onclick="moveFaq(${i},1)" title="B
 <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
  <b style="color:var(--gold2)">MIGRACIÓN A CLOUDINARY</b>
  <p style="color:var(--muted);font-size:11px;line-height:1.5">Copia las imágenes existentes desde Supabase a Cloudinary y actualiza sus referencias en la tienda. Los originales de Supabase no se borran.</p>
- <button class="btn gold sm" onclick="mnMigrateImagesToCloudinary()">Migrar imágenes a Cloudinary</button>
+ <button class="btn alt sm" onclick="mnAuditStorageImages()">Revisar archivos de Supabase</button> <button class="btn gold sm" onclick="mnMigrateImagesToCloudinary()">Migrar imágenes a Cloudinary</button>
+ <div id="mnStorageAuditStatus" style="margin-top:10px"></div>
  <div id="mnCloudinaryMigrationStatus" style="margin-top:10px"></div>
 </div>
 <div id="mnImageOptimizeStatus" style="margin-top:10px"></div></div></details></div>`; $('options').innerHTML=editor('Categorías',categories,'categories')+editor('Tallas',sizes,'sizes')+editor('Formas',forms,'forms')+editor('Largos',lengths,'lengths')+`<section class="box mn45-filter-settings" aria-labelledby="mn45-filter-heading"><div class="eyebrow">BUSCADOR DE LA TIENDA</div><h2 class="script" id="mn45-filter-heading">Filtros de búsqueda</h2><p style="color:var(--muted);font-size:12px;line-height:1.6">Esta sección es independiente de las opciones de los productos. Categorías, tallas, formas y largos se sincronizan automáticamente con las listas de arriba: al añadir, cambiar o eliminar una opción, el filtro correspondiente se actualiza también. No hace falta repetirla aquí.</p><div class="mn45-filter-grid">${[['Categorías',categories],['Tallas',sizes],['Formas',forms],['Largos',lengths]].map(([name,values])=>`<div class="mn45-filter-group"><b>${name} <small>· automático</small></b><div class="chips">${values.map(v=>`<span class="chip">${esc(v)}</span>`).join('')||'<small>Sin opciones</small>'}</div></div>`).join('')}</div><div class="mn45-colors"><label for="mn44CatalogColors" style="color:var(--gold2);font-weight:900;font-size:12px">COLORES DE LOS FILTROS · EDITABLE</label><p style="color:var(--muted);font-size:12px;line-height:1.6">Añade nombres separados por comas. Para que un producto aparezca al filtrar por un color, inclúyelo en su nombre, descripción o palabras clave.</p><textarea id="mn44CatalogColors" rows="3" style="width:100%;max-width:100%;background:#21040c;border:1px solid #71303b;color:#f7ded7;border-radius:9px;padding:12px" placeholder="Rosa, Negro, Blanco, Azul...">${esc((Array.isArray(config.catalogColors)&&config.catalogColors.length?config.catalogColors:['Negro','Blanco','Rosa','Rojo','Azul','Morado','Verde','Amarillo','Dorado','Plateado']).join(', '))}</textarea><div style="margin-top:12px"><button type="button" class="btn sm" onclick="mn45SaveCatalogColors()">Guardar colores de filtros</button></div></div></section>`;
@@ -2127,6 +2128,40 @@ function mnCollectStorageImageUrls(){
  // Las fotos aprobadas del perfil se actualizan mediante su RPC administrativa.
  (window.mnCustomerProfiles||[]).forEach(c=>add(c.avatarUrl));
  return [...set];
+}
+async function mnListAllStorageObjects(){
+ const all=[];const walk=async(prefix='')=>{
+  let offset=0;
+  while(true){
+   const {data,error}=await mnCloud.storage.from(MN_IMAGE_BUCKET).list(prefix,{limit:1000,offset,sortBy:{column:'name',order:'asc'}});
+   if(error)throw error;
+   const rows=data||[];
+   for(const item of rows){
+    const path=prefix?`${prefix}/${item.name}`:item.name;
+    if(item.id===null||item.id===undefined){await walk(path)}
+    else all.push({path,name:item.name,folder:prefix||'(raíz)',metadata:item.metadata||{}});
+   }
+   if(rows.length<1000)break;
+   offset+=rows.length;
+   if(offset>100000)throw new Error('La carpeta contiene demasiados elementos para una revisión segura.');
+  }
+ };
+ await walk('');return all;
+}
+async function mnAuditStorageImages(){
+ const box=$('mnStorageAuditStatus');if(!box)return;
+ if(!window.mnCloudReady)return alert('Espera a que el administrador muestre “Nube: conectada”.');
+ box.innerHTML='<div class="notice">Revisando carpetas de Supabase y comparando sus archivos con las referencias de la tienda…</div>';
+ try{
+  const [objects,urls]=await Promise.all([mnListAllStorageObjects(),Promise.resolve(mnCollectStorageImageUrls())]);
+  const referenced=new Set(urls.map(mnStoragePathFromPublicUrl).filter(Boolean));
+  const used=objects.filter(o=>referenced.has(o.path));
+  const unused=objects.filter(o=>!referenced.has(o.path));
+  const groups={};for(const o of objects){const k=o.folder;groups[k]??={total:0,used:0,unused:0};groups[k].total++;if(referenced.has(o.path))groups[k].used++;else groups[k].unused++;}
+  const rows=Object.entries(groups).sort((a,b)=>a[0].localeCompare(b[0])).map(([folder,x])=>`<tr><td>${folder}</td><td>${x.total}</td><td>${x.used}</td><td>${x.unused}</td></tr>`).join('');
+  const fileList=(arr)=>arr.length?`<details style="margin-top:10px"><summary style="cursor:pointer;font-weight:800">${arr.length} archivos ${arr===unused?'sin referencia':'referenciados'} (ver nombres)</summary><div style="max-height:260px;overflow:auto;padding:8px;background:#17040a;border-radius:8px;margin-top:8px"><small>${arr.map(o=>o.path).join('<br>')}</small></div></details>`:'<small>Ninguno.</small>';
+  box.innerHTML=`<div class="notice"><b>Revisión terminada</b><br>Archivos encontrados en Supabase: <b>${objects.length}</b><br>Referenciados por los datos actuales de la tienda: <b>${used.length}</b><br>Sin referencia encontrada: <b>${unused.length}</b><br><small>Esta revisión no sube, modifica ni elimina archivos. Compara las rutas del bucket con las URLs guardadas en los módulos cargados del administrador.</small><div style="overflow:auto;margin-top:10px"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr><th align="left">Carpeta</th><th>Total</th><th>En uso</th><th>Sin referencia</th></tr></thead><tbody>${rows}</tbody></table></div>${fileList(unused)}${fileList(used)}</div>`;
+ }catch(e){console.error('Auditoría de Supabase:',e);box.innerHTML=`<div class="notice">No se pudo listar el bucket de Supabase: ${String(e.message||e)}<br><small>Puede faltar permiso de listado en Storage. No se modificó ningún archivo.</small></div>`;}
 }
 function mnReplaceImageUrl(value,map){
  if(typeof value==='string')return map.get(value)||value;
