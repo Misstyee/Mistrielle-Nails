@@ -1761,4 +1761,32 @@ applyOperationalState=function(){if(!window.mn43CloudStateLoaded&&storeOps.store
  };
 })();
 </script>
+
+<script id="mnWhatsAppAccessV1">
+(function(){
+ function mnWaHref(){
+  const n=String((typeof config!=='undefined'&&config?.whatsapp)||'').replace(/\D/g,'');
+  return n.length>=10?'https://wa.me/'+n+'?text='+encodeURIComponent('Hola, Mistrielle Nails ♡ Quiero realizar un pedido.'):'';
+ }
+ function mnEnsureWhatsAppAccess(){
+  const gate=document.getElementById('maintenanceGate'),card=gate?.querySelector('.mn-maint-card');
+  if(card){
+   let link=document.getElementById('mnMaintenanceWhatsApp');
+   if(!link){link=document.createElement('a');link.id='mnMaintenanceWhatsApp';link.className='btn gold';link.textContent='CONTACTAR POR WHATSAPP';link.style.cssText='display:inline-block;margin-top:18px;text-decoration:none';card.appendChild(link)}
+   const href=mnWaHref();link.href=href||'#';link.target='_blank';link.rel='noopener';link.style.display=href?'inline-block':'none';
+  }
+  let floating=document.getElementById('mnFloatingWhatsApp');
+  if(!floating){floating=document.createElement('a');floating.id='mnFloatingWhatsApp';floating.textContent='CONTACTAR POR WHATSAPP';floating.setAttribute('aria-label','Contactar por WhatsApp');floating.style.cssText='position:fixed;right:18px;bottom:18px;z-index:2400;padding:13px 17px;border:1px solid #d7b56e;border-radius:999px;background:linear-gradient(135deg,#7f1730,#4a0616);color:#fff0ea;text-decoration:none;font:700 10px Arial;letter-spacing:.06em;box-shadow:0 10px 30px #0007';document.body.appendChild(floating)}
+  const href=mnWaHref();floating.href=href||'#';floating.target='_blank';floating.rel='noopener';
+  floating.style.display=href&&(!gate||getComputedStyle(gate).display==='none')?'block':'none';
+ }
+ const oldRender=window.render;
+ if(typeof oldRender==='function')window.render=function(){const v=oldRender.apply(this,arguments);mnEnsureWhatsAppAccess();return v};
+ const oldApply=window.applyOperationalState;
+ if(typeof oldApply==='function')window.applyOperationalState=function(){const v=oldApply.apply(this,arguments);mnEnsureWhatsAppAccess();return v};
+ document.addEventListener('DOMContentLoaded',mnEnsureWhatsAppAccess);
+ window.addEventListener('load',mnEnsureWhatsAppAccess);
+ setInterval(mnEnsureWhatsAppAccess,1500);
+})();
+</script>
 </body></html>
