@@ -2031,7 +2031,7 @@ try{renderAdmin()}catch(e){console.error('Render inicial Admin:',e)}
 <div id="mnAuthGate"><div class="mn-login"><div style="letter-spacing:.18em;font-size:11px">MISTRIELLE NAILS</div><h2>Administración</h2><p>Inicia sesión con tu cuenta administradora. La sesión se cerrará automáticamente después de 12 horas.</p><label>Correo</label><input id="mnLoginEmail" type="email" autocomplete="username"><label>Contraseña</label><input id="mnLoginPassword" type="password" autocomplete="current-password"><button id="mnLoginBtn">Entrar</button><div id="mnAuthError"></div></div></div><div class="mn-cloud-badge" id="mnCloudBadge">Nube: conectando…</div>
 <script>
 const mnCloud = window.supabase.createClient(window.MN_SUPABASE_URL, window.MN_SUPABASE_KEY);
-const MN_IMAGE_BUCKET='mistrielle-images';
+const MN_IMAGE_BUCKET='Mistrielle-images';
 function mnSafeName(name){return String(name||'archivo').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9._-]+/g,'-').replace(/-+/g,'-').toLowerCase()}
 function mnImageProfile(folder='general'){
  const f=String(folder||'');
