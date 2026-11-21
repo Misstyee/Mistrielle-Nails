@@ -2183,59 +2183,49 @@ async function mnUploadExistingImageToCloudinary(url){
 }
 async function mnMigrateImagesToCloudinary(){
  const box=$('mnCloudinaryMigrationStatus');if(!box)return;
- const urls=mnCollectStorageImageUrls();
- if(!urls.length){box.innerHTML='<div class="notice">No quedan imágenes de Mistrielle en Supabase Storage dentro de los módulos compatibles.</div>';return}
  if(!window.mnCloudReady)return alert('Espera a que el administrador muestre “Nube: conectada”.');
- if(!confirm(`Se migrarán hasta ${urls.length} imágenes a Cloudinary. Se actualizarán los enlaces de productos, galería, extras, diseño, preguntas frecuentes, recompensas, temporadas, solicitudes, pedidos y fotos de perfil aprobadas. Los originales de Supabase NO se borrarán. ¿Continuar?`))return;
- const map=new Map();let ok=0,skip=0,fail=0,total=0;
- box.innerHTML=`<div class="notice">Preparando ${urls.length} imágenes… No cierres esta pestaña.</div>`;
+ const urls=mnCollectStorageImageUrls();
+ if(!urls.length){box.innerHTML='<div class="notice"><b>No hay imágenes pendientes.</b><br>Las referencias cargadas ya no contienen URLs del bucket de Supabase.</div>';return}
+ if(!confirm(`Se procesarán ${urls.length} imágenes de Supabase hacia Cloudinary. Se actualizarán las referencias de productos, galería, extras, diseño, preguntas frecuentes, recompensas, temporadas, solicitudes, pedidos y fotos de perfil aprobadas. Los originales de Supabase NO se borrarán. ¿Continuar?`))return;
+ const progressKey='mn_cloudinary_migration_progress_v1';
+ let saved={};try{saved=JSON.parse(localStorage.getItem(progressKey)||'{}')||{}}catch(_){saved={}}
+ const map=new Map(),errors=[];let ok=0,reused=0,skip=0,fail=0,total=0;
+ const show=(html)=>{box.innerHTML=`<div class="notice" style="line-height:1.65">${html}</div>`};
+ show(`<b>Preparando migración…</b><br>0 de ${urls.length} procesadas. No cierres esta pestaña.`);
  for(let i=0;i<urls.length;i++){
   const source=urls[i];
-  box.innerHTML=`<div class="notice"><b>Migrando ${i+1} de ${urls.length}</b><br><small>Copiando imagen a Cloudinary…</small></div>`;
+  show(`<b>Migrando ${i+1} de ${urls.length}</b><br><small>${Math.round(i/urls.length*100)}% completado. Copiando imagen a Cloudinary…</small>`);
   try{
+   if(typeof saved[source]==='string'&&saved[source].includes('res.cloudinary.com')){map.set(source,saved[source]);reused++;continue;}
    const result=await mnUploadExistingImageToCloudinary(source);
-   if(result.skip){skip++;continue}
-   map.set(source,result.url);ok++;total+=Number(result.bytes||0);
-  }catch(e){console.error('Migración Cloudinary:',source,e);fail++}
+   if(result.skip){skip++;continue;}
+   map.set(source,result.url);saved[source]=result.url;localStorage.setItem(progressKey,JSON.stringify(saved));ok++;total+=Number(result.bytes||0);
+  }catch(e){console.error('Migración Cloudinary:',source,e);fail++;errors.push({url:source,error:String(e.message||e)});}
  }
  if(map.size){
-  products=mnReplaceImageUrl(products,map);
-  extras=mnReplaceImageUrl(extras,map);
-  galleryItems=mnReplaceImageUrl(galleryItems,map);
-  config=mnReplaceImageUrl(config,map);
-  faqs=mnReplaceImageUrl(faqs,map);
-  photoRewards=mnReplaceImageUrl(photoRewards,map);
-  seasonThemes=mnReplaceImageUrl(seasonThemes,map);
-  storeNotices=mnReplaceImageUrl(storeNotices,map);
-  productMeta=mnReplaceImageUrl(productMeta,map);
-  requests=mnReplaceImageUrl(requests,map);
-  orders=mnReplaceImageUrl(orders,map);
-  // Las fotos de perfil aprobadas viven detrás de una función RPC propia.
+  products=mnReplaceImageUrl(products,map);extras=mnReplaceImageUrl(extras,map);galleryItems=mnReplaceImageUrl(galleryItems,map);config=mnReplaceImageUrl(config,map);faqs=mnReplaceImageUrl(faqs,map);photoRewards=mnReplaceImageUrl(photoRewards,map);seasonThemes=mnReplaceImageUrl(seasonThemes,map);storeNotices=mnReplaceImageUrl(storeNotices,map);productMeta=mnReplaceImageUrl(productMeta,map);requests=mnReplaceImageUrl(requests,map);orders=mnReplaceImageUrl(orders,map);
   for(const c of (window.mnCustomerProfiles||[])){
    if(!map.has(c.avatarUrl))continue;
    const profileData={name:c.name||'',alias:c.alias||'',role:c.role||'',badges:Array.isArray(c.badges)?c.badges:[],avatarUrl:map.get(c.avatarUrl),avatarSettings:c.avatarSettings||{},favorite:!!c.favorite,featured:!!c.featured,featureLabel:c.featureLabel||'',publicNote:c.publicNote||'',featureSort:Number(c.featureSort||0),internal:!!c.internal,publicShowStats:c.publicShowStats!==false,publicShowPhotos:c.publicShowPhotos!==false,publicShowReviews:c.publicShowReviews!==false};
-   try{const {error}=await mnCloud.rpc('mn_admin_update_customer',{target_customer_id:c.customerId,profile_data:profileData});if(error)throw error;c.avatarUrl=profileData.avatarUrl}catch(e){console.warn('No se pudo actualizar avatar de clienta:',c.customerId,e);fail++}
+   try{const {error}=await mnCloud.rpc('mn_admin_update_customer',{target_customer_id:c.customerId,profile_data:profileData});if(error)throw error;c.avatarUrl=profileData.avatarUrl;}catch(e){console.warn('No se pudo actualizar avatar de clienta:',c.customerId,e);fail++;errors.push({url:c.avatarUrl,error:'No se pudo guardar la foto de perfil: '+String(e.message||e)});}
   }
-  // Persistir primero el catálogo y después los módulos públicos en Supabase.
-  save('products',products);
-  save('requests',requests);
-  save('orders',orders);
-  for(const key of ['extras','galleryItems','config','faqs','photoRewards','seasonThemes','storeNotices','productMeta']){
-   const value=({extras,galleryItems,config,faqs,photoRewards,seasonThemes,storeNotices,productMeta})[key];
-   save(key,value);
-  }
+  save('products',products);save('requests',requests);save('orders',orders);
+  for(const key of ['extras','galleryItems','config','faqs','photoRewards','seasonThemes','storeNotices','productMeta']){const value=({extras,galleryItems,config,faqs,photoRewards,seasonThemes,storeNotices,productMeta})[key];save(key,value);}
+ }
+ let syncError='';
+ if(map.size){
   try{
-   await mnSyncProducts();
-   await mnSyncCollection('requests');
-   await mnSyncCollection('orders');
+   show(`<b>Imágenes copiadas. Guardando referencias…</b><br>${ok+reused} de ${urls.length} imágenes disponibles en Cloudinary.`);
+   await mnSyncProducts();await mnSyncCollection('requests');await mnSyncCollection('orders');
    for(const key of ['extras','galleryItems','config','faqs','photoRewards','seasonThemes','storeNotices','productMeta'])await mnSyncCollection(key);
    await mnRefreshCustomerProfiles();
-  }catch(e){console.error('Guardar referencias migradas:',e);fail++}
+  }catch(e){console.error('Guardar referencias migradas:',e);fail++;syncError=String(e.message||e);}
  }
  const mb=(total/1024/1024).toFixed(2);
- box.innerHTML=`<div class="notice"><b>Migración terminada.</b><br>${ok} imágenes copiadas · ${skip} omitidas (SVG/GIF u otro formato no compatible) · ${fail} con error.<br><small>${mb} MB de originales leídos. Los enlaces migrados ya apuntan a Cloudinary. Los archivos originales de Supabase permanecen intactos.${fail?'<br>Vuelve a ejecutar la migración para reintentar las imágenes pendientes.':''}</small></div>`;
- renderAdmin();
+ const errHtml=errors.length?`<details style="margin-top:8px"><summary>Ver ${errors.length} errores</summary><div style="max-height:180px;overflow:auto"><small>${errors.map(x=>`${String(x.url).replace(/</g,'&lt;')}<br>${String(x.error).replace(/</g,'&lt;')}`).join('<br><br>')}</small></div></details>`:'';
+ show(`<b>Proceso de migración finalizado.</b><br><b>${ok}</b> imágenes subidas ahora · <b>${reused}</b> recuperadas de una ejecución anterior · <b>${skip}</b> omitidas (SVG/GIF u otro formato no compatible) · <b>${fail}</b> errores.<br><small>${mb} MB leídos en esta ejecución. Los originales de Supabase permanecen intactos. El resultado se mantiene visible y el progreso de las subidas se conserva para evitar duplicados si hay que reintentar.</small>${syncError?`<br><b style="color:#ffb0b8">Error al guardar referencias en Supabase:</b> ${syncError.replace(/</g,'&lt;')}`:''}${errHtml}<br><button type="button" class="btn alt sm" style="margin-top:10px" onclick="mnAuditStorageImages()">Verificar archivos y referencias</button>`);
 }
+
 async function mnOptimizeExistingStorageImage(url){
  const path=mnStoragePathFromPublicUrl(url);if(!path)return {status:'skip'};
  const sep=url.includes('?')?'&':'?';
