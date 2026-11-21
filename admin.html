@@ -2119,14 +2119,12 @@ function mnStoragePathFromPublicUrl(url){
 }
 function mnCollectStorageImageUrls(){
  const set=new Set(),add=u=>{u=String(u||'');if(u&&mnStoragePathFromPublicUrl(u))set.add(u)};
- products.forEach(p=>(p.images||[]).forEach(add));extras.forEach(x=>add(x.image));galleryItems.forEach(x=>add(x.image));
- [config.logo,config.heroImage,config.customImage].forEach(add);
- faqs.forEach(f=>{(Array.isArray(f.mediaItems)?f.mediaItems:[]).forEach(m=>{if((m.type||'image')==='image')add(m.url)});if(f.mediaType!=='video')add(f.media)});
- photoRewards.forEach(x=>add(x.image));
- seasonThemes.forEach(s=>{[s.heroImage,s.heroImageTablet,s.heroImageMobile].forEach(add);(Array.isArray(s.heroSlides)?s.heroSlides:[]).forEach(sl=>[sl.desktop,sl.tablet,sl.mobile].forEach(add))});
- storeNotices.forEach(x=>{add(x.image);add(x.imageUrl)});
  const scan=(v)=>{if(typeof v==='string'){add(v);return}if(Array.isArray(v)){v.forEach(scan);return}if(v&&typeof v==='object')Object.values(v).forEach(scan)};
- scan(productMeta);
+ // Recorrer cada módulo completo evita dejar fuera campos de imagen añadidos
+ // posteriormente, variantes de diseño y archivos adjuntos de solicitudes/pedidos.
+ [products,extras,galleryItems,config,faqs,photoRewards,seasonThemes,
+  storeNotices,productMeta,requests,orders].forEach(scan);
+ // Las fotos aprobadas del perfil se actualizan mediante su RPC administrativa.
  (window.mnCustomerProfiles||[]).forEach(c=>add(c.avatarUrl));
  return [...set];
 }
@@ -2153,7 +2151,7 @@ async function mnMigrateImagesToCloudinary(){
  const urls=mnCollectStorageImageUrls();
  if(!urls.length){box.innerHTML='<div class="notice">No quedan imágenes de Mistrielle en Supabase Storage dentro de los módulos compatibles.</div>';return}
  if(!window.mnCloudReady)return alert('Espera a que el administrador muestre “Nube: conectada”.');
- if(!confirm(`Se migrarán hasta ${urls.length} imágenes a Cloudinary. Se actualizarán los enlaces de productos, galería, extras, diseño, preguntas frecuentes, recompensas y temporadas. Los originales de Supabase NO se borrarán. ¿Continuar?`))return;
+ if(!confirm(`Se migrarán hasta ${urls.length} imágenes a Cloudinary. Se actualizarán los enlaces de productos, galería, extras, diseño, preguntas frecuentes, recompensas, temporadas, solicitudes, pedidos y fotos de perfil aprobadas. Los originales de Supabase NO se borrarán. ¿Continuar?`))return;
  const map=new Map();let ok=0,skip=0,fail=0,total=0;
  box.innerHTML=`<div class="notice">Preparando ${urls.length} imágenes… No cierres esta pestaña.</div>`;
  for(let i=0;i<urls.length;i++){
@@ -2175,6 +2173,8 @@ async function mnMigrateImagesToCloudinary(){
   seasonThemes=mnReplaceImageUrl(seasonThemes,map);
   storeNotices=mnReplaceImageUrl(storeNotices,map);
   productMeta=mnReplaceImageUrl(productMeta,map);
+  requests=mnReplaceImageUrl(requests,map);
+  orders=mnReplaceImageUrl(orders,map);
   // Las fotos de perfil aprobadas viven detrás de una función RPC propia.
   for(const c of (window.mnCustomerProfiles||[])){
    if(!map.has(c.avatarUrl))continue;
@@ -2183,12 +2183,16 @@ async function mnMigrateImagesToCloudinary(){
   }
   // Persistir primero el catálogo y después los módulos públicos en Supabase.
   save('products',products);
+  save('requests',requests);
+  save('orders',orders);
   for(const key of ['extras','galleryItems','config','faqs','photoRewards','seasonThemes','storeNotices','productMeta']){
    const value=({extras,galleryItems,config,faqs,photoRewards,seasonThemes,storeNotices,productMeta})[key];
    save(key,value);
   }
   try{
    await mnSyncProducts();
+   await mnSyncCollection('requests');
+   await mnSyncCollection('orders');
    for(const key of ['extras','galleryItems','config','faqs','photoRewards','seasonThemes','storeNotices','productMeta'])await mnSyncCollection(key);
    await mnRefreshCustomerProfiles();
   }catch(e){console.error('Guardar referencias migradas:',e);fail++}
