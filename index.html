@@ -1194,7 +1194,20 @@ const mnCloud = (window.supabase && window.supabase.createClient)
         rpc(fn,args){return request(base+'/rpc/'+encodeURIComponent(fn),{method:'POST',body:JSON.stringify(args||{})})}
       };
     })();
-function mnFromDb(p){return {id:p.id,name:p.name||'',description:p.description||'',keywords:p.keywords||'',price:Number(p.price||0),salePrice:p.promo_price==null?null:Number(p.promo_price),category:Array.isArray(p.categories)?(p.categories[0]||''):((p.categories&&p.categories.category)||''),images:Array.isArray(p.images)?p.images:[],forms:Array.isArray(p.forms)?p.forms:[],lengths:Array.isArray(p.lengths)?p.lengths:[],stock:(p.stock&&typeof p.stock==='object')?p.stock:{},madeToOrder:!!p.made_to_order,status:p.status||'Disponible'};}
+function mnPublicImageUrl(url){
+ let s=String(url||'');
+ if(s.includes('res.cloudinary.com')&&s.includes('/image/upload/')&&!/\/image\/upload\/(?:[^/]*,)*(?:f_auto|q_auto)(?:\/|$)/.test(s)){
+  s=s.replace('/image/upload/','/image/upload/f_auto,q_auto/');
+ }
+ return s;
+}
+function mnNormalizePublicMedia(value){
+ if(typeof value==='string')return mnPublicImageUrl(value);
+ if(Array.isArray(value))return value.map(mnNormalizePublicMedia);
+ if(value&&typeof value==='object'){const out={};for(const [k,v] of Object.entries(value))out[k]=mnNormalizePublicMedia(v);return out}
+ return value;
+}
+function mnFromDb(p){return {id:p.id,name:p.name||'',description:p.description||'',keywords:p.keywords||'',price:Number(p.price||0),salePrice:p.promo_price==null?null:Number(p.promo_price),category:Array.isArray(p.categories)?(p.categories[0]||''):((p.categories&&p.categories.category)||''),images:Array.isArray(p.images)?p.images.map(mnPublicImageUrl):[],forms:Array.isArray(p.forms)?p.forms:[],lengths:Array.isArray(p.lengths)?p.lengths:[],stock:(p.stock&&typeof p.stock==='object')?p.stock:{},madeToOrder:!!p.made_to_order,status:p.status||'Disponible'};}
 async function mnLoadCloudProducts(){
   try{
     const {data,error}=await mnCloud.from('products').select('*').eq('visible',true).order('created_at',{ascending:false});
@@ -1210,7 +1223,7 @@ async function mnLoadCloudProducts(){
 // V14.1: pedidos, solicitudes, seguimiento y configuración en Supabase.
 async function mnLoadPublicState(){
  try{const {data,error}=await mnCloud.from('mn_store_state').select('key,payload').eq('public_read',true);if(error)throw error;
-  window.mn43CloudStateLoaded=true;for(const x of data||[]){if(x.key==='faqs')faqs=x.payload;if(x.key==='config')config=x.payload;if(x.key==='categories')categories=x.payload;if(x.key==='sizes')sizes=x.payload;if(x.key==='forms')forms=x.payload;if(x.key==='lengths')lengths=x.payload;if(x.key==='extras')extras=Array.isArray(x.payload)?x.payload:[];if(x.key==='galleryItems')galleryItems=Array.isArray(x.payload)?x.payload:[];if(x.key==='storeNotices')storeNotices=Array.isArray(x.payload)?x.payload:[];if(x.key==='gallerySettings')gallerySettings=(x.payload&&typeof x.payload==='object')?x.payload:gallerySettings;if(x.key==='discountCampaigns')discountCampaigns=Array.isArray(x.payload)?x.payload:[];if(x.key==='productMeta')productMeta=(x.payload&&typeof x.payload==='object')?x.payload:{};if(x.key==='storeOps')storeOps=(x.payload&&typeof x.payload==='object')?x.payload:storeOps;if(x.key==='seasonThemes')seasonThemes=Array.isArray(x.payload)?x.payload:[];if(x.key==='activeSeasonId')activeSeasonId=String(x.payload||'');if(['storeOps','config','categories','sizes','forms','lengths','activeSeasonId'].includes(x.key)){try{localStorage.setItem('mn_'+x.key,JSON.stringify(x.payload))}catch(e){console.warn('Caché ligera omitida:',x.key)}}}render();
+  window.mn43CloudStateLoaded=true;for(const x of data||[]){const payload=mnNormalizePublicMedia(x.payload);if(x.key==='faqs')faqs=payload;if(x.key==='config')config=payload;if(x.key==='categories')categories=payload;if(x.key==='sizes')sizes=payload;if(x.key==='forms')forms=payload;if(x.key==='lengths')lengths=payload;if(x.key==='extras')extras=Array.isArray(payload)?payload:[];if(x.key==='galleryItems')galleryItems=Array.isArray(payload)?payload:[];if(x.key==='storeNotices')storeNotices=Array.isArray(payload)?payload:[];if(x.key==='gallerySettings')gallerySettings=(payload&&typeof payload==='object')?payload:gallerySettings;if(x.key==='discountCampaigns')discountCampaigns=Array.isArray(payload)?payload:[];if(x.key==='productMeta')productMeta=(payload&&typeof payload==='object')?payload:{};if(x.key==='storeOps')storeOps=(payload&&typeof payload==='object')?payload:storeOps;if(x.key==='seasonThemes')seasonThemes=Array.isArray(payload)?payload:[];if(x.key==='activeSeasonId')activeSeasonId=String(payload||'');if(['storeOps','config','categories','sizes','forms','lengths','activeSeasonId'].includes(x.key)){try{localStorage.setItem('mn_'+x.key,JSON.stringify(payload))}catch(e){console.warn('Caché ligera omitida:',x.key)}}}render();
  }catch(e){console.error('Estado público:',e)}
 }
 const mnLocalPlaceOrder=placeOrder;
