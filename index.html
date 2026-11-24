@@ -1227,35 +1227,58 @@ async function mnLoadPublicState(){
 }
 const mnLocalPlaceOrder=placeOrder;
 placeOrder=async function(){
- const before=load('orders',orders).map(x=>x.number);
+ const before=(load('orders',orders)||[]).map(x=>x.number);
  mnLocalPlaceOrder();
- const after=load('orders',orders);const fresh=after.find(x=>!before.includes(x.number));if(!fresh)return;
- const oldNumber=fresh.number;
- const waBtn=[...document.querySelectorAll('#modalContent a.btn')].find(a=>a.textContent.includes('WHATSAPP'));
- if(waBtn){waBtn.style.pointerEvents='none';waBtn.style.opacity='.55';waBtn.textContent='GUARDANDO PEDIDO…';}
+ const after=(load('orders',orders)||[]).slice();
+ const fresh=after.find(x=>!before.includes(x.number));
+ if(!fresh)return;
+ const localNumber=String(fresh.number||'');
+ const waBtn=[...document.querySelectorAll('#modalContent a.btn')].find(a=>(a.textContent||'').includes('WHATSAPP'));
+ if(waBtn){waBtn.style.pointerEvents='none';waBtn.style.opacity='.55';waBtn.textContent='CONFIRMANDO PEDIDO…';}
+ const result=$('mnCustomerIdResult');
  try{
-  const {data,error}=await mnCloud.rpc('mn_create_order',{order_data:fresh});if(error)throw error;
-  const cloudNumber=String(data||oldNumber).toUpperCase();
-  const customerId=await Promise.race([
-      mnClaimCustomerIdForRecord(cloudNumber,fresh.name,fresh.whatsapp),
-      new Promise((_,reject)=>setTimeout(()=>reject(new Error('Tiempo de espera del ID agotado')),10000))
-    ]);fresh.customerId=customerId;orders=after.map(x=>x.number===oldNumber?{...x,number:cloudNumber,customerId}:x);save('orders',orders);mnShowCustomerIdInModal(customerId,fresh.whatsapp);
-  if(cloudNumber!==oldNumber){
-   fresh.number=cloudNumber;
-   orders=orders.map(x=>x.number===cloudNumber?{...x,customerId:fresh.customerId||x.customerId}:x);
-   save('orders',orders);
-   const mc=$('modalContent');
-   if(mc)mc.innerHTML=mc.innerHTML.split(oldNumber).join(cloudNumber);
+  const response=await Promise.race([
+   mnCloud.rpc('mn_create_order',{order_data:fresh}),
+   new Promise((_,reject)=>setTimeout(()=>reject(new Error('Supabase tardó demasiado en confirmar el pedido.')),25000))
+  ]);
+  if(response.error)throw response.error;
+  const cloudNumber=String(response.data||localNumber).toUpperCase();
+  // El registro del pedido y la asignación del ID son dos operaciones distintas.
+  // Un fallo del ID nunca debe borrar un pedido que ya se guardó.
+  orders=(load('orders',orders)||[]).map(o=>o.number===localNumber?{...o,number:cloudNumber,cloudStatus:'saved'}:o);
+  save('orders',orders);
+  let customerId='';
+  try{
+   customerId=await Promise.race([
+    mnClaimCustomerIdForRecord(cloudNumber,fresh.name,fresh.whatsapp),
+    new Promise((_,reject)=>setTimeout(()=>reject(new Error('La asignación del ID tardó demasiado.')),10000))
+   ]);
+   if(customerId){
+    orders=(load('orders',orders)||[]).map(o=>o.number===cloudNumber?{...o,customerId,cloudStatus:'saved'}:o);
+    save('orders',orders);
+    if(typeof mnShowCustomerIdInModal==='function')mnShowCustomerIdInModal(customerId,fresh.whatsapp);
+   }
+  }catch(idError){
+   console.warn('Pedido guardado; ID de clienta pendiente:',idError);
   }
-  const btn=[...document.querySelectorAll('#modalContent a.btn')].find(a=>a.textContent.includes('GUARDANDO')||a.textContent.includes('WHATSAPP'));
+  const mc=$('modalContent');
+  if(mc&&cloudNumber!==localNumber)mc.innerHTML=mc.innerHTML.split(localNumber).join(cloudNumber);
+  const btn=[...document.querySelectorAll('#modalContent a.btn')].find(a=>(a.textContent||'').includes('CONFIRMANDO')||(a.textContent||'').includes('WHATSAPP'));
   if(btn){
-   if(btn.href)btn.href=btn.href.split(oldNumber).join(cloudNumber);
+   if(btn.href)btn.href=btn.href.split(localNumber).join(cloudNumber);
    btn.style.pointerEvents='auto';btn.style.opacity='1';btn.textContent='FINALIZAR PEDIDO POR WHATSAPP';
   }
+  if(result)result.textContent=customerId
+   ?'Pedido guardado en la nube. Tu ID de clienta es '+customerId+'.'
+   :'Pedido guardado en la nube. La asignación del ID de clienta quedó pendiente; tu pedido sí está registrado.';
  }catch(e){
-  orders=after.filter(x=>x.number!==oldNumber);save('orders',orders);
-  const mc=$('modalContent');if(mc)mc.innerHTML='<div class="notice"><b>El pedido no pudo registrarse.</b><br>No se enviará como pedido válido. '+esc(e.message)+'</div>';
-  alert('El pedido no pudo guardarse en la nube. No se enviará como pedido válido. '+e.message);
+  // No borrar: ante un timeout el servidor pudo insertar antes de perderse la respuesta.
+  orders=(load('orders',orders)||[]).map(o=>o.number===localNumber?{...o,cloudStatus:'pending_check'}:o);
+  save('orders',orders);
+  if(waBtn)waBtn.style.display='none';
+  const mc=$('modalContent');
+  if(mc)mc.innerHTML='<div class="notice"><b>No pudimos confirmar el registro en la nube.</b><br>Conservamos los datos en este dispositivo. No repitas el envío hasta comprobar si Supabase alcanzó a guardarlo. Folio provisional: '+esc(localNumber)+'.</div>';
+  alert('No se pudo confirmar el pedido en Supabase. No eliminamos tus datos. No lo envíes otra vez hasta comprobar si la nube alcanzó a insertarlo. '+(e.message||e));
  }
 };
 const mnLocalSaveRequest=saveRequest;
